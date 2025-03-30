@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BarChart, Calendar, ChevronDown, ChevronUp, Database, Graduation, Layers, Users, Video } from 'lucide-react';
+import { BarChart, Calendar, ChevronDown, ChevronUp, Database, GraduationCap, Layers, Users, Video } from 'lucide-react';
 
 const AdminDashboard = () => {
   return (
@@ -29,7 +28,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
-            <Graduation className="h-4 w-4 text-gray-500" />
+            <GraduationCap className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">24</div>
@@ -79,7 +78,7 @@ const AdminDashboard = () => {
                 Students
               </Button>
               <Button variant="ghost" className="w-full justify-start">
-                <Graduation className="mr-2 h-4 w-4" />
+                <GraduationCap className="mr-2 h-4 w-4" />
                 Courses
               </Button>
               <Button variant="ghost" className="w-full justify-start">

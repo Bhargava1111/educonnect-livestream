@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Code, Graduation, Laptop, Users, Video } from 'lucide-react';
+import { Check, Code, GraduationCap, Laptop, Users, Video } from 'lucide-react';
 
 const Home = () => {
   const features = [
@@ -18,7 +17,7 @@ const Home = () => {
       description: "Practice with our integrated online IDE for real coding experience."
     },
     {
-      icon: <Graduation className="h-6 w-6 text-eduBlue-600" />,
+      icon: <GraduationCap className="h-6 w-6 text-eduBlue-600" />,
       title: "Certification",
       description: "Earn industry-recognized certifications upon course completion."
     },
