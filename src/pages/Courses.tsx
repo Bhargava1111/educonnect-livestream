@@ -16,7 +16,9 @@ import {
   Search, 
   Server, 
   Shield, 
-  Terminal 
+  Terminal,
+  Hash,
+  FileJson 
 } from 'lucide-react';
 
 const Courses = () => {
@@ -117,6 +119,37 @@ const Courses = () => {
       category: "mobile",
       price: 1149,
       icon: <Laptop />
+    },
+    {
+      id: 10,
+      title: "C Programming Fundamentals",
+      description: "Learn the foundation of programming with C language, covering memory management and low-level operations.",
+      duration: "8 weeks",
+      level: "Beginner",
+      category: "programming",
+      price: 899,
+      icon: <Hash />
+    },
+    {
+      id: 11,
+      title: "C++ Programming & OOP",
+      description: "Master C++ and object-oriented programming concepts for software development.",
+      duration: "10 weeks",
+      level: "Beginner to Intermediate",
+      category: "programming",
+      price: 999,
+      icon: <Hash />
+    },
+    {
+      id: 12,
+      title: "C# .NET Development",
+      description: "Build powerful desktop and web applications using C# and the .NET framework.",
+      duration: "12 weeks",
+      level: "Intermediate",
+      category: "full-stack",
+      price: 1099,
+      icon: <FileJson />,
+      popular: true
     }
   ];
 
@@ -155,12 +188,13 @@ const Courses = () => {
             <TabsTrigger value="backend">Backend</TabsTrigger>
             <TabsTrigger value="frontend">Frontend</TabsTrigger>
             <TabsTrigger value="data">Data Science</TabsTrigger>
+            <TabsTrigger value="programming">Programming</TabsTrigger>
             <TabsTrigger value="security">Cybersecurity</TabsTrigger>
             <TabsTrigger value="mobile">Mobile</TabsTrigger>
             <TabsTrigger value="devops">DevOps</TabsTrigger>
           </TabsList>
           
-          {["all", "full-stack", "backend", "frontend", "data", "security", "mobile", "devops"].map((category) => (
+          {["all", "full-stack", "backend", "frontend", "data", "programming", "security", "mobile", "devops"].map((category) => (
             <TabsContent key={category} value={category}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredCourses

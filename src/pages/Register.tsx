@@ -6,17 +6,34 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { Phone } from "lucide-react";
+import OTPVerification from "@/components/OTPVerification";
 
 const Register = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const totalSteps = 3;
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (step === 2 && !isPhoneVerified) {
+      toast({
+        title: "Phone Verification Required",
+        description: "Please verify your phone number before proceeding",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (step < totalSteps) {
       setStep(step + 1);
+      window.scrollTo(0, 0);
     } else {
       toast({
         title: "Registration Successful",
@@ -29,7 +46,36 @@ const Register = () => {
   const handlePrevious = () => {
     if (step > 1) {
       setStep(step - 1);
+      window.scrollTo(0, 0);
     }
+  };
+
+  const handleSendOTP = () => {
+    // Validate phone number
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid phone number",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // In a real app, you would call an API to send OTP
+    setShowOtpVerification(true);
+    toast({
+      title: "OTP Sent",
+      description: `A verification code has been sent to ${phoneNumber}`,
+    });
+  };
+
+  const handleVerificationComplete = () => {
+    setIsPhoneVerified(true);
+    setShowOtpVerification(false);
+  };
+
+  const handleResendOTP = () => {
+    // In a real app, you would call an API to resend OTP
   };
 
   return (
@@ -95,8 +141,46 @@ const Register = () => {
                   <h3 className="text-lg font-medium">Contact Information</h3>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" placeholder="(123) 456-7890" required />
+                    <div className="flex space-x-2">
+                      <div className="relative flex-grow">
+                        <Input 
+                          id="phone" 
+                          placeholder="(123) 456-7890" 
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          disabled={isPhoneVerified}
+                          required 
+                        />
+                        {isPhoneVerified && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                          </div>
+                        )}
+                      </div>
+                      <Button 
+                        type="button"
+                        variant={isPhoneVerified ? "outline" : "default"}
+                        className={isPhoneVerified ? "bg-green-50 text-green-600 border-green-200 hover:bg-green-50" : "bg-eduBlue-600 hover:bg-eduBlue-700"}
+                        onClick={isPhoneVerified ? () => {} : handleSendOTP}
+                        disabled={isPhoneVerified || !phoneNumber || phoneNumber.length < 10}
+                      >
+                        {isPhoneVerified ? "Verified" : "Verify"}
+                      </Button>
+                    </div>
                   </div>
+                  
+                  {showOtpVerification && !isPhoneVerified && (
+                    <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+                      <OTPVerification 
+                        phoneNumber={phoneNumber}
+                        onVerificationComplete={handleVerificationComplete}
+                        onResendOTP={handleResendOTP}
+                      />
+                    </div>
+                  )}
+                  
+                  <Separator className="my-4" />
+
                   <div className="space-y-2">
                     <Label htmlFor="address">Address</Label>
                     <Input id="address" placeholder="123 Main St" required />
