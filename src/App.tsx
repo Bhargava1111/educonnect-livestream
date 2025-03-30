@@ -12,6 +12,8 @@ import Careers from "./pages/Careers";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/Admin/Dashboard";
+import StudentDashboard from "./pages/Student/Dashboard";
+import CourseRoadmap from "./pages/CourseRoadmap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,11 +27,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Layout><Home /></Layout>} />
           <Route path="/courses" element={<Layout><Courses /></Layout>} />
+          <Route path="/courses/:courseId/roadmap" element={<Layout><CourseRoadmap /></Layout>} />
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
           <Route path="/login" element={<Layout><Login /></Layout>} />
           <Route path="/register" element={<Layout><Register /></Layout>} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route path="/student/*" element={<StudentDashboard />} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
       </BrowserRouter>
