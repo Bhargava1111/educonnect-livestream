@@ -34,11 +34,16 @@ const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center space-x-6">
           <Link to="/" className="text-gray-700 hover:text-eduBlue-600 font-medium">Home</Link>
           <Link to="/courses" className="text-gray-700 hover:text-eduBlue-600 font-medium">Courses</Link>
+          <Link to="/placements" className="text-gray-700 hover:text-eduBlue-600 font-medium">Placements</Link>
+          <Link to="/jobs" className="text-gray-700 hover:text-eduBlue-600 font-medium">Jobs</Link>
           <Link to="/careers" className="text-gray-700 hover:text-eduBlue-600 font-medium">Careers</Link>
           <Link to="/contact" className="text-gray-700 hover:text-eduBlue-600 font-medium">Contact</Link>
+          {isLoggedIn && (
+            <Link to="/student" className="text-gray-700 hover:text-eduBlue-600 font-medium">My Dashboard</Link>
+          )}
         </nav>
 
         {/* Auth Buttons - Desktop */}
@@ -84,8 +89,13 @@ const Header = () => {
           <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
             <Link to="/" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Home</Link>
             <Link to="/courses" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Courses</Link>
+            <Link to="/placements" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Placements</Link>
+            <Link to="/jobs" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Jobs</Link>
             <Link to="/careers" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Careers</Link>
             <Link to="/contact" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Contact</Link>
+            {isLoggedIn && (
+              <Link to="/student" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>My Dashboard</Link>
+            )}
             
             <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100">
               {isLoggedIn ? (

@@ -13,6 +13,20 @@ const MOCK_STUDENTS = [
     password: "password123",
     name: "John Doe",
     enrolledCourses: []
+  },
+  {
+    id: "s2",
+    email: "jane@example.com",
+    password: "password123",
+    name: "Jane Smith",
+    enrolledCourses: ["course_1"]
+  },
+  {
+    id: "s3",
+    email: "mike@example.com",
+    password: "password123",
+    name: "Mike Johnson",
+    enrolledCourses: ["course_2", "course_3"]
   }
 ];
 
@@ -82,3 +96,32 @@ export const enrollStudentInCourse = (courseId: string | number) => {
   return false;
 };
 
+// Admin functions for student management
+export const getAllStudents = () => {
+  return MOCK_STUDENTS.map(student => {
+    // Don't expose passwords
+    const { password, ...safeStudentData } = student;
+    return safeStudentData;
+  });
+};
+
+export const getStudentById = (id: string) => {
+  const student = MOCK_STUDENTS.find(s => s.id === id);
+  if (!student) return null;
+  
+  // Don't expose password
+  const { password, ...safeStudentData } = student;
+  return safeStudentData;
+};
+
+export const getStudentsByEnrolledCourse = (courseId: string | number) => {
+  const studentsInCourse = MOCK_STUDENTS.filter(student => 
+    student.enrolledCourses.includes(courseId)
+  );
+  
+  return studentsInCourse.map(student => {
+    // Don't expose passwords
+    const { password, ...safeStudentData } = student;
+    return safeStudentData;
+  });
+};

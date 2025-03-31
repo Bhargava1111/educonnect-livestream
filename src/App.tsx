@@ -9,10 +9,13 @@ import Home from "./pages/Home";
 import Courses from "./pages/Courses";
 import Contact from "./pages/Contact";
 import Careers from "./pages/Careers";
+import Jobs from "./pages/Jobs";
+import Placements from "./pages/Placements";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/Admin/Dashboard";
+import AdminStudents from "./pages/Admin/Students";
 import StudentDashboard from "./pages/Student/Dashboard";
 import CourseRoadmap from "./pages/CourseRoadmap";
 import CourseCurriculum from "./pages/CourseCurriculum";
@@ -33,9 +36,13 @@ const App = () => (
           <Route path="/courses/:courseId" element={<Layout><CourseCurriculum /></Layout>} />
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
+          <Route path="/jobs" element={<Layout><Jobs /></Layout>} />
+          <Route path="/placements" element={<Layout><Placements /></Layout>} />
           <Route path="/login" element={<Layout><Login /></Layout>} />
           <Route path="/register" element={<Layout><Register /></Layout>} />
           <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/students" element={<AdminStudents />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/student/*" element={<StudentDashboard />} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
