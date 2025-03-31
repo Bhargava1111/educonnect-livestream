@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import {
   FileText, 
   GraduationCap, 
   Layers, 
+  LogOut,
   Plus, 
   Settings, 
   User, 
@@ -21,8 +23,23 @@ import {
   Users, 
   Video 
 } from 'lucide-react';
+import { isAdminLoggedIn, logoutAdmin } from '@/lib/auth';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
+  // Check if admin is logged in
+  useEffect(() => {
+    if (!isAdminLoggedIn()) {
+      navigate('/admin-login');
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    logoutAdmin();
+    navigate('/admin-login');
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
@@ -75,6 +92,14 @@ const AdminDashboard = () => {
             <Button variant="ghost" className="w-full justify-start">
               <Settings className="mr-2 h-4 w-4" />
               Settings
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-red-500 hover:text-red-700 hover:bg-red-50"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
             </Button>
           </nav>
         </div>

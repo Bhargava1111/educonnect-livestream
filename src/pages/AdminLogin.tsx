@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { loginAdmin } from '@/lib/auth';
+import { loginAdmin, isAdminLoggedIn } from '@/lib/auth';
+import { Lock } from 'lucide-react';
 
 const AdminLogin = () => {
   const { toast } = useToast();
@@ -14,6 +15,13 @@ const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAdminLoggedIn()) {
+      navigate('/admin');
+    }
+  }, [navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +49,11 @@ const AdminLogin = () => {
       <div className="container max-w-md">
         <Card>
           <CardHeader className="space-y-1">
+            <div className="flex justify-center mb-2">
+              <div className="p-2 rounded-full bg-eduBlue-100">
+                <Lock className="h-6 w-6 text-eduBlue-600" />
+              </div>
+            </div>
             <CardTitle className="text-2xl font-bold text-center">Administrator Login</CardTitle>
             <CardDescription className="text-center">
               Enter your credentials to access the admin dashboard
@@ -81,6 +94,11 @@ const AdminLogin = () => {
               </div>
             </form>
           </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-gray-500">
+              Use your admin credentials to sign in
+            </p>
+          </CardFooter>
         </Card>
       </div>
     </div>
