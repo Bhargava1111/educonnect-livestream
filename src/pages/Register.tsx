@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Phone } from "lucide-react";
-import OTPVerification from "@/components/OTPVerification";
+import OTPVerifierWrapper from "@/components/OTPVerifierWrapper";
 
 const Register = () => {
   const { toast } = useToast();
@@ -76,6 +76,10 @@ const Register = () => {
 
   const handleResendOTP = () => {
     // In a real app, you would call an API to resend OTP
+    toast({
+      title: "OTP Resent",
+      description: `A new verification code has been sent to ${phoneNumber}`,
+    });
   };
 
   return (
@@ -171,7 +175,7 @@ const Register = () => {
                   
                   {showOtpVerification && !isPhoneVerified && (
                     <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
-                      <OTPVerification 
+                      <OTPVerifierWrapper 
                         phoneNumber={phoneNumber}
                         onVerificationComplete={handleVerificationComplete}
                         onResendOTP={handleResendOTP}

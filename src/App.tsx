@@ -14,6 +14,7 @@ import Register from "./pages/Register";
 import AdminDashboard from "./pages/Admin/Dashboard";
 import StudentDashboard from "./pages/Student/Dashboard";
 import CourseRoadmap from "./pages/CourseRoadmap";
+import CourseCurriculum from "./pages/CourseCurriculum";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/" element={<Layout><Home /></Layout>} />
           <Route path="/courses" element={<Layout><Courses /></Layout>} />
           <Route path="/courses/:courseId/roadmap" element={<Layout><CourseRoadmap /></Layout>} />
+          <Route path="/courses/:courseId" element={<Layout><CourseCurriculum /></Layout>} />
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
           <Route path="/login" element={<Layout><Login /></Layout>} />

@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Code, GraduationCap, Laptop, Users, Video } from 'lucide-react';
+import TrainingRoadmap from '@/components/TrainingRoadmap';
 
 const Home = () => {
   const features = [
@@ -83,7 +85,7 @@ const Home = () => {
       {/* Features Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose EduConnect</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Career Aspire Technology</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-md card-hover">
@@ -97,6 +99,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Training & Placement Roadmap */}
+      <TrainingRoadmap />
 
       {/* Popular Courses */}
       <section className="py-16">

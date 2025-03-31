@@ -15,7 +15,7 @@ const Header = () => {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2">
-          <span className="font-bold text-2xl text-eduBlue-600">Career Aspire Technology.com</span>
+          <span className="font-bold text-2xl text-eduBlue-600">Career Aspire Technology</span>
         </Link>
 
         {/* Desktop Navigation */}

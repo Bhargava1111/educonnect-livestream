@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">EduConnect</h3>
+            <h3 className="text-xl font-bold mb-4">Career Aspire Technology</h3>
             <p className="text-gray-400">
               Empowering students with professional software training and career opportunities.
             </p>
@@ -36,16 +36,16 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
             <address className="not-italic text-gray-400">
-              <p>123 Learning Street</p>
-              <p>Education City, EC 12345</p>
-              <p>Phone: (123) 456-7890</p>
-              <p>Email: info@educonnect.com</p>
+              <p>Kothanur Dinne, JP Nagar</p>
+              <p>Bangalore, Karnataka</p>
+              <p>Phone: +91 9380872628, +91 9845405852</p>
+              <p>Email: info@careeraspiretechnology.com</p>
             </address>
           </div>
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-500">&copy; {new Date().getFullYear()} EduConnect. All rights reserved.</p>
+          <p className="text-gray-500">&copy; {new Date().getFullYear()} Career Aspire Technology. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="#" className="text-gray-400 hover:text-white">
               <span className="sr-only">Facebook</span>
