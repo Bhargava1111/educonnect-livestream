@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Book, BookOpen, Calendar, Clock, Code, Download, FileText, GraduationCap, Users } from 'lucide-react';
+import { Check } from "lucide-react";
 
 const CourseCurriculum = () => {
   const { courseId } = useParams<{ courseId: string }>();
