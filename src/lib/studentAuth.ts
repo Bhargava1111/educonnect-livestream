@@ -85,8 +85,11 @@ export const enrollStudentInCourse = (courseId: string | number) => {
   if (!studentData) return false;
   
   // Add course to enrolled courses if not already enrolled
-  if (!studentData.enrolledCourses.includes(courseId)) {
-    studentData.enrolledCourses.push(courseId);
+  // Convert courseId to string to ensure type consistency
+  const courseIdString = String(courseId);
+  
+  if (!studentData.enrolledCourses.includes(courseIdString)) {
+    studentData.enrolledCourses.push(courseIdString);
     
     // Update localStorage
     localStorage.setItem(STUDENT_AUTH_KEY, JSON.stringify(studentData));
@@ -115,8 +118,11 @@ export const getStudentById = (id: string) => {
 };
 
 export const getStudentsByEnrolledCourse = (courseId: string | number) => {
+  // Convert courseId to string for consistent comparison
+  const courseIdString = String(courseId);
+  
   const studentsInCourse = MOCK_STUDENTS.filter(student => 
-    student.enrolledCourses.includes(courseId)
+    student.enrolledCourses.includes(courseIdString)
   );
   
   return studentsInCourse.map(student => {
