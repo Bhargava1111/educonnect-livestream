@@ -33,7 +33,7 @@ const Login = () => {
         title: "Login Successful",
         description: "Welcome back! You have been logged in successfully.",
       });
-      navigate('/');
+      navigate('/'); // Redirect to home page after successful login
     } else {
       toast({
         title: "Login Failed",

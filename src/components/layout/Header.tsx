@@ -1,15 +1,24 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut } from 'lucide-react';
-import { isStudentLoggedIn, getStudentData, logoutStudent } from '@/lib/studentAuth';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { Menu, X, ChevronDown } from 'lucide-react';
+import { isStudentLoggedIn, logoutStudent, getStudentData } from '@/lib/studentAuth';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const isLoggedIn = isStudentLoggedIn();
   const studentData = isLoggedIn ? getStudentData() : null;
 
@@ -21,117 +30,200 @@ const Header = () => {
     logoutStudent();
     toast({
       title: "Logged Out",
-      description: "You have been logged out successfully.",
+      description: "You have been successfully logged out",
     });
     navigate('/');
   };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="flex items-center space-x-2">
-          <span className="font-bold text-2xl text-eduBlue-600">Career Aspire Technology</span>
-        </Link>
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex justify-between items-center">
+          {/* Logo */}
+          <Link to="/" className="text-2xl font-bold text-eduBlue-600">
+            Career Aspire
+          </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-gray-700 hover:text-eduBlue-600 font-medium">Home</Link>
-          <Link to="/courses" className="text-gray-700 hover:text-eduBlue-600 font-medium">Courses</Link>
-          <Link to="/placements" className="text-gray-700 hover:text-eduBlue-600 font-medium">Placements</Link>
-          <Link to="/jobs" className="text-gray-700 hover:text-eduBlue-600 font-medium">Jobs</Link>
-          <Link to="/careers" className="text-gray-700 hover:text-eduBlue-600 font-medium">Careers</Link>
-          <Link to="/contact" className="text-gray-700 hover:text-eduBlue-600 font-medium">Contact</Link>
-          {isLoggedIn && (
-            <Link to="/student" className="text-gray-700 hover:text-eduBlue-600 font-medium">My Dashboard</Link>
-          )}
-        </nav>
-
-        {/* Auth Buttons - Desktop */}
-        <div className="hidden md:flex items-center space-x-4">
-          {isLoggedIn ? (
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-eduBlue-100 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-eduBlue-600" />
-                </div>
-                <span className="font-medium">{studentData?.name}</span>
-              </div>
-              <Button 
-                variant="outline" 
-                className="flex items-center space-x-2"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Log Out</span>
-              </Button>
-            </div>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button variant="outline">Log In</Button>
-              </Link>
-              <Link to="/register">
-                <Button className="bg-eduBlue-600 hover:bg-eduBlue-700">Sign Up</Button>
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Mobile menu button */}
-        <button onClick={toggleMobileMenu} className="md:hidden text-gray-700">
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 animate-fade-in">
-          <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <Link to="/" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Home</Link>
-            <Link to="/courses" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Courses</Link>
-            <Link to="/placements" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Placements</Link>
-            <Link to="/jobs" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Jobs</Link>
-            <Link to="/careers" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Careers</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>Contact</Link>
+          {/* Desktop Menu */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link to="/" className="text-gray-700 hover:text-eduBlue-600 font-medium">
+              Home
+            </Link>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-gray-700 hover:text-eduBlue-600 font-medium focus:outline-none flex items-center">
+                Courses <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link to="/courses">All Courses</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/courses/1">Web Development</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/courses/2">Cybersecurity</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/courses/3">MERN Stack</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
             {isLoggedIn && (
-              <Link to="/student" className="text-gray-700 hover:text-eduBlue-600 font-medium py-2" onClick={toggleMobileMenu}>My Dashboard</Link>
+              <Link to="/live-meetings" className="text-gray-700 hover:text-eduBlue-600 font-medium">
+                Live Sessions
+              </Link>
             )}
             
-            <div className="flex flex-col space-y-2 pt-2 border-t border-gray-100">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-gray-700 hover:text-eduBlue-600 font-medium focus:outline-none flex items-center">
+                Career <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link to="/jobs">Jobs</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/placements">Placements</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/careers">Careers</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Link to="/contact" className="text-gray-700 hover:text-eduBlue-600 font-medium">
+              Contact
+            </Link>
+            
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="cursor-pointer">
+                    <AvatarFallback>{studentData.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link to="/student/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/student/courses">My Courses</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/student/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link to="/login">
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="bg-eduBlue-600 hover:bg-eduBlue-700">Register</Button>
+                </Link>
+              </div>
+            )}
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden text-gray-700 focus:outline-none"
+            onClick={toggleMobileMenu}
+          >
+            {mobileMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden pt-4 pb-2">
+            <div className="flex flex-col space-y-3">
+              <Link 
+                to="/" 
+                className="text-gray-700 hover:text-eduBlue-600 font-medium"
+                onClick={toggleMobileMenu}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/courses" 
+                className="text-gray-700 hover:text-eduBlue-600 font-medium"
+                onClick={toggleMobileMenu}
+              >
+                Courses
+              </Link>
+              {isLoggedIn && (
+                <Link 
+                  to="/live-meetings" 
+                  className="text-gray-700 hover:text-eduBlue-600 font-medium"
+                  onClick={toggleMobileMenu}
+                >
+                  Live Sessions
+                </Link>
+              )}
+              <Link 
+                to="/jobs" 
+                className="text-gray-700 hover:text-eduBlue-600 font-medium"
+                onClick={toggleMobileMenu}
+              >
+                Jobs
+              </Link>
+              <Link 
+                to="/placements" 
+                className="text-gray-700 hover:text-eduBlue-600 font-medium"
+                onClick={toggleMobileMenu}
+              >
+                Placements
+              </Link>
+              <Link 
+                to="/contact" 
+                className="text-gray-700 hover:text-eduBlue-600 font-medium"
+                onClick={toggleMobileMenu}
+              >
+                Contact
+              </Link>
+              
               {isLoggedIn ? (
                 <>
-                  <div className="flex items-center space-x-2 py-2">
-                    <div className="w-8 h-8 bg-eduBlue-100 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-eduBlue-600" />
-                    </div>
-                    <span className="font-medium">{studentData?.name}</span>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center justify-center space-x-2 w-full"
+                  <Link 
+                    to="/student/dashboard" 
+                    className="text-gray-700 hover:text-eduBlue-600 font-medium"
+                    onClick={toggleMobileMenu}
+                  >
+                    Dashboard
+                  </Link>
+                  <button 
+                    className="text-left text-gray-700 hover:text-eduBlue-600 font-medium"
                     onClick={() => {
                       handleLogout();
                       toggleMobileMenu();
                     }}
                   >
-                    <LogOut className="h-4 w-4" />
-                    <span>Log Out</span>
-                  </Button>
+                    Logout
+                  </button>
                 </>
               ) : (
-                <>
+                <div className="flex flex-col space-y-2 pt-2">
                   <Link to="/login" onClick={toggleMobileMenu}>
-                    <Button variant="outline" className="w-full">Log In</Button>
+                    <Button variant="outline" className="w-full">Login</Button>
                   </Link>
                   <Link to="/register" onClick={toggleMobileMenu}>
-                    <Button className="w-full bg-eduBlue-600 hover:bg-eduBlue-700">Sign Up</Button>
+                    <Button className="w-full bg-eduBlue-600 hover:bg-eduBlue-700">Register</Button>
                   </Link>
-                </>
+                </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+          </nav>
+        )}
+      </div>
     </header>
   );
 };

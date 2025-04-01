@@ -19,6 +19,7 @@ import AdminStudents from "./pages/Admin/Students";
 import StudentDashboard from "./pages/Student/Dashboard";
 import CourseRoadmap from "./pages/CourseRoadmap";
 import CourseCurriculum from "./pages/CourseCurriculum";
+import LiveMeetings from "./pages/LiveMeetings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
           <Route path="/jobs" element={<Layout><Jobs /></Layout>} />
           <Route path="/placements" element={<Layout><Placements /></Layout>} />
+          <Route path="/live-meetings" element={<Layout><LiveMeetings /></Layout>} />
           <Route path="/login" element={<Layout><Login /></Layout>} />
           <Route path="/register" element={<Layout><Register /></Layout>} />
           <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
