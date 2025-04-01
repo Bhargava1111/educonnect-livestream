@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { WhatsApp } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 const WhatsAppContact = () => {
   const [phoneNumber, setPhoneNumber] = useState('+91');
@@ -47,7 +47,7 @@ const WhatsAppContact = () => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center">
-          <WhatsApp className="mr-2" size={20} />
+          <MessageSquare className="mr-2" size={20} />
           Connect via WhatsApp
         </CardTitle>
         <CardDescription>
@@ -77,7 +77,7 @@ const WhatsAppContact = () => {
             />
           </div>
           <Button type="submit" className="w-full">
-            <WhatsApp className="mr-2" size={16} />
+            <MessageSquare className="mr-2" size={16} />
             Connect on WhatsApp
           </Button>
         </form>
