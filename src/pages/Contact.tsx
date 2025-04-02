@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { trackFormSubmission } from "@/lib/courseManagement";
+import { trackFormSubmission, contactDetails } from "@/lib/courseManagement";
 import WhatsAppContact from '@/components/WhatsAppContact';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
@@ -77,10 +77,14 @@ const Contact = () => {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              <a href="tel:+918765432100" className="hover:text-eduBlue-600">+91 8765 432 100</a>
+              <a href={`tel:${contactDetails.phone.primary}`} className="hover:text-eduBlue-600">
+                {contactDetails.phone.primary}
+              </a>
             </p>
             <p className="text-gray-600">
-              <a href="tel:+918765432101" className="hover:text-eduBlue-600">+91 8765 432 101</a>
+              <a href={`tel:${contactDetails.phone.secondary}`} className="hover:text-eduBlue-600">
+                {contactDetails.phone.secondary}
+              </a>
             </p>
           </CardContent>
         </Card>
@@ -94,10 +98,14 @@ const Contact = () => {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              <a href="mailto:info@careeraspiretechnology.com" className="hover:text-eduBlue-600">info@careeraspiretechnology.com</a>
+              <a href={`mailto:${contactDetails.email.info}`} className="hover:text-eduBlue-600">
+                {contactDetails.email.info}
+              </a>
             </p>
             <p className="text-gray-600">
-              <a href="mailto:support@careeraspiretechnology.com" className="hover:text-eduBlue-600">support@careeraspiretechnology.com</a>
+              <a href={`mailto:${contactDetails.email.support}`} className="hover:text-eduBlue-600">
+                {contactDetails.email.support}
+              </a>
             </p>
           </CardContent>
         </Card>
@@ -111,9 +119,9 @@ const Contact = () => {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Career Aspire Technology,<br />
-              123, Tech Park, Sector 15,<br />
-              Gurugram, Haryana - 122001
+              {contactDetails.address.line1},<br />
+              {contactDetails.address.line2},<br />
+              {contactDetails.address.city}, {contactDetails.address.state} - {contactDetails.address.pincode}
             </p>
           </CardContent>
         </Card>

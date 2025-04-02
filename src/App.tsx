@@ -16,6 +16,11 @@ import Register from "./pages/Register";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/Admin/Dashboard";
 import AdminStudents from "./pages/Admin/Students";
+import AdminCourses from "./pages/Admin/Courses";
+import AdminCourseRoadmap from "./pages/Admin/CourseRoadmap";
+import AdminLiveMeetings from "./pages/Admin/LiveMeetings";
+import AdminJobs from "./pages/Admin/Jobs";
+import AdminPlacements from "./pages/Admin/Placements";
 import StudentDashboard from "./pages/Student/Dashboard";
 import CourseRoadmap from "./pages/CourseRoadmap";
 import CourseCurriculum from "./pages/CourseCurriculum";
@@ -45,6 +50,11 @@ const App = () => (
           <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/students" element={<AdminStudents />} />
+          <Route path="/admin/courses" element={<AdminCourses />} />
+          <Route path="/admin/courses/:courseId/roadmap" element={<AdminCourseRoadmap />} />
+          <Route path="/admin/live-meetings" element={<AdminLiveMeetings />} />
+          <Route path="/admin/jobs" element={<AdminJobs />} />
+          <Route path="/admin/placements" element={<AdminPlacements />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/student/*" element={<StudentDashboard />} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />

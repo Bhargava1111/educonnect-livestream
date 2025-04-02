@@ -1,74 +1,34 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Video } from 'lucide-react';
 import { getStudentData, isStudentLoggedIn } from '@/lib/studentAuth';
 import { useNavigate } from 'react-router-dom';
-
-// Mock data for live meetings
-const liveMeetings = [
-  {
-    id: '1',
-    title: 'Python Fundamentals Workshop',
-    description: 'Learn the fundamentals of Python programming language',
-    instructor: 'Dr. Kumar',
-    date: '2023-10-15',
-    time: '10:00 AM',
-    duration: '2 hours',
-    link: 'https://meet.google.com/abc-defg-hij',
-    courseId: 'course_1',
-    status: 'upcoming'
-  },
-  {
-    id: '2',
-    title: 'React Component Design Patterns',
-    description: 'Advanced techniques for designing React components',
-    instructor: 'Ms. Sharma',
-    date: '2023-10-16',
-    time: '2:00 PM',
-    duration: '1.5 hours',
-    link: 'https://meet.google.com/klm-nopq-rst',
-    courseId: 'course_1',
-    status: 'upcoming'
-  },
-  {
-    id: '3',
-    title: 'Java Spring Boot Introduction',
-    description: 'Getting started with Spring Boot for backend development',
-    instructor: 'Mr. Patel',
-    date: '2023-10-14',
-    time: '11:00 AM',
-    duration: '2 hours',
-    link: 'https://meet.google.com/uvw-xyz-123',
-    courseId: 'course_2',
-    status: 'completed'
-  },
-  {
-    id: '4',
-    title: 'Database Design Best Practices',
-    description: 'Learn how to design efficient and scalable databases',
-    instructor: 'Dr. Singh',
-    date: '2023-10-17',
-    time: '3:00 PM',
-    duration: '2 hours',
-    link: 'https://meet.google.com/456-789-abc',
-    courseId: 'course_3',
-    status: 'upcoming'
-  }
-];
+import { getAllLiveMeetings, getAllCourses } from '@/lib/courseManagement';
 
 const LiveMeetings = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
+  const [meetings, setMeetings] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   
   // Check if student is logged in
   const isLoggedIn = isStudentLoggedIn();
   const studentData = isLoggedIn ? getStudentData() : null;
   
+  useEffect(() => {
+    // Load meetings and courses
+    const allMeetings = getAllLiveMeetings();
+    const allCourses = getAllCourses();
+    
+    setMeetings(allMeetings);
+    setCourses(allCourses);
+  }, []);
+  
   // Filter meetings based on student enrollment and tab selection
-  const filteredMeetings = liveMeetings.filter(meeting => {
+  const filteredMeetings = meetings.filter(meeting => {
     // If logged in, only show meetings for enrolled courses
     if (isLoggedIn && studentData && studentData.enrolledCourses) {
       if (!studentData.enrolledCourses.includes(meeting.courseId)) {
@@ -83,6 +43,12 @@ const LiveMeetings = () => {
   // Join meeting handler
   const joinMeeting = (link: string) => {
     window.open(link, '_blank');
+  };
+  
+  // Get course name by ID
+  const getCourseNameById = (courseId: string): string => {
+    const course = courses.find(c => c.id === courseId);
+    return course ? course.title : 'Unknown Course';
   };
 
   return (
@@ -133,7 +99,7 @@ const LiveMeetings = () => {
                       <div>
                         <CardTitle>{meeting.title}</CardTitle>
                         <CardDescription className="mt-1">
-                          Instructor: {meeting.instructor}
+                          Course: {getCourseNameById(meeting.courseId)}
                         </CardDescription>
                       </div>
                       <Badge variant={meeting.status === 'upcoming' ? 'default' : 'secondary'}>
