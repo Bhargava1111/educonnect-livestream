@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { createPayment } from '@/lib/courseManagement';
+import { createPayment, updatePayment } from '@/lib/paymentService';
 import { getStudentData } from '@/lib/studentAuth';
 
 // Define the props interface for the component
@@ -79,10 +79,8 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
         order_id: orderId,
         handler: function (response: any) {
           // Update payment with success status and razorpay payment ID
-          import('@/lib/courseManagement').then(({ updatePayment }) => {
-            updatePayment(payment.id, 'completed', {
-              paymentId: response.razorpay_payment_id
-            });
+          updatePayment(payment.id, 'completed', {
+            paymentId: response.razorpay_payment_id
           });
           
           toast({
@@ -108,9 +106,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
         modal: {
           ondismiss: function() {
             // Update payment with failed status if dismissed
-            import('@/lib/courseManagement').then(({ updatePayment }) => {
-              updatePayment(payment.id, 'failed');
-            });
+            updatePayment(payment.id, 'failed');
             setIsProcessing(false);
           }
         }
