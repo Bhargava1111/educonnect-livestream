@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import RazorpayPayment from './RazorpayPayment';
-import { isStudentLoggedIn, enrollStudentInCourse } from '@/lib/studentAuth';
+import { isStudentLoggedIn } from '@/lib/studentAuth';
 
 interface CourseEnrollmentProps {
   courseId: string | number;
@@ -29,18 +29,13 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   const [isEnrolling, setIsEnrolling] = useState(false);
 
   const handlePaymentSuccess = (response: any) => {
-    // Record enrollment in student data
-    const enrolled = enrollStudentInCourse(courseId);
+    toast({
+      title: "Enrollment Successful",
+      description: `You have successfully enrolled in ${title}`,
+    });
     
-    if (enrolled) {
-      toast({
-        title: "Enrollment Successful",
-        description: `You have successfully enrolled in ${title}`,
-      });
-      
-      // Navigate to the course
-      navigate(`/courses/${courseId}`);
-    }
+    // Navigate to the course
+    navigate(`/student/courses`);
   };
 
   const handleEnroll = () => {
@@ -83,6 +78,7 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
             <RazorpayPayment 
               amount={price} 
               courseName={title}
+              courseId={String(courseId)}
               description={`Enrollment for ${title}`}
               onSuccess={handlePaymentSuccess}
               onFailure={() => setIsEnrolling(false)}
