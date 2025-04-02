@@ -31,7 +31,7 @@ const AdminCourses = () => {
     description: '',
     duration: '',
     price: 0,
-    level: 'Beginner',
+    level: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced',
     instructor: ''
   });
   
@@ -50,7 +50,13 @@ const AdminCourses = () => {
   };
   
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'level') {
+      // Ensure level is one of the allowed values
+      const levelValue = value as 'Beginner' | 'Intermediate' | 'Advanced';
+      setFormData(prev => ({ ...prev, [name]: levelValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
   
   const handleAddCourse = () => {
@@ -59,6 +65,8 @@ const AdminCourses = () => {
         ...formData,
         price: Number(formData.price),
         curriculum: [],
+        // Ensure level is properly typed for the Course interface
+        level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced'
       });
       
       toast({
@@ -72,7 +80,7 @@ const AdminCourses = () => {
         description: '',
         duration: '',
         price: 0,
-        level: 'Beginner',
+        level: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced',
         instructor: ''
       });
       setIsAddModalOpen(false);
@@ -94,7 +102,9 @@ const AdminCourses = () => {
     try {
       updateCourse(selectedCourse.id, {
         ...formData,
-        price: Number(formData.price)
+        price: Number(formData.price),
+        // Ensure level is properly typed for the Course interface
+        level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced'
       });
       
       toast({
