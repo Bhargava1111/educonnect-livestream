@@ -1,16 +1,15 @@
-
-import { Enrollment, ENROLLMENT_KEY } from './types';
+import { Enrollment, ENROLLMENTS_KEY } from './types';
 import { getCourseById, updateCourse } from './courseService';
 
 // Initialize enrollments
 const initializeEnrollmentsIfNeeded = (): Enrollment[] => {
-  const existingEnrollments = localStorage.getItem(ENROLLMENT_KEY);
+  const existingEnrollments = localStorage.getItem(ENROLLMENTS_KEY);
   
   if (existingEnrollments) {
     return JSON.parse(existingEnrollments);
   } else {
     const defaultEnrollments: Enrollment[] = [];
-    localStorage.setItem(ENROLLMENT_KEY, JSON.stringify(defaultEnrollments));
+    localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(defaultEnrollments));
     return defaultEnrollments;
   }
 };
@@ -52,7 +51,7 @@ export const createEnrollment = (studentId: string, courseId: string): Enrollmen
   };
   
   enrollments.push(newEnrollment);
-  localStorage.setItem(ENROLLMENT_KEY, JSON.stringify(enrollments));
+  localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments));
   
   const course = getCourseById(courseId);
   if (course) {
@@ -81,7 +80,7 @@ export const updateEnrollmentProgress = (
       ...(isCompleted && { certificateIssued: true })
     };
     
-    localStorage.setItem(ENROLLMENT_KEY, JSON.stringify(enrollments));
+    localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments));
     return enrollments[index];
   }
   
