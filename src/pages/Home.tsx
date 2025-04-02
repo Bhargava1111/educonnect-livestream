@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,21 +35,24 @@ const Home = () => {
       title: "Full-Stack Web Development",
       description: "Master front-end and back-end technologies for complete web applications.",
       duration: "12 weeks",
-      level: "Intermediate"
+      level: "Intermediate",
+      imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=600&h=300"
     },
     {
       id: 2,
       title: "Data Science & Analytics",
       description: "Learn to analyze and visualize complex data for business insights.",
       duration: "10 weeks",
-      level: "Advanced"
+      level: "Advanced",
+      imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=600&h=300"
     },
     {
       id: 3,
       title: "Mobile App Development",
       description: "Create native mobile applications for iOS and Android platforms.",
       duration: "8 weeks",
-      level: "Intermediate"
+      level: "Intermediate",
+      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&h=300"
     }
   ];
 
@@ -116,8 +118,12 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {popularCourses.map((course) => (
               <Card key={course.id} className="card-hover overflow-hidden">
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                  <Laptop className="h-16 w-16 text-gray-400" />
+                <div className="h-48 bg-gray-200 overflow-hidden">
+                  <img 
+                    src={course.imageUrl} 
+                    alt={course.title}
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                  />
                 </div>
                 <CardHeader>
                   <CardTitle>{course.title}</CardTitle>

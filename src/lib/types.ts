@@ -1,19 +1,18 @@
+// Local Storage keys
+export const COURSES_KEY = 'career_aspire_courses';
+export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
+export const PAYMENTS_KEY = 'career_aspire_payments';
+export const LIVE_MEETINGS_KEY = 'career_aspire_live_meetings';
+export const USERS_KEY = 'career_aspire_users';
+export const ADMINS_KEY = 'career_aspire_admins';
+export const JOBS_KEY = 'career_aspire_jobs';
+export const PLACEMENTS_KEY = 'career_aspire_placements';
+export const ASSESSMENTS_KEY = 'career_aspire_assessments';
 
-// Common types used across the application
-
-export interface Course {
+// Course types
+export interface Topic {
   id: string;
   title: string;
-  description: string;
-  duration: string;
-  price: number;
-  curriculum: Module[];
-  image?: string;
-  level?: 'Beginner' | 'Intermediate' | 'Advanced';
-  students?: number;
-  rating?: number;
-  instructor?: string;
-  roadmap?: RoadmapPhase[];
 }
 
 export interface Module {
@@ -22,19 +21,27 @@ export interface Module {
   topics: Topic[];
 }
 
-export interface Topic {
-  id: string;
-  title: string;
-  duration?: string;
-  content?: string;
-}
-
 export interface RoadmapPhase {
   phase: number;
   title: string;
   duration: string;
   topics: string[];
   projects: string[];
+}
+
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  price: number;
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  students?: number;
+  rating?: number;
+  instructor?: string;
+  imageUrl?: string;
+  curriculum?: Module[];
+  roadmap?: RoadmapPhase[];
 }
 
 export interface Assessment {
@@ -115,12 +122,3 @@ export interface Payment {
   status: 'pending' | 'completed' | 'failed';
   paymentMethod: string;
 }
-
-// Local storage key constants
-export const COURSES_KEY = 'career_aspire_courses';
-export const ASSESSMENTS_KEY = 'career_aspire_assessments';
-export const LIVE_MEETINGS_KEY = 'career_aspire_live_meetings';
-export const JOBS_KEY = 'career_aspire_jobs';
-export const PLACEMENTS_KEY = 'career_aspire_placements';
-export const ENROLLMENT_KEY = 'career_aspire_enrollments';
-export const PAYMENTS_KEY = 'career_aspire_payments';

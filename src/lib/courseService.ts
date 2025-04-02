@@ -1,4 +1,3 @@
-
 import { 
   Course, 
   RoadmapPhase, 
@@ -23,6 +22,7 @@ const initializeCoursesIfNeeded = (): Course[] => {
         students: 125,
         rating: 4.8,
         instructor: 'Priya Sharma',
+        imageUrl: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&h=400',
         curriculum: [
           {
             id: 'module_1',
@@ -96,6 +96,68 @@ const initializeCoursesIfNeeded = (): Course[] => {
             projects: ["End-to-End Testing Project"]
           }
         ]
+      },
+      {
+        id: 'course_web_dev',
+        title: 'Full-Stack Web Development',
+        description: 'Master front-end and back-end technologies for complete web applications',
+        duration: '14 weeks',
+        price: 29999,
+        level: 'Intermediate',
+        students: 210,
+        rating: 4.9,
+        instructor: 'Rahul Khanna',
+        imageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
+        curriculum: [
+          {
+            id: 'module_1',
+            title: 'Frontend Development',
+            topics: [
+              { id: 'topic_1', title: 'HTML5 & CSS3' },
+              { id: 'topic_2', title: 'JavaScript Fundamentals' },
+              { id: 'topic_3', title: 'React.js' }
+            ]
+          },
+          {
+            id: 'module_2',
+            title: 'Backend Development',
+            topics: [
+              { id: 'topic_4', title: 'Node.js' },
+              { id: 'topic_5', title: 'Express.js' },
+              { id: 'topic_6', title: 'MongoDB' }
+            ]
+          }
+        ],
+        roadmap: [
+          {
+            phase: 1,
+            title: "Web Fundamentals",
+            duration: "3 weeks",
+            topics: ["HTML5", "CSS3", "Responsive Design", "JavaScript Basics", "Git & GitHub"],
+            projects: ["Portfolio Website"]
+          },
+          {
+            phase: 2,
+            title: "Frontend Development",
+            duration: "4 weeks",
+            topics: ["JavaScript Advanced", "React.js", "Redux", "UI Libraries", "REST API Interaction"],
+            projects: ["E-commerce Frontend"]
+          },
+          {
+            phase: 3,
+            title: "Backend Development",
+            duration: "4 weeks",
+            topics: ["Node.js", "Express.js", "MongoDB", "Authentication", "API Development"],
+            projects: ["RESTful API"]
+          },
+          {
+            phase: 4,
+            title: "Full Stack Integration",
+            duration: "3 weeks",
+            topics: ["Full Stack Architecture", "Deployment", "Performance Optimization", "Testing", "Security"],
+            projects: ["Complete Web Application"]
+          }
+        ]
       }
     ];
     localStorage.setItem(COURSES_KEY, JSON.stringify(defaultCourses));
@@ -118,6 +180,9 @@ export const createCourse = (course: Omit<Course, 'id'>): Course => {
   const newCourse = {
     ...course,
     id: `course_${Date.now()}`,
+    imageUrl: course.imageUrl || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
+    students: course.students || 0,
+    rating: course.rating || 0
   };
   
   courses.push(newCourse);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -49,14 +48,8 @@ const AdminCourses = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleSelectChange = (name: string, value: string) => {
-    if (name === 'level') {
-      // Ensure level is one of the allowed values
-      const levelValue = value as 'Beginner' | 'Intermediate' | 'Advanced';
-      setFormData(prev => ({ ...prev, [name]: levelValue }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced') => {
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
   
   const handleAddCourse = () => {
@@ -65,8 +58,7 @@ const AdminCourses = () => {
         ...formData,
         price: Number(formData.price),
         curriculum: [],
-        // Ensure level is properly typed for the Course interface
-        level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced'
+        level: formData.level
       });
       
       toast({
@@ -103,8 +95,7 @@ const AdminCourses = () => {
       updateCourse(selectedCourse.id, {
         ...formData,
         price: Number(formData.price),
-        // Ensure level is properly typed for the Course interface
-        level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced'
+        level: formData.level
       });
       
       toast({
@@ -293,7 +284,7 @@ const AdminCourses = () => {
                     <Label htmlFor="level">Level</Label>
                     <Select 
                       value={formData.level} 
-                      onValueChange={(value) => handleSelectChange('level', value)}
+                      onValueChange={(value: 'Beginner' | 'Intermediate' | 'Advanced') => handleSelectChange('level', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select level" />
@@ -389,7 +380,7 @@ const AdminCourses = () => {
                     <Label htmlFor="edit-level">Level</Label>
                     <Select 
                       value={formData.level} 
-                      onValueChange={(value) => handleSelectChange('level', value)}
+                      onValueChange={(value: 'Beginner' | 'Intermediate' | 'Advanced') => handleSelectChange('level', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select level" />
