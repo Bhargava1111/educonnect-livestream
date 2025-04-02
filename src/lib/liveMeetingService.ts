@@ -8,7 +8,70 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
   if (existingMeetings) {
     return JSON.parse(existingMeetings);
   } else {
-    const defaultMeetings: LiveMeeting[] = [];
+    // Create default sample meetings if none exist
+    const defaultMeetings: LiveMeeting[] = [
+      {
+        id: 'meeting_1',
+        courseId: 'course_1',
+        title: 'Introduction to Python Programming',
+        description: 'Learn the fundamentals of Python programming including variables, data types, and basic syntax.',
+        instructor: 'Dr. Smith',
+        date: new Date().toLocaleDateString(),
+        time: '14:00',
+        duration: '60 minutes',
+        link: 'https://meet.google.com/sample-meeting-1',
+        status: 'upcoming'
+      },
+      {
+        id: 'meeting_2',
+        courseId: 'course_2',
+        title: 'React Components & State Management',
+        description: 'Deep dive into React components, props, state, and context API.',
+        instructor: 'Jane Cooper',
+        date: new Date(Date.now() + 86400000).toLocaleDateString(), // tomorrow
+        time: '15:30',
+        duration: '90 minutes',
+        link: 'https://meet.google.com/sample-meeting-2',
+        status: 'upcoming'
+      },
+      {
+        id: 'meeting_3',
+        courseId: 'course_3',
+        title: 'Network Security Essentials',
+        description: 'Understanding network vulnerabilities and protection mechanisms.',
+        instructor: 'Robert Wilson',
+        date: new Date(Date.now() + 172800000).toLocaleDateString(), // day after tomorrow
+        time: '11:00',
+        duration: '120 minutes',
+        link: 'https://meet.google.com/sample-meeting-3',
+        status: 'upcoming'
+      },
+      {
+        id: 'meeting_4',
+        courseId: 'course_1',
+        title: 'Advanced Python: Working with APIs',
+        description: 'Learn how to interact with RESTful APIs using Python requests library.',
+        instructor: 'Dr. Smith',
+        date: new Date(Date.now() - 172800000).toLocaleDateString(), // 2 days ago
+        time: '14:00',
+        duration: '60 minutes',
+        link: 'https://meet.google.com/sample-meeting-4',
+        status: 'completed'
+      },
+      {
+        id: 'meeting_5',
+        courseId: 'course_2',
+        title: 'Building a Full-Stack App with MERN',
+        description: 'Hands-on workshop to build a complete application using MongoDB, Express, React, and Node.js.',
+        instructor: 'Jane Cooper',
+        date: new Date(Date.now() - 86400000).toLocaleDateString(), // yesterday
+        time: '16:00',
+        duration: '120 minutes',
+        link: 'https://meet.google.com/sample-meeting-5',
+        status: 'completed'
+      }
+    ];
+    
     localStorage.setItem(LIVE_MEETINGS_KEY, JSON.stringify(defaultMeetings));
     return defaultMeetings;
   }
@@ -59,4 +122,23 @@ export const deleteLiveMeeting = (id: string): boolean => {
   }
   
   return false;
+};
+
+// Utility function to mark meetings as completed based on date
+export const updateMeetingStatuses = (): void => {
+  const meetings = getAllLiveMeetings();
+  const now = new Date();
+  let updated = false;
+  
+  meetings.forEach(meeting => {
+    const meetingDate = new Date(`${meeting.date} ${meeting.time}`);
+    if (meeting.status === 'upcoming' && meetingDate < now) {
+      meeting.status = 'completed';
+      updated = true;
+    }
+  });
+  
+  if (updated) {
+    localStorage.setItem(LIVE_MEETINGS_KEY, JSON.stringify(meetings));
+  }
 };

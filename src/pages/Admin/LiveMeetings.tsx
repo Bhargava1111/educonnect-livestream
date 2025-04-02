@@ -1,34 +1,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Card, CardContent, CardHeader, CardTitle 
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+import { Badge } from "@/components/ui/badge";
+import { 
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import {
-  getAllLiveMeetings, getAllCourses, createLiveMeeting, updateLiveMeeting, 
-  deleteLiveMeeting, LiveMeeting, Course
-} from "@/lib/courseManagement";
+import { 
+  getAllLiveMeetings, createLiveMeeting, updateLiveMeeting, deleteLiveMeeting, LiveMeeting
+} from '@/lib/courseManagement';
 import { Calendar, Clock, Edit, Plus, Trash, Video } from 'lucide-react';
+import { getAllCourses } from '@/lib/courseManagement';
 
 const AdminLiveMeetings = () => {
   const { toast } = useToast();
   const [meetings, setMeetings] = useState<LiveMeeting[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<LiveMeeting | null>(null);
   
-  const [formData, setFormData] = useState<Omit<LiveMeeting, 'id'>>({
+  const [formData, setFormData] = useState({
     courseId: '',
     title: '',
     description: '',
@@ -37,7 +36,7 @@ const AdminLiveMeetings = () => {
     time: '',
     duration: '',
     link: '',
-    status: 'upcoming'
+    status: 'upcoming' as 'upcoming' | 'completed'
   });
   
   useEffect(() => {
@@ -66,11 +65,23 @@ const AdminLiveMeetings = () => {
   
   const handleAddMeeting = () => {
     try {
-      createLiveMeeting(formData);
+      if (!formData.courseId || !formData.title || !formData.date || !formData.time) {
+        toast({
+          title: "Missing Fields",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const newMeeting = createLiveMeeting({
+        ...formData,
+        status: formData.status as 'upcoming' | 'completed'
+      });
       
       toast({
-        title: "Meeting Created",
-        description: "The live meeting has been scheduled successfully."
+        title: "Meeting Added",
+        description: `${newMeeting.title} has been scheduled successfully.`
       });
       
       // Reset form and close modal
@@ -82,7 +93,7 @@ const AdminLiveMeetings = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create meeting. Please try again.",
+        description: "Failed to schedule meeting. Please try again.",
         variant: "destructive"
       });
     }
@@ -92,11 +103,23 @@ const AdminLiveMeetings = () => {
     if (!selectedMeeting) return;
     
     try {
-      updateLiveMeeting(selectedMeeting.id, formData);
+      if (!formData.courseId || !formData.title || !formData.date || !formData.time) {
+        toast({
+          title: "Missing Fields",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      updateLiveMeeting(selectedMeeting.id, {
+        ...formData,
+        status: formData.status as 'upcoming' | 'completed'
+      });
       
       toast({
         title: "Meeting Updated",
-        description: "The live meeting has been updated successfully."
+        description: `${formData.title} has been updated successfully.`
       });
       
       // Reset and close modal
@@ -122,7 +145,7 @@ const AdminLiveMeetings = () => {
         
         toast({
           title: "Meeting Deleted",
-          description: "The live meeting has been deleted successfully."
+          description: "The meeting has been deleted successfully."
         });
         
         // Reload meetings
@@ -175,10 +198,10 @@ const AdminLiveMeetings = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Manage Live Meetings</h1>
+        <h1 className="text-2xl font-bold">Manage Live Sessions</h1>
         <Button onClick={() => setIsAddModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Schedule New Meeting
+          Schedule New Session
         </Button>
       </div>
       
@@ -190,7 +213,6 @@ const AdminLiveMeetings = () => {
                 <TableHead>Title</TableHead>
                 <TableHead>Course</TableHead>
                 <TableHead>Date & Time</TableHead>
-                <TableHead>Instructor</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -198,7 +220,7 @@ const AdminLiveMeetings = () => {
             <TableBody>
               {meetings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">No live meetings scheduled. Add a new meeting to get started.</TableCell>
+                  <TableCell colSpan={5} className="text-center py-4">No meetings found. Schedule a new session to get started.</TableCell>
                 </TableRow>
               ) : (
                 meetings.map((meeting) => (
@@ -206,20 +228,31 @@ const AdminLiveMeetings = () => {
                     <TableCell className="font-medium">{meeting.title}</TableCell>
                     <TableCell>{getCourseNameById(meeting.courseId)}</TableCell>
                     <TableCell>
-                      {meeting.date} at {meeting.time}
+                      <div className="flex flex-col">
+                        <span className="flex items-center">
+                          <Calendar className="h-3 w-3 mr-1" /> {meeting.date}
+                        </span>
+                        <span className="flex items-center text-sm text-muted-foreground">
+                          <Clock className="h-3 w-3 mr-1" /> {meeting.time} ({meeting.duration})
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell>{meeting.instructor}</TableCell>
                     <TableCell>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        meeting.status === 'upcoming' 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {meeting.status.charAt(0).toUpperCase() + meeting.status.slice(1)}
-                      </span>
+                      <Badge variant={meeting.status === 'upcoming' ? 'default' : 'secondary'}>
+                        {meeting.status === 'upcoming' ? 'Upcoming' : 'Completed'}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {meeting.status === 'upcoming' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(meeting.link, '_blank')}
+                          >
+                            <Video className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -247,33 +280,32 @@ const AdminLiveMeetings = () => {
       {/* Add Meeting Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-lg">
+          <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle>Schedule New Live Meeting</CardTitle>
+              <CardTitle>Schedule New Session</CardTitle>
+              <CardDescription>Create a new live session for students</CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="courseId">Course</Label>
                   <Select 
-                    value={formData.courseId}
+                    value={formData.courseId} 
                     onValueChange={(value) => handleSelectChange('courseId', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select course" />
+                      <SelectValue placeholder="Select a course" />
                     </SelectTrigger>
                     <SelectContent>
                       {courses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}
-                        </SelectItem>
+                        <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="title">Meeting Title</Label>
+                  <Label htmlFor="title">Session Title</Label>
                   <Input 
                     id="title" 
                     name="title" 
@@ -288,10 +320,9 @@ const AdminLiveMeetings = () => {
                   <Textarea 
                     id="description" 
                     name="description" 
-                    rows={2} 
+                    rows={3} 
                     value={formData.description} 
                     onChange={handleInputChange} 
-                    required 
                   />
                 </div>
                 
@@ -309,38 +340,26 @@ const AdminLiveMeetings = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="date">Date</Label>
-                    <div className="flex">
-                      <span className="bg-gray-100 px-3 flex items-center border border-r-0 rounded-l-md">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                      </span>
-                      <Input 
-                        id="date" 
-                        name="date" 
-                        type="date"
-                        className="rounded-l-none"
-                        value={formData.date} 
-                        onChange={handleInputChange} 
-                        required 
-                      />
-                    </div>
+                    <Input 
+                      id="date" 
+                      name="date" 
+                      type="date"
+                      value={formData.date} 
+                      onChange={handleInputChange} 
+                      required 
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="time">Time</Label>
-                    <div className="flex">
-                      <span className="bg-gray-100 px-3 flex items-center border border-r-0 rounded-l-md">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                      </span>
-                      <Input 
-                        id="time" 
-                        name="time" 
-                        type="time"
-                        className="rounded-l-none"
-                        value={formData.time} 
-                        onChange={handleInputChange} 
-                        required 
-                      />
-                    </div>
+                    <Input 
+                      id="time" 
+                      name="time" 
+                      type="time"
+                      value={formData.time} 
+                      onChange={handleInputChange} 
+                      required 
+                    />
                   </div>
                 </div>
                 
@@ -350,7 +369,7 @@ const AdminLiveMeetings = () => {
                     <Input 
                       id="duration" 
                       name="duration" 
-                      placeholder="e.g. 1 hour" 
+                      placeholder="e.g. 60 minutes" 
                       value={formData.duration} 
                       onChange={handleInputChange} 
                       required 
@@ -361,7 +380,7 @@ const AdminLiveMeetings = () => {
                     <Label htmlFor="status">Status</Label>
                     <Select 
                       value={formData.status} 
-                      onValueChange={(value: 'upcoming' | 'completed') => handleSelectChange('status', value)}
+                      onValueChange={(value) => handleSelectChange('status', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -376,27 +395,21 @@ const AdminLiveMeetings = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="link">Meeting Link</Label>
-                  <div className="flex">
-                    <span className="bg-gray-100 px-3 flex items-center border border-r-0 rounded-l-md">
-                      <Video className="h-4 w-4 text-gray-500" />
-                    </span>
-                    <Input 
-                      id="link" 
-                      name="link" 
-                      className="rounded-l-none"
-                      placeholder="https://meet.google.com/..." 
-                      value={formData.link} 
-                      onChange={handleInputChange} 
-                      required 
-                    />
-                  </div>
+                  <Input 
+                    id="link" 
+                    name="link" 
+                    value={formData.link} 
+                    onChange={handleInputChange} 
+                    placeholder="e.g. https://meet.google.com/xyz-abcd-efg" 
+                    required 
+                  />
                 </div>
               </form>
             </CardContent>
-            <div className="p-6 flex justify-between">
+            <CardFooter className="flex justify-between">
               <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddMeeting}>Schedule Meeting</Button>
-            </div>
+              <Button onClick={handleAddMeeting}>Schedule Session</Button>
+            </CardFooter>
           </Card>
         </div>
       )}
@@ -404,33 +417,32 @@ const AdminLiveMeetings = () => {
       {/* Edit Meeting Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-lg">
+          <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle>Edit Live Meeting</CardTitle>
+              <CardTitle>Edit Session</CardTitle>
+              <CardDescription>Update live session details</CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-courseId">Course</Label>
                   <Select 
-                    value={formData.courseId}
+                    value={formData.courseId} 
                     onValueChange={(value) => handleSelectChange('courseId', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select course" />
+                      <SelectValue placeholder="Select a course" />
                     </SelectTrigger>
                     <SelectContent>
                       {courses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}
-                        </SelectItem>
+                        <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-title">Meeting Title</Label>
+                  <Label htmlFor="edit-title">Session Title</Label>
                   <Input 
                     id="edit-title" 
                     name="title" 
@@ -440,15 +452,15 @@ const AdminLiveMeetings = () => {
                   />
                 </div>
                 
+                {/* Additional form fields similar to add modal */}
                 <div className="space-y-2">
                   <Label htmlFor="edit-description">Description</Label>
                   <Textarea 
                     id="edit-description" 
                     name="description" 
-                    rows={2} 
+                    rows={3} 
                     value={formData.description} 
                     onChange={handleInputChange} 
-                    required 
                   />
                 </div>
                 
@@ -466,38 +478,26 @@ const AdminLiveMeetings = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="edit-date">Date</Label>
-                    <div className="flex">
-                      <span className="bg-gray-100 px-3 flex items-center border border-r-0 rounded-l-md">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                      </span>
-                      <Input 
-                        id="edit-date" 
-                        name="date" 
-                        type="date"
-                        className="rounded-l-none"
-                        value={formData.date} 
-                        onChange={handleInputChange} 
-                        required 
-                      />
-                    </div>
+                    <Input 
+                      id="edit-date" 
+                      name="date" 
+                      type="date"
+                      value={formData.date} 
+                      onChange={handleInputChange} 
+                      required 
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="edit-time">Time</Label>
-                    <div className="flex">
-                      <span className="bg-gray-100 px-3 flex items-center border border-r-0 rounded-l-md">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                      </span>
-                      <Input 
-                        id="edit-time" 
-                        name="time" 
-                        type="time"
-                        className="rounded-l-none"
-                        value={formData.time} 
-                        onChange={handleInputChange} 
-                        required 
-                      />
-                    </div>
+                    <Input 
+                      id="edit-time" 
+                      name="time" 
+                      type="time"
+                      value={formData.time} 
+                      onChange={handleInputChange} 
+                      required 
+                    />
                   </div>
                 </div>
                 
@@ -507,7 +507,6 @@ const AdminLiveMeetings = () => {
                     <Input 
                       id="edit-duration" 
                       name="duration" 
-                      placeholder="e.g. 1 hour" 
                       value={formData.duration} 
                       onChange={handleInputChange} 
                       required 
@@ -518,7 +517,7 @@ const AdminLiveMeetings = () => {
                     <Label htmlFor="edit-status">Status</Label>
                     <Select 
                       value={formData.status} 
-                      onValueChange={(value: 'upcoming' | 'completed') => handleSelectChange('status', value)}
+                      onValueChange={(value) => handleSelectChange('status', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -533,27 +532,20 @@ const AdminLiveMeetings = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="edit-link">Meeting Link</Label>
-                  <div className="flex">
-                    <span className="bg-gray-100 px-3 flex items-center border border-r-0 rounded-l-md">
-                      <Video className="h-4 w-4 text-gray-500" />
-                    </span>
-                    <Input 
-                      id="edit-link" 
-                      name="link" 
-                      className="rounded-l-none"
-                      placeholder="https://meet.google.com/..." 
-                      value={formData.link} 
-                      onChange={handleInputChange} 
-                      required 
-                    />
-                  </div>
+                  <Input 
+                    id="edit-link" 
+                    name="link" 
+                    value={formData.link} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
                 </div>
               </form>
             </CardContent>
-            <div className="p-6 flex justify-between">
+            <CardFooter className="flex justify-between">
               <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-              <Button onClick={handleEditMeeting}>Update Meeting</Button>
-            </div>
+              <Button onClick={handleEditMeeting}>Update Session</Button>
+            </CardFooter>
           </Card>
         </div>
       )}

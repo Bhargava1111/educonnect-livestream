@@ -7,9 +7,11 @@ import { Calendar, Clock, Video } from 'lucide-react';
 import { getStudentData, isStudentLoggedIn } from '@/lib/studentAuth';
 import { useNavigate } from 'react-router-dom';
 import { getAllLiveMeetings, getAllCourses } from '@/lib/courseManagement';
+import { useToast } from "@/hooks/use-toast";
 
 const LiveMeetings = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
   const [meetings, setMeetings] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
@@ -42,7 +44,22 @@ const LiveMeetings = () => {
   
   // Join meeting handler
   const joinMeeting = (link: string) => {
+    if (!link) {
+      toast({
+        title: "Meeting Link Error",
+        description: "The meeting link is not available. Please contact support.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Open meeting link in a new tab
     window.open(link, '_blank');
+    
+    toast({
+      title: "Joining Meeting",
+      description: "Redirecting to the meeting room."
+    });
   };
   
   // Get course name by ID

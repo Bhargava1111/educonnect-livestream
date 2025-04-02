@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,16 @@ const AdminDashboard = () => {
     navigate('/admin-login');
   };
 
+  // Navigation handlers
+  const navigateTo = (path: string) => {
+    navigate(path);
+  };
+
+  const addNewStudent = () => {
+    // Navigate to add student page or open modal
+    navigate('/admin/students?action=add');
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
@@ -61,35 +71,67 @@ const AdminDashboard = () => {
           </div>
           
           <nav className="space-y-1">
-            <Button variant="default" className="w-full justify-start">
+            <Button 
+              variant="default" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin')}
+            >
               <Layers className="mr-2 h-4 w-4" />
               Dashboard
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/students')}
+            >
               <Users className="mr-2 h-4 w-4" />
               Students
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/courses')}
+            >
               <GraduationCap className="mr-2 h-4 w-4" />
               Courses
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/live-meetings')}
+            >
               <Video className="mr-2 h-4 w-4" />
               Live Sessions
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/assessments')}
+            >
               <Database className="mr-2 h-4 w-4" />
               Assessments
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/schedule')}
+            >
               <Calendar className="mr-2 h-4 w-4" />
               Schedule
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/reports')}
+            >
               <BarChart className="mr-2 h-4 w-4" />
               Reports
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/settings')}
+            >
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </Button>
@@ -110,11 +152,19 @@ const AdminDashboard = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigateTo('/admin/settings')}
+            >
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </Button>
-            <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
+            <Button 
+              className="bg-eduBlue-600 hover:bg-eduBlue-700" 
+              size="sm"
+              onClick={addNewStudent}
+            >
               <UserPlus className="mr-2 h-4 w-4" />
               Add New Student
             </Button>
@@ -193,7 +243,11 @@ const AdminDashboard = () => {
                     New students who registered in the last 7 days
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigateTo('/admin/students')}
+                >
                   View All
                 </Button>
               </CardHeader>
@@ -235,7 +289,11 @@ const AdminDashboard = () => {
                     Most enrolled courses this month
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigateTo('/admin/courses')}
+                >
                   Manage Courses
                 </Button>
               </CardHeader>
@@ -262,7 +320,11 @@ const AdminDashboard = () => {
                         <span className="text-xs text-green-500 flex items-center mr-4">
                           <ChevronUp className="h-3 w-3 mr-1" /> {course.growth}%
                         </span>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigateTo(`/admin/courses`)}
+                        >
                           View Details
                         </Button>
                       </div>
@@ -281,7 +343,11 @@ const AdminDashboard = () => {
                     Latest submissions and grades
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigateTo('/admin/assessments')}
+                >
                   View All
                 </Button>
               </CardHeader>
@@ -325,7 +391,11 @@ const AdminDashboard = () => {
                     <FileText className="h-4 w-4 mr-2" />
                     Export
                   </Button>
-                  <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
+                  <Button 
+                    className="bg-eduBlue-600 hover:bg-eduBlue-700" 
+                    size="sm"
+                    onClick={addNewStudent}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Student
                   </Button>
@@ -387,7 +457,11 @@ const AdminDashboard = () => {
                               </Badge>
                             </td>
                             <td className="p-2 text-right">
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => navigateTo(`/admin/students?id=${i}`)}
+                              >
                                 <User className="h-4 w-4 mr-1" /> View
                               </Button>
                             </td>
@@ -410,7 +484,11 @@ const AdminDashboard = () => {
                     View and manage all courses
                   </CardDescription>
                 </div>
-                <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
+                <Button 
+                  className="bg-eduBlue-600 hover:bg-eduBlue-700" 
+                  size="sm"
+                  onClick={() => navigateTo('/admin/courses?action=add')}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Course
                 </Button>
@@ -450,7 +528,11 @@ const AdminDashboard = () => {
                               </Badge>
                             </td>
                             <td className="p-2 text-right">
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => navigateTo(`/admin/courses?id=${i}`)}
+                              >
                                 Manage
                               </Button>
                             </td>
@@ -473,7 +555,11 @@ const AdminDashboard = () => {
                     Sessions scheduled for the next 7 days
                   </CardDescription>
                 </div>
-                <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
+                <Button 
+                  className="bg-eduBlue-600 hover:bg-eduBlue-700" 
+                  size="sm"
+                  onClick={() => navigateTo('/admin/live-meetings?action=add')}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Schedule Session
                 </Button>

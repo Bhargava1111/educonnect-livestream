@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -31,7 +32,8 @@ const AdminCourses = () => {
     duration: '',
     price: 0,
     level: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced',
-    instructor: ''
+    instructor: '',
+    imageUrl: ''
   });
   
   useEffect(() => {
@@ -73,7 +75,8 @@ const AdminCourses = () => {
         duration: '',
         price: 0,
         level: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced',
-        instructor: ''
+        instructor: '',
+        imageUrl: ''
       });
       setIsAddModalOpen(false);
       
@@ -148,7 +151,8 @@ const AdminCourses = () => {
       duration: course.duration,
       price: course.price,
       level: course.level || 'Beginner',
-      instructor: course.instructor || ''
+      instructor: course.instructor || '',
+      imageUrl: course.imageUrl || ''
     });
     setIsEditModalOpen(true);
   };
@@ -307,6 +311,17 @@ const AdminCourses = () => {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="imageUrl">Image URL</Label>
+                  <Input 
+                    id="imageUrl" 
+                    name="imageUrl" 
+                    value={formData.imageUrl} 
+                    onChange={handleInputChange} 
+                    placeholder="URL to course image" 
+                  />
+                </div>
               </form>
             </CardContent>
             <CardFooter className="flex justify-between">
@@ -402,6 +417,17 @@ const AdminCourses = () => {
                       onChange={handleInputChange} 
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-imageUrl">Image URL</Label>
+                  <Input 
+                    id="edit-imageUrl" 
+                    name="imageUrl" 
+                    value={formData.imageUrl} 
+                    onChange={handleInputChange} 
+                    placeholder="URL to course image" 
+                  />
                 </div>
               </form>
             </CardContent>
