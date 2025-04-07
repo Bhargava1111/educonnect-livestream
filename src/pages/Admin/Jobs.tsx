@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getAllJobs, createJob, updateJob, deleteJob, Job } from "@/lib/courseManagement";
 import { Plus, Edit, Trash } from 'lucide-react';
 
@@ -23,8 +24,8 @@ const AdminJobs = () => {
     location: '',
     description: '',
     salary: '',
-    jobType: '',
-    experienceLevel: '',
+    jobType: 'Full-time' as 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote',
+    experienceLevel: 'Entry' as 'Entry' | 'Mid' | 'Senior',
     lastDate: '',
     requirements: [] as string[]
   });
@@ -42,6 +43,20 @@ const AdminJobs = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    if (name === 'jobType') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [name]: value as 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote' 
+      }));
+    } else if (name === 'experienceLevel') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [name]: value as 'Entry' | 'Mid' | 'Senior' 
+      }));
+    }
   };
   
   const addRequirement = () => {
@@ -68,8 +83,8 @@ const AdminJobs = () => {
       location: '',
       description: '',
       salary: '',
-      jobType: '',
-      experienceLevel: '',
+      jobType: 'Full-time' as 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote',
+      experienceLevel: 'Entry' as 'Entry' | 'Mid' | 'Senior',
       lastDate: '',
       requirements: []
     });
@@ -105,9 +120,7 @@ const AdminJobs = () => {
     if (!selectedJob) return;
     
     try {
-      updateJob(selectedJob.id, {
-        ...formData
-      });
+      updateJob(selectedJob.id, formData);
       
       toast({
         title: "Job Updated",
@@ -155,10 +168,10 @@ const AdminJobs = () => {
       company: job.company,
       location: job.location,
       description: job.description,
-      salary: job.salary,
-      jobType: job.jobType,
-      experienceLevel: job.experienceLevel,
-      lastDate: job.lastDate,
+      salary: job.salary || '',
+      jobType: job.jobType || 'Full-time',
+      experienceLevel: job.experienceLevel || 'Entry',
+      lastDate: job.lastDate || '',
       requirements: job.requirements || []
     });
     setIsEditModalOpen(true);
@@ -224,25 +237,37 @@ const AdminJobs = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="jobType">Job Type</Label>
-              <Input
-                id="jobType"
-                name="jobType"
-                placeholder="Full-time, Part-time, etc."
-                value={formData.jobType}
-                onChange={handleInputChange}
-                required
-              />
+              <Select 
+                value={formData.jobType} 
+                onValueChange={(value) => handleSelectChange('jobType', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select job type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Full-time">Full-time</SelectItem>
+                  <SelectItem value="Part-time">Part-time</SelectItem>
+                  <SelectItem value="Contract">Contract</SelectItem>
+                  <SelectItem value="Internship">Internship</SelectItem>
+                  <SelectItem value="Remote">Remote</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="experienceLevel">Experience Level</Label>
-              <Input
-                id="experienceLevel"
-                name="experienceLevel"
-                placeholder="Entry, Mid, Senior"
-                value={formData.experienceLevel}
-                onChange={handleInputChange}
-                required
-              />
+              <Select 
+                value={formData.experienceLevel} 
+                onValueChange={(value) => handleSelectChange('experienceLevel', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select experience level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Entry">Entry</SelectItem>
+                  <SelectItem value="Mid">Mid</SelectItem>
+                  <SelectItem value="Senior">Senior</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
@@ -399,3 +424,4 @@ const AdminJobs = () => {
 };
 
 export default AdminJobs;
+
