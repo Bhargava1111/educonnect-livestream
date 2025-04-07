@@ -1,52 +1,82 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
+import { useNavigate } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { 
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  getAllLiveMeetings, createLiveMeeting, updateLiveMeeting, deleteLiveMeeting, LiveMeeting
-} from '@/lib/courseManagement';
 import { Calendar, Clock, Edit, Plus, Trash, Video } from 'lucide-react';
-import { getAllCourses } from '@/lib/courseManagement';
+import { 
+  getAllLiveMeetings, 
+  createLiveMeeting, 
+  updateLiveMeeting, 
+  deleteLiveMeeting,
+  getLiveMeetingById,
+  getUpcomingLiveMeetings,
+  getCompletedLiveMeetings
+} from '@/lib/liveMeetingService';
+import { getAllCourses } from '@/lib/courseService';
+import { LiveMeeting, Course } from '@/lib/types';
 
 const AdminLiveMeetings = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('upcoming');
   const [meetings, setMeetings] = useState<LiveMeeting[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<LiveMeeting | null>(null);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<LiveMeeting, 'id'>>({
     courseId: '',
     title: '',
     description: '',
     instructor: '',
-    date: '',
+    date: new Date().toLocaleDateString(),
     time: '',
     duration: '',
     link: '',
-    status: 'upcoming' as 'upcoming' | 'completed'
+    status: 'upcoming'
   });
   
   useEffect(() => {
     loadMeetings();
     loadCourses();
-  }, []);
+  }, [activeTab]);
   
   const loadMeetings = () => {
-    const allMeetings = getAllLiveMeetings();
-    setMeetings(allMeetings);
+    let meetingsData: LiveMeeting[] = [];
+    
+    if (activeTab === 'upcoming') {
+      meetingsData = getUpcomingLiveMeetings();
+    } else if (activeTab === 'completed') {
+      meetingsData = getCompletedLiveMeetings();
+    } else {
+      meetingsData = getAllLiveMeetings();
+    }
+    
+    setMeetings(meetingsData);
   };
   
   const loadCourses = () => {
@@ -65,27 +95,25 @@ const AdminLiveMeetings = () => {
   
   const handleAddMeeting = () => {
     try {
-      if (!formData.courseId || !formData.title || !formData.date || !formData.time) {
-        toast({
-          title: "Missing Fields",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      const newMeeting = createLiveMeeting({
-        ...formData,
-        status: formData.status as 'upcoming' | 'completed'
-      });
+      const newMeeting = createLiveMeeting(formData);
       
       toast({
-        title: "Meeting Added",
+        title: "Session Scheduled",
         description: `${newMeeting.title} has been scheduled successfully.`
       });
       
       // Reset form and close modal
-      resetForm();
+      setFormData({
+        courseId: '',
+        title: '',
+        description: '',
+        instructor: '',
+        date: new Date().toLocaleDateString(),
+        time: '',
+        duration: '',
+        link: '',
+        status: 'upcoming'
+      });
       setIsAddModalOpen(false);
       
       // Reload meetings
@@ -93,7 +121,7 @@ const AdminLiveMeetings = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to schedule meeting. Please try again.",
+        description: "Failed to schedule session. Please try again.",
         variant: "destructive"
       });
     }
@@ -103,27 +131,14 @@ const AdminLiveMeetings = () => {
     if (!selectedMeeting) return;
     
     try {
-      if (!formData.courseId || !formData.title || !formData.date || !formData.time) {
-        toast({
-          title: "Missing Fields",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      updateLiveMeeting(selectedMeeting.id, {
-        ...formData,
-        status: formData.status as 'upcoming' | 'completed'
-      });
+      updateLiveMeeting(selectedMeeting.id, formData);
       
       toast({
-        title: "Meeting Updated",
+        title: "Session Updated",
         description: `${formData.title} has been updated successfully.`
       });
       
       // Reset and close modal
-      resetForm();
       setSelectedMeeting(null);
       setIsEditModalOpen(false);
       
@@ -132,20 +147,20 @@ const AdminLiveMeetings = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update meeting. Please try again.",
+        description: "Failed to update session. Please try again.",
         variant: "destructive"
       });
     }
   };
   
   const handleDeleteMeeting = (meetingId: string) => {
-    if (confirm("Are you sure you want to delete this meeting?")) {
+    if (confirm("Are you sure you want to delete this session?")) {
       try {
         deleteLiveMeeting(meetingId);
         
         toast({
-          title: "Meeting Deleted",
-          description: "The meeting has been deleted successfully."
+          title: "Session Deleted",
+          description: "The session has been deleted successfully."
         });
         
         // Reload meetings
@@ -153,43 +168,58 @@ const AdminLiveMeetings = () => {
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to delete meeting. Please try again.",
+          description: "Failed to delete session. Please try again.",
           variant: "destructive"
         });
       }
     }
   };
   
-  const openEditModal = (meeting: LiveMeeting) => {
-    setSelectedMeeting(meeting);
-    setFormData({
-      courseId: meeting.courseId,
-      title: meeting.title,
-      description: meeting.description,
-      instructor: meeting.instructor,
-      date: meeting.date,
-      time: meeting.time,
-      duration: meeting.duration,
-      link: meeting.link,
-      status: meeting.status
-    });
-    setIsEditModalOpen(true);
+  const openEditModal = (meetingId: string) => {
+    const meeting = getLiveMeetingById(meetingId);
+    if (meeting) {
+      setSelectedMeeting(meeting);
+      setFormData({
+        courseId: meeting.courseId,
+        title: meeting.title,
+        description: meeting.description,
+        instructor: meeting.instructor,
+        date: meeting.date,
+        time: meeting.time,
+        duration: meeting.duration,
+        link: meeting.link,
+        status: meeting.status
+      });
+      setIsEditModalOpen(true);
+    } else {
+      toast({
+        title: "Error",
+        description: "Meeting not found.",
+        variant: "destructive"
+      });
+    }
   };
   
-  const resetForm = () => {
-    setFormData({
-      courseId: '',
-      title: '',
-      description: '',
-      instructor: '',
-      date: '',
-      time: '',
-      duration: '',
-      link: '',
-      status: 'upcoming'
+  const startMeeting = (link: string) => {
+    if (!link) {
+      toast({
+        title: "Meeting Link Error",
+        description: "The meeting link is not available.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Open meeting link in a new tab
+    window.open(link, '_blank');
+    
+    toast({
+      title: "Starting Meeting",
+      description: "Redirecting to the meeting room."
     });
   };
   
+  // Get course name by ID
   const getCourseNameById = (courseId: string): string => {
     const course = courses.find(c => c.id === courseId);
     return course ? course.title : 'Unknown Course';
@@ -198,11 +228,36 @@ const AdminLiveMeetings = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Manage Live Sessions</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>
+        <div>
+          <h1 className="text-2xl font-bold">Live Sessions</h1>
+          <p className="text-gray-500">Manage all scheduled and completed sessions</p>
+        </div>
+        <Button onClick={() => {
+          setFormData({
+            courseId: '',
+            title: '',
+            description: '',
+            instructor: '',
+            date: new Date().toLocaleDateString(),
+            time: '',
+            duration: '',
+            link: '',
+            status: 'upcoming'
+          });
+          setIsAddModalOpen(true);
+        }}>
           <Plus className="mr-2 h-4 w-4" />
           Schedule New Session
         </Button>
+      </div>
+      
+      <div className="mb-6">
+        <Tabs defaultValue="upcoming" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="upcoming">Upcoming Sessions</TabsTrigger>
+            <TabsTrigger value="completed">Completed Sessions</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
       <Card>
@@ -212,6 +267,7 @@ const AdminLiveMeetings = () => {
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Course</TableHead>
+                <TableHead>Instructor</TableHead>
                 <TableHead>Date & Time</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -220,20 +276,34 @@ const AdminLiveMeetings = () => {
             <TableBody>
               {meetings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">No meetings found. Schedule a new session to get started.</TableCell>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    No {activeTab} sessions found.
+                    {activeTab === 'upcoming' && (
+                      <div className="mt-2">
+                        <Button variant="link" onClick={() => setIsAddModalOpen(true)}>
+                          Schedule a new session
+                        </Button>
+                      </div>
+                    )}
+                  </TableCell>
                 </TableRow>
               ) : (
                 meetings.map((meeting) => (
                   <TableRow key={meeting.id}>
-                    <TableCell className="font-medium">{meeting.title}</TableCell>
+                    <TableCell className="font-medium">
+                      {meeting.title}
+                    </TableCell>
                     <TableCell>{getCourseNameById(meeting.courseId)}</TableCell>
+                    <TableCell>{meeting.instructor}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" /> {meeting.date}
+                        <span className="flex items-center text-sm">
+                          <Calendar className="h-3 w-3 mr-1 text-gray-500" />
+                          {meeting.date}
                         </span>
-                        <span className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3 mr-1" /> {meeting.time} ({meeting.duration})
+                        <span className="flex items-center text-sm">
+                          <Clock className="h-3 w-3 mr-1 text-gray-500" />
+                          {meeting.time} ({meeting.duration})
                         </span>
                       </div>
                     </TableCell>
@@ -243,12 +313,12 @@ const AdminLiveMeetings = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end space-x-2">
                         {meeting.status === 'upcoming' && (
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => window.open(meeting.link, '_blank')}
+                            onClick={() => startMeeting(meeting.link)}
                           >
                             <Video className="h-4 w-4" />
                           </Button>
@@ -256,7 +326,7 @@ const AdminLiveMeetings = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => openEditModal(meeting)}
+                          onClick={() => openEditModal(meeting.id)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -288,23 +358,6 @@ const AdminLiveMeetings = () => {
             <CardContent>
               <form className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="courseId">Course</Label>
-                  <Select 
-                    value={formData.courseId} 
-                    onValueChange={(value) => handleSelectChange('courseId', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a course" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
                   <Label htmlFor="title">Session Title</Label>
                   <Input 
                     id="title" 
@@ -316,6 +369,25 @@ const AdminLiveMeetings = () => {
                 </div>
                 
                 <div className="space-y-2">
+                  <Label htmlFor="courseId">Select Course</Label>
+                  <Select 
+                    value={formData.courseId} 
+                    onValueChange={(value) => handleSelectChange('courseId', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courses.map(course => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
                   <Textarea 
                     id="description" 
@@ -323,6 +395,7 @@ const AdminLiveMeetings = () => {
                     rows={3} 
                     value={formData.description} 
                     onChange={handleInputChange} 
+                    required 
                   />
                 </div>
                 
@@ -377,32 +450,16 @@ const AdminLiveMeetings = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select 
-                      value={formData.status} 
-                      onValueChange={(value) => handleSelectChange('status', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="upcoming">Upcoming</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="link">Meeting Link</Label>
+                    <Input 
+                      id="link" 
+                      name="link" 
+                      placeholder="https://meet.google.com/..." 
+                      value={formData.link} 
+                      onChange={handleInputChange} 
+                      required 
+                    />
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="link">Meeting Link</Label>
-                  <Input 
-                    id="link" 
-                    name="link" 
-                    value={formData.link} 
-                    onChange={handleInputChange} 
-                    placeholder="e.g. https://meet.google.com/xyz-abcd-efg" 
-                    required 
-                  />
                 </div>
               </form>
             </CardContent>
@@ -420,27 +477,10 @@ const AdminLiveMeetings = () => {
           <Card className="w-full max-w-md">
             <CardHeader>
               <CardTitle>Edit Session</CardTitle>
-              <CardDescription>Update live session details</CardDescription>
+              <CardDescription>Update session details</CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-courseId">Course</Label>
-                  <Select 
-                    value={formData.courseId} 
-                    onValueChange={(value) => handleSelectChange('courseId', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a course" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
                 <div className="space-y-2">
                   <Label htmlFor="edit-title">Session Title</Label>
                   <Input 
@@ -452,7 +492,25 @@ const AdminLiveMeetings = () => {
                   />
                 </div>
                 
-                {/* Additional form fields similar to add modal */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-courseId">Course</Label>
+                  <Select 
+                    value={formData.courseId} 
+                    onValueChange={(value) => handleSelectChange('courseId', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courses.map(course => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="edit-description">Description</Label>
                   <Textarea 
@@ -461,6 +519,7 @@ const AdminLiveMeetings = () => {
                     rows={3} 
                     value={formData.description} 
                     onChange={handleInputChange} 
+                    required 
                   />
                 </div>
                 
@@ -507,6 +566,7 @@ const AdminLiveMeetings = () => {
                     <Input 
                       id="edit-duration" 
                       name="duration" 
+                      placeholder="e.g. 60 minutes" 
                       value={formData.duration} 
                       onChange={handleInputChange} 
                       required 
@@ -514,31 +574,32 @@ const AdminLiveMeetings = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="edit-status">Status</Label>
-                    <Select 
-                      value={formData.status} 
-                      onValueChange={(value) => handleSelectChange('status', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="upcoming">Upcoming</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="edit-link">Meeting Link</Label>
+                    <Input 
+                      id="edit-link" 
+                      name="link" 
+                      placeholder="https://meet.google.com/..." 
+                      value={formData.link} 
+                      onChange={handleInputChange} 
+                      required 
+                    />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-link">Meeting Link</Label>
-                  <Input 
-                    id="edit-link" 
-                    name="link" 
-                    value={formData.link} 
-                    onChange={handleInputChange} 
-                    required 
-                  />
+                  <Label htmlFor="edit-status">Status</Label>
+                  <Select 
+                    value={formData.status} 
+                    onValueChange={(value) => handleSelectChange('status', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="upcoming">Upcoming</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </form>
             </CardContent>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Video } from 'lucide-react';
 import { getStudentData, isStudentLoggedIn } from '@/lib/studentAuth';
 import { useNavigate } from 'react-router-dom';
-import { getAllLiveMeetings, getAllCourses } from '@/lib/courseManagement';
+import { getAllLiveMeetings, updateMeetingStatuses, getAllCourses } from '@/lib/courseManagement';
 import { useToast } from "@/hooks/use-toast";
 
 const LiveMeetings = () => {
@@ -21,13 +21,16 @@ const LiveMeetings = () => {
   const studentData = isLoggedIn ? getStudentData() : null;
   
   useEffect(() => {
+    // Ensure meeting statuses are updated
+    updateMeetingStatuses();
+    
     // Load meetings and courses
     const allMeetings = getAllLiveMeetings();
     const allCourses = getAllCourses();
     
     setMeetings(allMeetings);
     setCourses(allCourses);
-  }, []);
+  }, [activeTab]); // Also refresh when tab changes
   
   // Filter meetings based on student enrollment and tab selection
   const filteredMeetings = meetings.filter(meeting => {

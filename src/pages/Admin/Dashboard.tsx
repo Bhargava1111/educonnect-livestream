@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +47,16 @@ const AdminDashboard = () => {
   const addNewStudent = () => {
     // Navigate to add student page or open modal
     navigate('/admin/students?action=add');
+  };
+
+  // Handle session navigation
+  const handleSessionAction = (action: string, id?: string) => {
+    if (action === 'edit' && id) {
+      navigate(`/admin/live-meetings?action=edit&id=${id}`);
+    } else if (action === 'start' && id) {
+      // This would typically launch the meeting
+      window.open(`https://meet.google.com/sample-meeting-${id}`, '_blank');
+    }
   };
 
   return (
@@ -567,11 +576,11 @@ const AdminDashboard = () => {
               <CardContent>
                 <div className="space-y-4">
                   {[
-                    { title: "Python Fundamentals: Data Structures", course: "Python Full Stack", instructor: "Dr. Smith", date: new Date().toLocaleDateString(), time: "10:00 AM", students: 35 },
-                    { title: "React Components & Props", course: "MERN Stack", instructor: "Mrs. Johnson", date: new Date().toLocaleDateString(), time: "1:00 PM", students: 28 },
-                    { title: "Java OOP Concepts", course: "Java Backend", instructor: "Mr. Davis", date: new Date(Date.now() + 86400000).toLocaleDateString(), time: "11:00 AM", students: 30 },
-                    { title: "Network Security Fundamentals", course: "Cybersecurity", instructor: "Ms. Wilson", date: new Date(Date.now() + 86400000).toLocaleDateString(), time: "2:00 PM", students: 22 },
-                    { title: "MongoDB Schema Design", course: "MEAN Stack", instructor: "Mr. Adams", date: new Date(Date.now() + 2*86400000).toLocaleDateString(), time: "10:00 AM", students: 25 },
+                    { id: "1", title: "Python Fundamentals: Data Structures", course: "Python Full Stack", instructor: "Dr. Smith", date: new Date().toLocaleDateString(), time: "10:00 AM", students: 35 },
+                    { id: "2", title: "React Components & Props", course: "MERN Stack", instructor: "Mrs. Johnson", date: new Date().toLocaleDateString(), time: "1:00 PM", students: 28 },
+                    { id: "3", title: "Java OOP Concepts", course: "Java Backend", instructor: "Mr. Davis", date: new Date(Date.now() + 86400000).toLocaleDateString(), time: "11:00 AM", students: 30 },
+                    { id: "4", title: "Network Security Fundamentals", course: "Cybersecurity", instructor: "Ms. Wilson", date: new Date(Date.now() + 86400000).toLocaleDateString(), time: "2:00 PM", students: 22 },
+                    { id: "5", title: "MongoDB Schema Design", course: "MEAN Stack", instructor: "Mr. Adams", date: new Date(Date.now() + 2*86400000).toLocaleDateString(), time: "10:00 AM", students: 25 },
                   ].map((session, i) => (
                     <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                       <div>
@@ -583,8 +592,8 @@ const AdminDashboard = () => {
                         <p className="text-sm text-gray-500">{`${session.date} at ${session.time} • ${session.students} students enrolled`}</p>
                       </div>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">Edit</Button>
-                        <Button size="sm" variant="outline" className="bg-eduBlue-600 text-white hover:bg-eduBlue-700">Start</Button>
+                        <Button size="sm" variant="outline" onClick={() => handleSessionAction('edit', session.id)}>Edit</Button>
+                        <Button size="sm" variant="outline" className="bg-eduBlue-600 text-white hover:bg-eduBlue-700" onClick={() => handleSessionAction('start', session.id)}>Start</Button>
                       </div>
                     </div>
                   ))}

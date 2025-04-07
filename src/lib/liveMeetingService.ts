@@ -79,7 +79,15 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
 
 // Live Meeting CRUD operations
 export const getAllLiveMeetings = (): LiveMeeting[] => {
-  return initializeLiveMeetingsIfNeeded();
+  const meetings = initializeLiveMeetingsIfNeeded();
+  // Always update meeting statuses before returning
+  updateMeetingStatuses();
+  return meetings;
+};
+
+export const getLiveMeetingById = (id: string): LiveMeeting | undefined => {
+  const meetings = getAllLiveMeetings();
+  return meetings.find(meeting => meeting.id === id);
 };
 
 export const getLiveMeetingsByCourseId = (courseId: string): LiveMeeting[] => {
@@ -141,4 +149,16 @@ export const updateMeetingStatuses = (): void => {
   if (updated) {
     localStorage.setItem(LIVE_MEETINGS_KEY, JSON.stringify(meetings));
   }
+};
+
+// Get upcoming live meetings
+export const getUpcomingLiveMeetings = (): LiveMeeting[] => {
+  const meetings = getAllLiveMeetings();
+  return meetings.filter(meeting => meeting.status === 'upcoming');
+};
+
+// Get completed live meetings
+export const getCompletedLiveMeetings = (): LiveMeeting[] => {
+  const meetings = getAllLiveMeetings();
+  return meetings.filter(meeting => meeting.status === 'completed');
 };
