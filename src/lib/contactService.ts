@@ -16,8 +16,8 @@ export const trackFormSubmission = (formData: any): void => {
   console.log(`Form submission received and would be sent to info@careeraspiretechnology.com`);
 };
 
-// Contact details for the website
-export const contactDetails = {
+// Default contact details for the website
+const defaultContactDetails = {
   email: {
     info: "info@careeraspiretechnology.com",
     support: "support@careeraspiretechnology.com"
@@ -40,3 +40,15 @@ export const contactDetails = {
     instagram: "https://instagram.com/careeraspiretechnology"
   }
 };
+
+// Get the current contact details
+export const getContactDetails = () => {
+  const savedDetails = localStorage.getItem('career_aspire_contact_details');
+  if (savedDetails) {
+    return JSON.parse(savedDetails);
+  }
+  return defaultContactDetails;
+};
+
+// Export the contact details
+export const contactDetails = getContactDetails();

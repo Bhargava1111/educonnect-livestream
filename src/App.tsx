@@ -22,6 +22,7 @@ import AdminCourseRoadmap from "./pages/Admin/CourseRoadmap";
 import AdminLiveMeetings from "./pages/Admin/LiveMeetings";
 import AdminJobs from "./pages/Admin/Jobs";
 import AdminPlacements from "./pages/Admin/Placements";
+import AdminContact from "./pages/Admin/Contact";
 import StudentDashboard from "./pages/Student/Dashboard";
 import CourseRoadmap from "./pages/CourseRoadmap";
 import CourseCurriculum from "./pages/CourseCurriculum";
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/admin/live-meetings" element={<AdminLiveMeetings />} />
           <Route path="/admin/jobs" element={<AdminJobs />} />
           <Route path="/admin/placements" element={<AdminPlacements />} />
+          <Route path="/admin/contact" element={<AdminContact />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/student/*" element={<StudentDashboard />} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />

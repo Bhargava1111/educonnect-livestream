@@ -3,44 +3,397 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { getAllJobs, createJob, updateJob, deleteJob } from "@/lib/courseManagement";
-import { Plus } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { getAllJobs, createJob, updateJob, deleteJob, Job } from "@/lib/courseManagement";
+import { Plus, Edit, Trash } from 'lucide-react';
 
 const AdminJobs = () => {
   const { toast } = useToast();
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    company: '',
+    location: '',
+    description: '',
+    salary: '',
+    jobType: '',
+    experienceLevel: '',
+    lastDate: '',
+    requirements: [] as string[]
+  });
+  const [requirementInput, setRequirementInput] = useState('');
   
   useEffect(() => {
+    loadJobs();
+  }, []);
+  
+  const loadJobs = () => {
     const allJobs = getAllJobs();
     setJobs(allJobs);
-  }, []);
+  };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const addRequirement = () => {
+    if (requirementInput.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        requirements: [...prev.requirements, requirementInput.trim()]
+      }));
+      setRequirementInput('');
+    }
+  };
+  
+  const removeRequirement = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      requirements: prev.requirements.filter((_, i) => i !== index)
+    }));
+  };
+  
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      company: '',
+      location: '',
+      description: '',
+      salary: '',
+      jobType: '',
+      experienceLevel: '',
+      lastDate: '',
+      requirements: []
+    });
+    setRequirementInput('');
+  };
+  
+  const handleAddJob = () => {
+    try {
+      const newJob = createJob({
+        ...formData,
+        createdAt: new Date().toISOString(),
+        appliedCount: 0
+      });
+      
+      toast({
+        title: "Job Added",
+        description: `${newJob.title} has been added successfully.`
+      });
+      
+      resetForm();
+      setIsAddModalOpen(false);
+      loadJobs();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add job. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleEditJob = () => {
+    if (!selectedJob) return;
+    
+    try {
+      updateJob(selectedJob.id, {
+        ...formData
+      });
+      
+      toast({
+        title: "Job Updated",
+        description: `${formData.title} has been updated successfully.`
+      });
+      
+      setSelectedJob(null);
+      resetForm();
+      setIsEditModalOpen(false);
+      loadJobs();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update job. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleDeleteJob = (jobId: string) => {
+    if (confirm("Are you sure you want to delete this job?")) {
+      try {
+        deleteJob(jobId);
+        
+        toast({
+          title: "Job Deleted",
+          description: "The job has been deleted successfully."
+        });
+        
+        loadJobs();
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete job. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+  
+  const openEditModal = (job: Job) => {
+    setSelectedJob(job);
+    setFormData({
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      description: job.description,
+      salary: job.salary,
+      jobType: job.jobType,
+      experienceLevel: job.experienceLevel,
+      lastDate: job.lastDate,
+      requirements: job.requirements || []
+    });
+    setIsEditModalOpen(true);
+  };
+  
+  const JobForm = ({ onSubmit, onCancel, title, submitLabel }: any) => (
+    <Dialog open={true} onOpenChange={onCancel}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            Fill out the form below to {submitLabel === "Add Job" ? "create a new job listing" : "update the job listing"}.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Job Title</Label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company</Label>
+              <Input
+                id="company"
+                name="company"
+                value={formData.company}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="salary">Salary</Label>
+              <Input
+                id="salary"
+                name="salary"
+                placeholder="e.g. 6-10 LPA"
+                value={formData.salary}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="jobType">Job Type</Label>
+              <Input
+                id="jobType"
+                name="jobType"
+                placeholder="Full-time, Part-time, etc."
+                value={formData.jobType}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="experienceLevel">Experience Level</Label>
+              <Input
+                id="experienceLevel"
+                name="experienceLevel"
+                placeholder="Entry, Mid, Senior"
+                value={formData.experienceLevel}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="lastDate">Last Date to Apply</Label>
+            <Input
+              id="lastDate"
+              name="lastDate"
+              type="date"
+              value={formData.lastDate}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Job Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              rows={4}
+              value={formData.description}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Requirements</Label>
+            <div className="flex gap-2">
+              <Input
+                value={requirementInput}
+                onChange={(e) => setRequirementInput(e.target.value)}
+                placeholder="Add a requirement"
+              />
+              <Button type="button" onClick={addRequirement} variant="outline">
+                Add
+              </Button>
+            </div>
+            <ul className="mt-2 space-y-1">
+              {formData.requirements.map((req, index) => (
+                <li key={index} className="flex justify-between items-center bg-gray-100 p-2 rounded">
+                  <span>{req}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeRequirement(index)}
+                  >
+                    ✕
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button onClick={onSubmit}>
+            {submitLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
   
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manage Job Listings</h1>
-        <Button>
+        <Button onClick={() => setIsAddModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add New Job
         </Button>
       </div>
       
       <Card>
-        <CardHeader>
-          <CardTitle>Job Listings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>This is where you can manage job listings for students. Implement job creation, editing, and deletion functionality.</p>
-          <p className="mt-4">Features to be implemented:</p>
-          <ul className="list-disc ml-6 mt-2">
-            <li>Create job listings with details like title, company, location, requirements, etc.</li>
-            <li>Edit existing job listings</li>
-            <li>Delete job listings</li>
-            <li>Mark job listings as filled or active</li>
-            <li>Track applications</li>
-          </ul>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Company</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Experience</TableHead>
+                <TableHead>Salary</TableHead>
+                <TableHead>Last Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {jobs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">No jobs found. Add a new job to get started.</TableCell>
+                </TableRow>
+              ) : (
+                jobs.map((job) => (
+                  <TableRow key={job.id}>
+                    <TableCell className="font-medium">{job.title}</TableCell>
+                    <TableCell>{job.company}</TableCell>
+                    <TableCell>{job.location}</TableCell>
+                    <TableCell>{job.experienceLevel}</TableCell>
+                    <TableCell>{job.salary}</TableCell>
+                    <TableCell>{job.lastDate}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openEditModal(job)}
+                          title="Edit Job"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteJob(job.id)}
+                          title="Delete Job"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
+      
+      {isAddModalOpen && (
+        <JobForm
+          onSubmit={handleAddJob}
+          onCancel={() => setIsAddModalOpen(false)}
+          title="Add New Job"
+          submitLabel="Add Job"
+        />
+      )}
+      
+      {isEditModalOpen && (
+        <JobForm
+          onSubmit={handleEditJob}
+          onCancel={() => setIsEditModalOpen(false)}
+          title="Edit Job"
+          submitLabel="Update Job"
+        />
+      )}
     </div>
   );
 };

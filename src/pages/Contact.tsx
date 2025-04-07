@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { trackFormSubmission, contactDetails } from "@/lib/courseManagement";
+import { trackFormSubmission } from "@/lib/courseManagement";
+import { getContactDetails } from "@/lib/contactService";
 import WhatsAppContact from '@/components/WhatsAppContact';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
 const Contact = () => {
   const { toast } = useToast();
+  const contactDetails = getContactDetails();
   const [formData, setFormData] = React.useState({
     name: '',
     email: '',

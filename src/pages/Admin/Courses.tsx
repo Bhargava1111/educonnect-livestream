@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from 'lucide-react';
@@ -21,7 +21,13 @@ const AdminCourses = () => {
     handleEditCourse,
     handleDeleteCourse,
     openEditModal,
+    loadCourses
   } = useCourseManagement();
+  
+  // Load all courses when the component mounts
+  useEffect(() => {
+    loadCourses();
+  }, [loadCourses]);
   
   return (
     <div className="p-6">

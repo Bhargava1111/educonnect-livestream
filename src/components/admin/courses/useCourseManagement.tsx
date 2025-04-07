@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { 
   getAllCourses, createCourse, updateCourse, deleteCourse, Course
@@ -33,14 +33,14 @@ export function useCourseManagement() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [formData, setFormData] = useState<CourseFormData>(initialFormData);
   
-  useEffect(() => {
-    loadCourses();
-  }, []);
-  
-  const loadCourses = () => {
+  const loadCourses = useCallback(() => {
     const allCourses = getAllCourses();
     setCourses(allCourses);
-  };
+  }, []);
+  
+  useEffect(() => {
+    loadCourses();
+  }, [loadCourses]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -161,5 +161,6 @@ export function useCourseManagement() {
     handleEditCourse,
     handleDeleteCourse,
     openEditModal,
+    loadCourses,
   };
 }

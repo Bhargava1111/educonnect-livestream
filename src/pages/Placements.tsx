@@ -1,47 +1,22 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getAllPlacements, Placement } from '@/lib/courseManagement';
 
 const Placements = () => {
+  const [placements, setPlacements] = useState<Placement[]>([]);
+  
+  useEffect(() => {
+    const allPlacements = getAllPlacements();
+    setPlacements(allPlacements);
+  }, []);
+  
   const placementStats = [
     { label: 'Placement Rate', value: '92%' },
     { label: 'Average Package', value: '₹7.5 LPA' },
     { label: 'Highest Package', value: '₹24 LPA' },
     { label: 'Companies', value: '150+' }
-  ];
-
-  const successStories = [
-    {
-      id: 1,
-      name: 'Priya Sharma',
-      role: 'Full Stack Developer',
-      company: 'Microsoft',
-      package: '₹19 LPA',
-      image: '',
-      course: 'MERN Stack Development',
-      testimonial: 'The practical approach and industry-aligned curriculum at Career Aspire Technology helped me secure my dream job at Microsoft.'
-    },
-    {
-      id: 2,
-      name: 'Rahul Gupta',
-      role: 'Data Engineer',
-      company: 'Amazon',
-      package: '₹16 LPA',
-      image: '',
-      course: 'Python Full Stack',
-      testimonial: 'The mentors at Career Aspire Technology were supportive and guided me throughout my learning journey. Their mock interviews prepared me well for real interviews.'
-    },
-    {
-      id: 3,
-      name: 'Zoya Khan',
-      role: 'DevOps Engineer',
-      company: 'Google',
-      package: '₹22 LPA',
-      image: '',
-      course: 'DevOps & Cloud Computing',
-      testimonial: 'Learning DevOps at Career Aspire was a game changer for my career. The hands-on projects and certifications made my resume stand out.'
-    }
   ];
 
   const companyLogos = [
@@ -76,22 +51,27 @@ const Placements = () => {
       {/* Success Stories */}
       <h2 className="text-2xl font-bold mb-6 text-center">Student Success Stories</h2>
       <div className="grid md:grid-cols-3 gap-6 mb-12">
-        {successStories.map((story) => (
-          <Card key={story.id} className="overflow-hidden">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center mb-4">
-                <Avatar className="h-20 w-20 mb-4">
-                  <AvatarFallback>{story.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  {story.image && <AvatarImage src={story.image} alt={story.name} />}
-                </Avatar>
-                <h3 className="font-bold text-lg">{story.name}</h3>
-                <p className="text-sm text-gray-500">{story.role} at {story.company}</p>
-                <p className="text-sm font-medium text-eduBlue-600">{story.package}</p>
-              </div>
-              <p className="text-gray-700 text-center italic">"{story.testimonial}"</p>
-            </CardContent>
-          </Card>
-        ))}
+        {placements.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <p className="text-gray-500">No placement stories available at the moment. Check back later.</p>
+          </div>
+        ) : (
+          placements.map((story) => (
+            <Card key={story.id} className="overflow-hidden">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center mb-4">
+                  <Avatar className="h-20 w-20 mb-4">
+                    <AvatarFallback>{story.studentName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <h3 className="font-bold text-lg">{story.studentName}</h3>
+                  <p className="text-sm text-gray-500">{story.position} at {story.company}</p>
+                  <p className="text-sm font-medium text-eduBlue-600">{story.salary}</p>
+                </div>
+                <p className="text-gray-700 text-center italic">"{story.testimonial}"</p>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Recruiting Companies */}
