@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Briefcase, MapPin, Calendar } from 'lucide-react';
-import { getAllJobs, Job } from "@/lib/courseManagement";
+import { getAllJobs, Job } from "@/lib/jobService";
 
 const Jobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
