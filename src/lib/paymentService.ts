@@ -69,3 +69,40 @@ export const updatePayment = (
   
   return undefined;
 };
+
+// Payment link management
+export const setPaymentLink = (courseId: string, paymentLink: string): boolean => {
+  try {
+    const paymentLinks = getPaymentLinks();
+    paymentLinks[courseId] = paymentLink;
+    localStorage.setItem('payment_links', JSON.stringify(paymentLinks));
+    return true;
+  } catch (error) {
+    console.error("Error setting payment link:", error);
+    return false;
+  }
+};
+
+export const getPaymentLink = (courseId: string): string => {
+  const paymentLinks = getPaymentLinks();
+  return paymentLinks[courseId] || '';
+};
+
+export const getPaymentLinks = (): Record<string, string> => {
+  const storedLinks = localStorage.getItem('payment_links');
+  return storedLinks ? JSON.parse(storedLinks) : {};
+};
+
+export const removePaymentLink = (courseId: string): boolean => {
+  try {
+    const paymentLinks = getPaymentLinks();
+    if (paymentLinks[courseId]) {
+      delete paymentLinks[courseId];
+      localStorage.setItem('payment_links', JSON.stringify(paymentLinks));
+    }
+    return true;
+  } catch (error) {
+    console.error("Error removing payment link:", error);
+    return false;
+  }
+};

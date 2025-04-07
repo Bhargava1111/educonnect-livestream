@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Check, ExternalLink } from 'lucide-react';
 import RazorpayPayment from './RazorpayPayment';
 import { isStudentLoggedIn } from '@/lib/studentAuth';
+import { getPaymentLink } from '@/lib/paymentService';
 
 interface CourseEnrollmentProps {
   courseId: string | number;
@@ -27,6 +28,13 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   const navigate = useNavigate();
   const isLoggedIn = isStudentLoggedIn();
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [customPaymentLink, setCustomPaymentLink] = useState('');
+
+  useEffect(() => {
+    // Check if there's a custom payment link for this course
+    const paymentLink = getPaymentLink(String(courseId));
+    setCustomPaymentLink(paymentLink);
+  }, [courseId]);
 
   const handlePaymentSuccess = (response: any) => {
     toast({
@@ -52,6 +60,21 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
     setIsEnrolling(true);
   };
 
+  const handleExternalPayment = () => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "Please login to enroll in this course",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
+    // Open custom payment link in a new tab
+    window.open(customPaymentLink, '_blank');
+  };
+
   return (
     <Card className="shadow-lg border-2 border-gray-100">
       <CardHeader className="text-center border-b pb-6">
@@ -73,7 +96,21 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
         </ul>
       </CardContent>
       <CardFooter className="flex flex-col space-y-3 pt-4">
-        {isEnrolling ? (
+        {customPaymentLink ? (
+          // Show external payment button if custom payment link exists
+          <>
+            <Button 
+              onClick={handleExternalPayment} 
+              className="w-full bg-eduBlue-600 hover:bg-eduBlue-700 flex items-center justify-center"
+            >
+              Pay Now <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+            <p className="text-xs text-center text-gray-500">
+              You will be redirected to our payment partner
+            </p>
+          </>
+        ) : isEnrolling ? (
+          // Show Razorpay payment button
           <div className="w-full">
             <RazorpayPayment 
               amount={price} 
@@ -92,6 +129,7 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
             </Button>
           </div>
         ) : (
+          // Show default enroll button
           <Button 
             onClick={handleEnroll} 
             className="w-full bg-eduBlue-600 hover:bg-eduBlue-700"

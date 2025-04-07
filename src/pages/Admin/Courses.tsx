@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   getAllCourses, createCourse, updateCourse, deleteCourse, Course
 } from "@/lib/courseManagement";
-import { Edit, Trash, Plus, FileText } from 'lucide-react';
+import { Edit, Trash, Plus, FileText, Settings } from 'lucide-react';
 
 const AdminCourses = () => {
   const { toast } = useToast();
@@ -196,7 +196,16 @@ const AdminCourses = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
+                          onClick={() => navigate(`/admin/courses/${course.id}`)}
+                          title="Course Settings"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
                           onClick={() => navigate(`/admin/courses/${course.id}/roadmap`)}
+                          title="Edit Roadmap"
                         >
                           <FileText className="h-4 w-4" />
                         </Button>
@@ -204,6 +213,7 @@ const AdminCourses = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => openEditModal(course)}
+                          title="Edit Course"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -211,6 +221,7 @@ const AdminCourses = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleDeleteCourse(course.id)}
+                          title="Delete Course"
                         >
                           <Trash className="h-4 w-4" />
                         </Button>

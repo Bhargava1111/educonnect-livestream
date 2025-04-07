@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Code, GraduationCap, Laptop, Users, Video } from 'lucide-react';
+import { Check, Code, GraduationCap, Laptop, Users, Video, CreditCard, BookOpen, Award } from 'lucide-react';
 import TrainingRoadmap from '@/components/TrainingRoadmap';
 
 const Home = () => {
@@ -56,6 +57,25 @@ const Home = () => {
     }
   ];
 
+  // Payment methods information
+  const paymentMethods = [
+    {
+      icon: <CreditCard className="h-10 w-10 text-eduBlue-600" />,
+      title: "Secure Payment Options",
+      description: "Multiple payment methods including Credit/Debit Cards, Net Banking, and UPI."
+    },
+    {
+      icon: <BookOpen className="h-10 w-10 text-eduBlue-600" />,
+      title: "EMI Available",
+      description: "Flexible EMI options available for all courses. Learn now, pay later."
+    },
+    {
+      icon: <Award className="h-10 w-10 text-eduBlue-600" />,
+      title: "Scholarships",
+      description: "Merit-based scholarships for deserving candidates."
+    }
+  ];
+
   return (
     <div>
       {/* Hero Section */}
@@ -104,6 +124,81 @@ const Home = () => {
 
       {/* Training & Placement Roadmap */}
       <TrainingRoadmap />
+
+      {/* Creative Image Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Learning Experience</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <img 
+                src="/lovable-uploads/80b1af96-81af-443c-975e-ca241efcc354.png" 
+                alt="IT Training Platform" 
+                className="rounded-lg shadow-xl w-full"
+              />
+            </div>
+            <div className="space-y-6">
+              <h3 className="text-2xl font-semibold">LIVE IT Course Platform for All Your Career Needs</h3>
+              <p className="text-lg text-gray-700">
+                Our platform provides comprehensive IT training with live sessions, hands-on projects, and career guidance.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
+                  <span>Interactive live sessions with industry experts</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
+                  <span>Dedicated mentorship throughout your learning journey</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
+                  <span>Industry-relevant projects and assignments</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
+                  <span>Placement assistance and interview preparation</span>
+                </li>
+              </ul>
+              <Link to="/courses">
+                <Button className="mt-4 bg-eduBlue-600 hover:bg-eduBlue-700">
+                  Browse Our Courses
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Payment Methods Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-4">Flexible Payment Options</h2>
+          <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto">
+            We offer various payment methods to make quality education accessible to everyone.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {paymentMethods.map((method, index) => (
+              <div key={index} className="bg-white p-8 rounded-lg shadow-md text-center">
+                <div className="flex justify-center mb-4">
+                  {method.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{method.title}</h3>
+                <p className="text-gray-600">{method.description}</p>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-12 text-center">
+            <Link to="/contact">
+              <Button className="bg-eduBlue-600 hover:bg-eduBlue-700">
+                Contact Us for Payment Queries
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Popular Courses */}
       <section className="py-16">
