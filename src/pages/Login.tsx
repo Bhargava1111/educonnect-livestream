@@ -37,6 +37,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      // Call the login function and get the result
       const result = loginStudent(email, password);
       
       if (result.success) {
@@ -44,7 +45,11 @@ const Login = () => {
           title: "Login Successful",
           description: "Welcome back! You have been logged in successfully.",
         });
-        navigate('/'); // Redirect to home page after successful login
+        
+        // Small delay to allow toast to be seen before redirect
+        setTimeout(() => {
+          navigate('/');
+        }, 500);
       } else {
         toast({
           title: "Login Failed",

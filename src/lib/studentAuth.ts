@@ -69,6 +69,7 @@ const saveStudentsToStorage = (students: any[]): void => {
 export const loginStudent = (email: string, password: string): { success: boolean; studentData?: any } => {
   const students = getAllStudentsFromStorage();
   
+  // Make comparison case-insensitive for email
   const student = students.find(
     (s) => s.email.toLowerCase() === email.toLowerCase() && s.password === password
   );
