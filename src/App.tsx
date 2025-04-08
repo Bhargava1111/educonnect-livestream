@@ -13,6 +13,7 @@ import Jobs from "./pages/Jobs";
 import Placements from "./pages/Placements";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/Admin/Dashboard";
 import AdminStudents from "./pages/Admin/Students";
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/live-meetings" element={<Layout><LiveMeetings /></Layout>} />
           <Route path="/login" element={<Layout><Login /></Layout>} />
           <Route path="/register" element={<Layout><Register /></Layout>} />
+          <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
           <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/students" element={<AdminStudents />} />

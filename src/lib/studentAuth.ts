@@ -5,60 +5,10 @@ import { createEnrollment, getEnrollmentsByStudentId } from './courseManagement'
 // Session storage key for student auth
 const STUDENT_AUTH_KEY = "career_aspire_student_auth";
 
-// Mock student users for demo purposes
-// In a real app, this would come from a database
-const MOCK_STUDENTS = [
-  {
-    id: "s1",
-    email: "student@example.com",
-    password: "password123",
-    name: "John Doe",
-    enrolledCourses: [],
-    phone: "9876543210",
-    address: "123, Student Housing, Bangalore",
-    profilePicture: "",
-    registrationDate: "2023-01-15T10:30:00Z"
-  },
-  {
-    id: "s2",
-    email: "jane@example.com",
-    password: "password123",
-    name: "Jane Smith",
-    enrolledCourses: ["course_1"],
-    phone: "8765432109",
-    address: "456, College Road, Mumbai",
-    profilePicture: "",
-    registrationDate: "2023-02-20T14:45:00Z"
-  },
-  {
-    id: "s3",
-    email: "mike@example.com",
-    password: "password123",
-    name: "Mike Johnson",
-    enrolledCourses: ["course_2", "course_3"],
-    phone: "7654321098",
-    address: "789, Tech Park, Delhi",
-    profilePicture: "",
-    registrationDate: "2023-03-10T09:15:00Z"
-  }
-];
-
-// Store students in localStorage if not already present
-const initializeStudentsIfNeeded = (): void => {
-  const storedStudents = localStorage.getItem("career_aspire_students");
-  
-  if (!storedStudents) {
-    localStorage.setItem("career_aspire_students", JSON.stringify(MOCK_STUDENTS));
-  }
-};
-
-// Call initialization on module load
-initializeStudentsIfNeeded();
-
 // Get all students from storage
 const getAllStudentsFromStorage = (): any[] => {
   const storedStudents = localStorage.getItem("career_aspire_students");
-  return storedStudents ? JSON.parse(storedStudents) : MOCK_STUDENTS;
+  return storedStudents ? JSON.parse(storedStudents) : [];
 };
 
 // Save students to storage
@@ -109,6 +59,7 @@ export const registerStudent = (studentData: {
     id: `s${Date.now()}`,
     enrolledCourses: [],
     profilePicture: "",
+    skills: [],
     registrationDate: new Date().toISOString(),
     ...studentData
   };
@@ -159,6 +110,7 @@ export const updateStudentProfile = (profileData: {
   phone?: string;
   address?: string;
   profilePicture?: string;
+  skills?: string[];
 }): boolean => {
   const studentData = getStudentData();
   if (!studentData) return false;
