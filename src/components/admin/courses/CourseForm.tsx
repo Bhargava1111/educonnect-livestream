@@ -16,9 +16,11 @@ interface CourseFormProps {
     level: 'Beginner' | 'Intermediate' | 'Advanced';
     instructor: string;
     imageUrl: string;
+    status?: 'Active' | 'Inactive' | 'Coming Soon';
+    category?: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSelectChange: (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced') => void;
+  handleSelectChange: (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced' | 'Active' | 'Inactive' | 'Coming Soon') => void;
   handleSubmit: () => void;
   handleCancel: () => void;
   submitLabel: string;
@@ -38,7 +40,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
@@ -113,12 +115,42 @@ const CourseForm: React.FC<CourseFormProps> = ({
               </div>
               
               <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select 
+                  value={formData.status || 'Active'} 
+                  onValueChange={(value: 'Active' | 'Inactive' | 'Coming Soon') => handleSelectChange('status', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Coming Soon">Coming Soon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="instructor">Instructor</Label>
                 <Input 
                   id="instructor" 
                   name="instructor" 
                   value={formData.instructor} 
                   onChange={handleInputChange} 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Input 
+                  id="category" 
+                  name="category" 
+                  value={formData.category || ''} 
+                  onChange={handleInputChange} 
+                  placeholder="e.g. Web Development" 
                 />
               </div>
             </div>
@@ -132,6 +164,19 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 onChange={handleInputChange} 
                 placeholder="URL to course image" 
               />
+              {formData.imageUrl && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 mb-1">Preview:</p>
+                  <img 
+                    src={formData.imageUrl} 
+                    alt="Course Preview" 
+                    className="w-full max-h-40 object-cover rounded-md"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400';
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </form>
         </CardContent>

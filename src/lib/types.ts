@@ -1,3 +1,4 @@
+
 // Local Storage keys
 export const COURSES_KEY = 'career_aspire_courses';
 export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
@@ -8,6 +9,8 @@ export const ADMINS_KEY = 'career_aspire_admins';
 export const JOBS_KEY = 'career_aspire_jobs';
 export const PLACEMENTS_KEY = 'career_aspire_placements';
 export const ASSESSMENTS_KEY = 'career_aspire_assessments';
+export const CONTACTS_KEY = 'career_aspire_contacts';
+export const EMAIL_NOTIFICATIONS_KEY = 'career_aspire_email_notifications';
 
 // Course types
 export interface Topic {
@@ -42,6 +45,18 @@ export interface Course {
   imageUrl?: string;
   curriculum?: Module[];
   roadmap?: RoadmapPhase[];
+  status?: 'Active' | 'Inactive' | 'Coming Soon';
+  category?: string;
+}
+
+export interface Question {
+  id: string;
+  text: string;
+  options: string[];
+  correctAnswerIndex: number;
+  points?: number;
+  type?: 'multiple-choice' | 'coding' | 'essay';
+  codingTemplate?: string;
 }
 
 export interface Assessment {
@@ -52,14 +67,8 @@ export interface Assessment {
   questions: Question[];
   timeLimit?: number; // in minutes
   passingScore?: number;
-}
-
-export interface Question {
-  id: string;
-  text: string;
-  options: string[];
-  correctAnswerIndex: number;
-  points?: number;
+  type?: 'quiz' | 'coding-challenge' | 'project' | 'exam';
+  dueDate?: string;
 }
 
 export interface LiveMeeting {
@@ -121,4 +130,15 @@ export interface Payment {
   paymentId: string;
   status: 'pending' | 'completed' | 'failed';
   paymentMethod: string;
+}
+
+export interface EmailNotification {
+  id: string;
+  to: string;
+  subject: string;
+  body: string;
+  sentDate: string;
+  status: 'sent' | 'failed' | 'pending';
+  type: 'enrollment' | 'payment' | 'assessment' | 'general';
+  relatedId?: string;
 }

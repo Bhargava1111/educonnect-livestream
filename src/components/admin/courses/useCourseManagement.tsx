@@ -13,6 +13,8 @@ export interface CourseFormData {
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   instructor: string;
   imageUrl: string;
+  status?: 'Active' | 'Inactive' | 'Coming Soon';
+  category?: string;
 }
 
 export const initialFormData: CourseFormData = {
@@ -22,7 +24,9 @@ export const initialFormData: CourseFormData = {
   price: 0,
   level: 'Beginner',
   instructor: '',
-  imageUrl: ''
+  imageUrl: '',
+  status: 'Active',
+  category: ''
 };
 
 export function useCourseManagement() {
@@ -34,9 +38,19 @@ export function useCourseManagement() {
   const [formData, setFormData] = useState<CourseFormData>(initialFormData);
   
   const loadCourses = useCallback(() => {
-    const allCourses = getAllCourses();
-    setCourses(allCourses);
-  }, []);
+    try {
+      const allCourses = getAllCourses();
+      setCourses(allCourses);
+      console.log(`Loaded ${allCourses.length} courses`);
+    } catch (error) {
+      console.error("Error loading courses:", error);
+      toast({
+        title: "Error Loading Courses",
+        description: "There was a problem loading the courses. Please refresh the page.",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
   
   useEffect(() => {
     loadCourses();
@@ -44,10 +58,15 @@ export function useCourseManagement() {
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      if (name === 'price') {
+        return { ...prev, [name]: Number(value) };
+      }
+      return { ...prev, [name]: value };
+    });
   };
   
-  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced') => {
+  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced' | 'Active' | 'Inactive' | 'Coming Soon') => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
@@ -72,6 +91,7 @@ export function useCourseManagement() {
       // Reload courses
       loadCourses();
     } catch (error) {
+      console.error("Error adding course:", error);
       toast({
         title: "Error",
         description: "Failed to add course. Please try again.",
@@ -102,6 +122,7 @@ export function useCourseManagement() {
       // Reload courses
       loadCourses();
     } catch (error) {
+      console.error("Error updating course:", error);
       toast({
         title: "Error",
         description: "Failed to update course. Please try again.",
@@ -123,6 +144,7 @@ export function useCourseManagement() {
         // Reload courses
         loadCourses();
       } catch (error) {
+        console.error("Error deleting course:", error);
         toast({
           title: "Error",
           description: "Failed to delete course. Please try again.",
@@ -141,7 +163,9 @@ export function useCourseManagement() {
       price: course.price,
       level: course.level || 'Beginner',
       instructor: course.instructor || '',
-      imageUrl: course.imageUrl || ''
+      imageUrl: course.imageUrl || '',
+      status: course.status || 'Active',
+      category: course.category || ''
     });
     setIsEditModalOpen(true);
   };

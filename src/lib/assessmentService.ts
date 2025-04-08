@@ -1,5 +1,5 @@
 
-import { Assessment, ASSESSMENTS_KEY } from './types';
+import { Assessment, ASSESSMENTS_KEY, Question } from './types';
 
 // Assessment CRUD operations
 export const getAllAssessments = (): Assessment[] => {
@@ -10,6 +10,11 @@ export const getAllAssessments = (): Assessment[] => {
 export const getAssessmentsByCourseId = (courseId: string): Assessment[] => {
   const assessments = getAllAssessments();
   return assessments.filter(assessment => assessment.courseId === courseId);
+};
+
+export const getAssessmentById = (id: string): Assessment | undefined => {
+  const assessments = getAllAssessments();
+  return assessments.find(assessment => assessment.id === id);
 };
 
 export const createAssessment = (assessment: Omit<Assessment, 'id'>): Assessment => {
@@ -47,4 +52,32 @@ export const deleteAssessment = (id: string): boolean => {
   }
   
   return false;
+};
+
+// Helper function to create question
+export const createQuestion = (
+  text: string, 
+  options: string[], 
+  correctAnswerIndex: number,
+  points: number = 10,
+  type: 'multiple-choice' | 'coding' | 'essay' = 'multiple-choice'
+): Question => {
+  return {
+    id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    text,
+    options,
+    correctAnswerIndex,
+    points,
+    type
+  };
+};
+
+// Initialize with default assessments if none exist
+export const initializeAssessments = (): void => {
+  const existingAssessments = localStorage.getItem(ASSESSMENTS_KEY);
+  
+  if (!existingAssessments) {
+    const defaultAssessments: Assessment[] = [];
+    localStorage.setItem(ASSESSMENTS_KEY, JSON.stringify(defaultAssessments));
+  }
 };

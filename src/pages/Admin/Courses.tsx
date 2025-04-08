@@ -6,8 +6,10 @@ import { Plus } from 'lucide-react';
 import CourseTable from '@/components/admin/courses/CourseTable';
 import CourseForm from '@/components/admin/courses/CourseForm';
 import { useCourseManagement, initialFormData } from '@/components/admin/courses/useCourseManagement';
+import { useToast } from "@/hooks/use-toast";
 
 const AdminCourses = () => {
+  const { toast } = useToast();
   const {
     courses,
     formData,
@@ -26,8 +28,20 @@ const AdminCourses = () => {
   
   // Load all courses when the component mounts
   useEffect(() => {
-    loadCourses();
-  }, [loadCourses]);
+    try {
+      loadCourses();
+      toast({
+        title: "Courses Loaded",
+        description: `${courses.length} courses were loaded successfully.`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load courses. Please try refreshing the page.",
+        variant: "destructive"
+      });
+    }
+  }, []);
   
   return (
     <div className="p-6">

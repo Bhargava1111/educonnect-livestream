@@ -19,6 +19,8 @@ import AdminStudents from "./pages/Admin/Students";
 import AdminCourses from "./pages/Admin/Courses";
 import CourseDetails from "./pages/Admin/CourseDetails";
 import AdminCourseRoadmap from "./pages/Admin/CourseRoadmap";
+import CourseAssessments from "./pages/Admin/CourseAssessments";
+import CourseReports from "./pages/Admin/CourseReports";
 import AdminLiveMeetings from "./pages/Admin/LiveMeetings";
 import AdminJobs from "./pages/Admin/Jobs";
 import AdminPlacements from "./pages/Admin/Placements";
@@ -55,10 +57,13 @@ const App = () => (
           <Route path="/admin/courses" element={<AdminCourses />} />
           <Route path="/admin/courses/:courseId" element={<CourseDetails />} />
           <Route path="/admin/courses/:courseId/roadmap" element={<AdminCourseRoadmap />} />
+          <Route path="/admin/courses/:courseId/assessments" element={<CourseAssessments />} />
+          <Route path="/admin/courses/:courseId/reports" element={<CourseReports />} />
           <Route path="/admin/live-meetings" element={<AdminLiveMeetings />} />
           <Route path="/admin/jobs" element={<AdminJobs />} />
           <Route path="/admin/placements" element={<AdminPlacements />} />
           <Route path="/admin/contact" element={<AdminContact />} />
+          <Route path="/admin/settings" element={<AdminDashboard />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/student/*" element={<StudentDashboard />} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
