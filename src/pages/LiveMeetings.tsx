@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,8 @@ const LiveMeetings = () => {
   const isLoggedIn = isStudentLoggedIn();
   const studentData = isLoggedIn ? getStudentData() : null;
   
-  useEffect(() => {
+  // Use useCallback to prevent recreation on each render
+  const loadData = useCallback(() => {
     // Ensure meeting statuses are updated
     updateMeetingStatuses();
     
@@ -32,7 +33,11 @@ const LiveMeetings = () => {
     
     setMeetings(allMeetings);
     setCourses(allCourses);
-  }, [activeTab]); // Also refresh when tab changes
+  }, []);
+  
+  useEffect(() => {
+    loadData();
+  }, [activeTab, loadData]);
   
   // Filter meetings based on student enrollment and tab selection
   const filteredMeetings = meetings.filter(meeting => {

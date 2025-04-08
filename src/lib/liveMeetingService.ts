@@ -77,26 +77,45 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
   }
 };
 
+// Get all meetings without calling updateMeetingStatuses to prevent circular reference
+const getMeetingsFromStorage = (): LiveMeeting[] => {
+  return initializeLiveMeetingsIfNeeded();
+};
+
 // Live Meeting CRUD operations
 export const getAllLiveMeetings = (): LiveMeeting[] => {
-  const meetings = initializeLiveMeetingsIfNeeded();
-  // Always update meeting statuses before returning
-  updateMeetingStatuses();
+  const meetings = getMeetingsFromStorage();
+  // Update statuses manually here instead of recursively calling
+  const now = new Date();
+  let updated = false;
+  
+  meetings.forEach(meeting => {
+    const meetingDate = new Date(`${meeting.date} ${meeting.time}`);
+    if (meeting.status === 'upcoming' && meetingDate < now) {
+      meeting.status = 'completed';
+      updated = true;
+    }
+  });
+  
+  if (updated) {
+    localStorage.setItem(LIVE_MEETINGS_KEY, JSON.stringify(meetings));
+  }
+  
   return meetings;
 };
 
 export const getLiveMeetingById = (id: string): LiveMeeting | undefined => {
-  const meetings = getAllLiveMeetings();
+  const meetings = getMeetingsFromStorage();
   return meetings.find(meeting => meeting.id === id);
 };
 
 export const getLiveMeetingsByCourseId = (courseId: string): LiveMeeting[] => {
-  const meetings = getAllLiveMeetings();
+  const meetings = getMeetingsFromStorage();
   return meetings.filter(meeting => meeting.courseId === courseId);
 };
 
 export const createLiveMeeting = (meeting: Omit<LiveMeeting, 'id'>): LiveMeeting => {
-  const meetings = getAllLiveMeetings();
+  const meetings = getMeetingsFromStorage();
   const newMeeting = {
     ...meeting,
     id: `meeting_${Date.now()}`,
@@ -108,7 +127,7 @@ export const createLiveMeeting = (meeting: Omit<LiveMeeting, 'id'>): LiveMeeting
 };
 
 export const updateLiveMeeting = (id: string, updatedMeeting: Partial<LiveMeeting>): LiveMeeting | undefined => {
-  const meetings = getAllLiveMeetings();
+  const meetings = getMeetingsFromStorage();
   const index = meetings.findIndex(meeting => meeting.id === id);
   
   if (index !== -1) {
@@ -121,7 +140,7 @@ export const updateLiveMeeting = (id: string, updatedMeeting: Partial<LiveMeetin
 };
 
 export const deleteLiveMeeting = (id: string): boolean => {
-  const meetings = getAllLiveMeetings();
+  const meetings = getMeetingsFromStorage();
   const filteredMeetings = meetings.filter(meeting => meeting.id !== id);
   
   if (filteredMeetings.length < meetings.length) {
@@ -134,7 +153,7 @@ export const deleteLiveMeeting = (id: string): boolean => {
 
 // Utility function to mark meetings as completed based on date
 export const updateMeetingStatuses = (): void => {
-  const meetings = getAllLiveMeetings();
+  const meetings = getMeetingsFromStorage();
   const now = new Date();
   let updated = false;
   

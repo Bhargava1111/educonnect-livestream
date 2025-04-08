@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -61,8 +61,8 @@ const AdminLiveMeetings = () => {
     status: 'upcoming'
   });
   
-  // Define loadMeetings and loadCourses outside of useEffect to avoid recreation
-  const loadMeetings = () => {
+  // Use useCallback to prevent recreation of these functions on each render
+  const loadMeetings = useCallback(() => {
     console.log("Loading meetings for tab:", activeTab);
     let meetingsData: LiveMeeting[] = [];
     
@@ -75,18 +75,18 @@ const AdminLiveMeetings = () => {
     }
     
     setMeetings(meetingsData);
-  };
+  }, [activeTab]);
   
-  const loadCourses = () => {
+  const loadCourses = useCallback(() => {
     console.log("Loading courses");
     const allCourses = getAllCourses();
     setCourses(allCourses);
-  };
+  }, []);
   
   useEffect(() => {
     loadMeetings();
     loadCourses();
-  }, [activeTab]);
+  }, [activeTab, loadMeetings, loadCourses]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
