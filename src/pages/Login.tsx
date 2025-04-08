@@ -22,27 +22,46 @@ const Login = () => {
     }
   }, [navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    const result = loginStudent(email, password);
-    
-    if (result.success) {
+    if (!email || !password) {
       toast({
-        title: "Login Successful",
-        description: "Welcome back! You have been logged in successfully.",
-      });
-      navigate('/'); // Redirect to home page after successful login
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid email or password. Please try again.",
+        title: "Input Error",
+        description: "Please enter both email and password.",
         variant: "destructive",
       });
+      return;
     }
     
-    setIsLoading(false);
+    setIsLoading(true);
+    
+    try {
+      const result = loginStudent(email, password);
+      
+      if (result.success) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome back! You have been logged in successfully.",
+        });
+        navigate('/'); // Redirect to home page after successful login
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login Error",
+        description: "An error occurred while logging in. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

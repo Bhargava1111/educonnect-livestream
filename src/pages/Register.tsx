@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registerStudent, isStudentLoggedIn } from "@/lib/studentAuth";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -32,6 +33,13 @@ const Register = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isStudentLoggedIn()) {
+      navigate('/');
+    }
+  }, [navigate]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,19 +53,39 @@ const Register = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    // Simulate API call to register user
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // In a real app, this would send the registration data to a backend API
-    // For now, we'll just show a success message and redirect to login
-    
-    toast({
-      title: "Registration Successful",
-      description: "Your account has been created successfully. Please login.",
-    });
-    
-    setIsLoading(false);
-    navigate('/login');
+    try {
+      // Register the student
+      const result = registerStudent({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
+      
+      if (result.success) {
+        toast({
+          title: "Registration Successful",
+          description: "Your account has been created successfully. You are now logged in.",
+        });
+        
+        // Navigate to home page after successful registration
+        navigate('/');
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: result.error || "Failed to create account. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Registration Error",
+        description: "An error occurred during registration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
