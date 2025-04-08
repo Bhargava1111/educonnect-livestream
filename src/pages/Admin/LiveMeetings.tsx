@@ -39,6 +39,7 @@ import { getAllCourses } from '@/lib/courseService';
 import { LiveMeeting, Course } from '@/lib/types';
 
 const AdminLiveMeetings = () => {
+  console.log("Rendering AdminLiveMeetings");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -60,12 +61,9 @@ const AdminLiveMeetings = () => {
     status: 'upcoming'
   });
   
-  useEffect(() => {
-    loadMeetings();
-    loadCourses();
-  }, [activeTab]);
-  
+  // Define loadMeetings and loadCourses outside of useEffect to avoid recreation
   const loadMeetings = () => {
+    console.log("Loading meetings for tab:", activeTab);
     let meetingsData: LiveMeeting[] = [];
     
     if (activeTab === 'upcoming') {
@@ -80,9 +78,15 @@ const AdminLiveMeetings = () => {
   };
   
   const loadCourses = () => {
+    console.log("Loading courses");
     const allCourses = getAllCourses();
     setCourses(allCourses);
   };
+  
+  useEffect(() => {
+    loadMeetings();
+    loadCourses();
+  }, [activeTab]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

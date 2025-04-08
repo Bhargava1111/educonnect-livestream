@@ -4,7 +4,7 @@
 // Export all types
 export * from './types';
 
-// Export all services
+// Export all services - removing circular dependencies
 export * from './courseService';
 export * from './liveMeetingService';
 export * from './jobService';

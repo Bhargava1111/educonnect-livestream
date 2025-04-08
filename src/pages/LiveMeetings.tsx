@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Video } from 'lucide-react';
 import { getStudentData, isStudentLoggedIn } from '@/lib/studentAuth';
 import { useNavigate } from 'react-router-dom';
-import { getAllLiveMeetings, updateMeetingStatuses, getAllCourses } from '@/lib/courseManagement';
 import { useToast } from "@/hooks/use-toast";
+import { LiveMeeting } from '@/lib/types';
+import { getAllLiveMeetings, updateMeetingStatuses } from '@/lib/liveMeetingService';
+import { getAllCourses } from '@/lib/courseService';
 
 const LiveMeetings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
-  const [meetings, setMeetings] = useState<any[]>([]);
+  const [meetings, setMeetings] = useState<LiveMeeting[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
   
   // Check if student is logged in
