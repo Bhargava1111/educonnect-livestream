@@ -1,6 +1,9 @@
 
 import { Job, JOBS_KEY } from './types';
 
+// Re-export the Job type
+export type { Job };
+
 // Initialize jobs if not present
 const initializeJobsIfNeeded = (): Job[] => {
   const existingJobs = localStorage.getItem(JOBS_KEY);
