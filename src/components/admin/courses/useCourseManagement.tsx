@@ -39,9 +39,10 @@ export function useCourseManagement() {
   
   const loadCourses = useCallback(() => {
     try {
+      console.log("useCourseManagement: Loading courses");
       const allCourses = getAllCourses();
+      console.log(`Loaded ${allCourses.length} courses:`, allCourses);
       setCourses(allCourses);
-      console.log(`Loaded ${allCourses.length} courses`);
     } catch (error) {
       console.error("Error loading courses:", error);
       toast({
@@ -53,6 +54,7 @@ export function useCourseManagement() {
   }, [toast]);
   
   useEffect(() => {
+    console.log("useCourseManagement: Initial load");
     loadCourses();
   }, [loadCourses]);
   
@@ -78,6 +80,8 @@ export function useCourseManagement() {
         curriculum: [],
         level: formData.level
       });
+      
+      console.log("New course created:", newCourse);
       
       toast({
         title: "Course Added",

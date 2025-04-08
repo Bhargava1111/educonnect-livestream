@@ -1,65 +1,94 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronRight, ExternalLink } from 'lucide-react';
+import { getAllCourses, Course } from "@/lib/courseManagement";
+import { getStudentData, enrollStudentInCourse } from '@/lib/studentAuth';
+import { useToast } from "@/hooks/use-toast";
+import { Link } from 'react-router-dom';
 
 const StudentCourses = () => {
-  const enrolledCourses = [
-    {
-      id: 1,
-      name: "Python Full Stack Development",
-      instructor: "Dr. Smith",
-      progress: 65,
-      startDate: "May 10, 2023",
-      endDate: "Aug 10, 2023",
-      nextSession: "Tomorrow, 2:00 PM"
-    },
-    {
-      id: 2,
-      name: "Cybersecurity Fundamentals",
-      instructor: "Mrs. Johnson",
-      progress: 42,
-      startDate: "June 5, 2023",
-      endDate: "Sep 5, 2023",
-      nextSession: "Wed, 3:30 PM"
-    }
-  ];
+  const { toast } = useToast();
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const availableCourses = [
-    {
-      id: 3,
-      name: "Java Backend Development",
-      instructor: "Mr. Davis",
-      duration: "12 weeks",
-      startDate: "July 15, 2023",
-    },
-    {
-      id: 4,
-      name: "MERN Stack Development",
-      instructor: "Ms. Wilson",
-      duration: "14 weeks",
-      startDate: "July 20, 2023",
-    },
-    {
-      id: 5,
-      name: "MEAN Stack Development",
-      instructor: "Mrs. Brown",
-      duration: "14 weeks",
-      startDate: "August 1, 2023",
-    },
-    {
-      id: 6,
-      name: "Advanced Ethical Hacking",
-      instructor: "Mr. Thompson",
-      duration: "10 weeks",
-      startDate: "August 10, 2023",
+  useEffect(() => {
+    const loadCourses = () => {
+      try {
+        // Get all courses from the database
+        const courses = getAllCourses();
+        console.log("Student courses page: Loaded courses:", courses);
+        setAllCourses(courses);
+
+        // Get student data to check enrolled courses
+        const student = getStudentData();
+        console.log("Student data:", student);
+
+        if (student && student.enrolledCourses) {
+          // Filter enrolled courses
+          const enrolled = courses.filter(course => 
+            student.enrolledCourses.includes(course.id)
+          );
+          setEnrolledCourses(enrolled);
+          
+          // Filter available courses (not enrolled)
+          const available = courses.filter(course => 
+            !student.enrolledCourses.includes(course.id)
+          );
+          setAvailableCourses(available);
+        } else {
+          // If no enrolled courses or not logged in, show all as available
+          setAvailableCourses(courses);
+        }
+      } catch (error) {
+        console.error("Error loading courses:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load courses. Please refresh the page.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCourses();
+  }, [toast]);
+
+  const handleEnroll = (courseId: string) => {
+    const success = enrollStudentInCourse(courseId);
+    
+    if (success) {
+      toast({
+        title: "Enrolled Successfully",
+        description: "You have been enrolled in this course."
+      });
+      
+      // Update the lists
+      const course = allCourses.find(c => c.id === courseId);
+      if (course) {
+        setEnrolledCourses(prev => [...prev, course]);
+        setAvailableCourses(prev => prev.filter(c => c.id !== courseId));
+      }
+    } else {
+      toast({
+        title: "Enrollment Failed",
+        description: "Please log in to enroll in courses.",
+        variant: "destructive"
+      });
     }
-  ];
+  };
+
+  if (loading) {
+    return <div className="p-6">Loading courses...</div>;
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <h1 className="text-2xl font-bold">My Courses</h1>
 
       <Tabs defaultValue="enrolled" className="w-full">
@@ -70,85 +99,111 @@ const StudentCourses = () => {
         </TabsList>
 
         <TabsContent value="enrolled" className="space-y-4 mt-4">
-          {enrolledCourses.map(course => (
-            <Card key={course.id}>
-              <CardHeader>
-                <CardTitle>{course.name}</CardTitle>
-                <CardDescription>Instructor: {course.instructor}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <div className="flex justify-between mb-1 text-sm">
-                    <span>Progress</span>
-                    <span>{course.progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div className="bg-eduBlue-600 h-2.5 rounded-full" style={{ width: `${course.progress}%` }}></div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">Start Date</p>
-                    <p>{course.startDate}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">End Date</p>
-                    <p>{course.endDate}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Next Session</p>
-                    <p>{course.nextSession}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex justify-end space-x-2">
-                  <Button variant="outline" size="sm">
-                    Materials
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Assignments
-                  </Button>
-                  <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
-                    Continue Learning <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="available" className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {availableCourses.map(course => (
+          {enrolledCourses.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-gray-500">You haven't enrolled in any courses yet.</p>
+              <Button 
+                className="mt-4 bg-eduBlue-600 hover:bg-eduBlue-700"
+                onClick={() => document.querySelector('[data-value="available"]')?.click()}
+              >
+                Browse Available Courses
+              </Button>
+            </div>
+          ) : (
+            enrolledCourses.map(course => (
               <Card key={course.id}>
                 <CardHeader>
-                  <CardTitle>{course.name}</CardTitle>
-                  <CardDescription>Instructor: {course.instructor}</CardDescription>
+                  <CardTitle>{course.title}</CardTitle>
+                  <CardDescription>Instructor: {course.instructor || 'TBD'}</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-4">
+                    <div className="flex justify-between mb-1 text-sm">
+                      <span>Progress</span>
+                      <span>0%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div className="bg-eduBlue-600 h-2.5 rounded-full" style={{ width: `0%` }}></div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Duration</p>
                       <p>{course.duration}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Start Date</p>
-                      <p>{course.startDate}</p>
+                      <p className="text-gray-500">Level</p>
+                      <p>{course.level || 'Not specified'}</p>
                     </div>
                   </div>
-                  
-                  <div className="mt-4 flex justify-between">
+
+                  <div className="mt-4 flex justify-end space-x-2">
                     <Button variant="outline" size="sm">
-                      View Details <ExternalLink className="ml-1 h-3 w-3" />
+                      Materials
                     </Button>
-                    <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
-                      Enroll Now
+                    <Button variant="outline" size="sm">
+                      Assignments
                     </Button>
+                    <Link to={`/courses/${course.id}/roadmap`}>
+                      <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
+                        Continue Learning <ChevronRight className="ml-1 h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="available" className="mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {availableCourses.length === 0 ? (
+              <div className="text-center py-10 col-span-2">
+                <p className="text-gray-500">No available courses at the moment.</p>
+              </div>
+            ) : (
+              availableCourses.map(course => (
+                <Card key={course.id}>
+                  <CardHeader>
+                    <CardTitle>{course.title}</CardTitle>
+                    <CardDescription>Instructor: {course.instructor || 'TBD'}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-3 line-clamp-2 text-sm text-gray-600">{course.description}</p>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Duration</p>
+                        <p>{course.duration}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Level</p>
+                        <p>{course.level || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Price</p>
+                        <p>₹{course.price?.toLocaleString() || 'Free'}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <Link to={`/courses/${course.id}/roadmap`}>
+                      <Button variant="outline" size="sm">
+                        View Details <ExternalLink className="ml-1 h-3 w-3" />
+                      </Button>
+                    </Link>
+                    <Button 
+                      className="bg-eduBlue-600 hover:bg-eduBlue-700" 
+                      size="sm"
+                      onClick={() => handleEnroll(course.id)}
+                    >
+                      Enroll Now
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            )}
           </div>
         </TabsContent>
 

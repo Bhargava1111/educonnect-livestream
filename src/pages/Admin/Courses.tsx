@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from 'lucide-react';
@@ -25,26 +25,12 @@ const AdminCourses = () => {
     openEditModal,
     loadCourses
   } = useCourseManagement();
-  
-  // Load all courses when the component mounts
+
+  // Force load courses when the component mounts
   useEffect(() => {
-    try {
-      loadCourses();
-      if (courses.length > 0) {
-        toast({
-          title: "Courses Loaded",
-          description: `${courses.length} courses were loaded successfully.`
-        });
-      }
-    } catch (error) {
-      console.error("Error loading courses:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load courses. Please try refreshing the page.",
-        variant: "destructive"
-      });
-    }
-  }, [loadCourses, toast]);
+    console.log("AdminCourses: Loading courses");
+    loadCourses();
+  }, [loadCourses]);
   
   return (
     <div className="p-6">
