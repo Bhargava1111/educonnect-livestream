@@ -2,7 +2,9 @@
 import { 
   Course, 
   RoadmapPhase, 
-  COURSES_KEY 
+  COURSES_KEY,
+  Enrollment,
+  Payment
 } from './types';
 
 // Initialize with some default courses if not present
@@ -410,12 +412,15 @@ export const deleteCourse = (id: string): boolean => {
   return false;
 };
 
+// Function to get enrollments for a course - directly imported from module
+import { getEnrollmentsByCourseId } from './enrollmentService';
+
+// Function to get payments for a course - directly imported from module
+import { getPaymentsByCourseId } from './paymentService';
+
 // Utility function to generate course statistics
 export const getCourseStatistics = (courseId: string) => {
-  // Import these functions directly to avoid circular dependencies
-  const { getEnrollmentsByCourseId } = require('./enrollmentService');
-  const { getPaymentsByCourseId } = require('./paymentService');
-  
+  // Use imported functions directly instead of require
   const enrollments = getEnrollmentsByCourseId(courseId);
   const payments = getPaymentsByCourseId(courseId);
   

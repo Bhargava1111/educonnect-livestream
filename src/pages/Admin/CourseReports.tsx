@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -12,10 +11,9 @@ import {
 } from "@/components/ui/table";
 import { 
   getCourseById,
-  getEnrollmentsByCourseId,
-  getCourseStatistics,
-  exportEnrollmentsAsCSV
-} from "@/lib/courseManagement";
+  getCourseStatistics
+} from "@/lib/courseService";
+import { getEnrollmentsByCourseId, exportEnrollmentsAsCSV } from "@/lib/enrollmentService";
 import { ChevronLeft, Download, Mail, FileCheck, Users, DollarSign, BarChart3 } from 'lucide-react';
 
 const CourseReports = () => {
@@ -27,7 +25,7 @@ const CourseReports = () => {
   const [stats, setStats] = useState<any>(null);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   
-  useEffect(() => {
+  const loadCourseData = useCallback(() => {
     if (!courseId) return;
     
     // Load course
@@ -50,7 +48,11 @@ const CourseReports = () => {
       });
       navigate('/admin/courses');
     }
-  }, [courseId]);
+  }, [courseId, navigate, toast]);
+  
+  useEffect(() => {
+    loadCourseData();
+  }, [loadCourseData]);
   
   const handleExportCSV = () => {
     if (!courseId) return;

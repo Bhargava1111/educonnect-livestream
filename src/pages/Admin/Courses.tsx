@@ -30,18 +30,21 @@ const AdminCourses = () => {
   useEffect(() => {
     try {
       loadCourses();
-      toast({
-        title: "Courses Loaded",
-        description: `${courses.length} courses were loaded successfully.`
-      });
+      if (courses.length > 0) {
+        toast({
+          title: "Courses Loaded",
+          description: `${courses.length} courses were loaded successfully.`
+        });
+      }
     } catch (error) {
+      console.error("Error loading courses:", error);
       toast({
         title: "Error",
         description: "Failed to load courses. Please try refreshing the page.",
         variant: "destructive"
       });
     }
-  }, []);
+  }, [loadCourses, toast]);
   
   return (
     <div className="p-6">
