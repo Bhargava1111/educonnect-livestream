@@ -83,6 +83,14 @@ const StudentCourses = () => {
     }
   };
 
+  // Helper function to navigate to available courses tab
+  const navigateToAvailableCoursesTab = () => {
+    const availableTabTrigger = document.querySelector('[data-value="available"]') as HTMLElement;
+    if (availableTabTrigger) {
+      availableTabTrigger.click();
+    }
+  };
+
   if (loading) {
     return <div className="p-6">Loading courses...</div>;
   }
@@ -104,7 +112,7 @@ const StudentCourses = () => {
               <p className="text-gray-500">You haven't enrolled in any courses yet.</p>
               <Button 
                 className="mt-4 bg-eduBlue-600 hover:bg-eduBlue-700"
-                onClick={() => document.querySelector('[data-value="available"]')?.click()}
+                onClick={navigateToAvailableCoursesTab}
               >
                 Browse Available Courses
               </Button>
