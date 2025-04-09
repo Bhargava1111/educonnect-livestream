@@ -20,14 +20,14 @@ import {
   getAllCourses,
   getAllAssessments,
   getAllLiveMeetings,
-  getEnrollments,
-  getPayments,
   Course,
   Assessment,
   LiveMeeting,
   Enrollment,
   Payment
 } from '@/lib/courseManagement';
+import { getAllEnrollments } from '@/lib/enrollmentService';
+import { getAllPayments } from '@/lib/paymentService';
 
 const AdminReports = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -52,8 +52,8 @@ const AdminReports = () => {
   useEffect(() => {
     // Load all data
     const loadedCourses = getAllCourses();
-    const loadedEnrollments = getEnrollments();
-    const loadedPayments = getPayments();
+    const loadedEnrollments = getAllEnrollments();
+    const loadedPayments = getAllPayments();
     const loadedAssessments = getAllAssessments();
     const loadedMeetings = getAllLiveMeetings();
     
