@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,142 +18,49 @@ import {
   Shield, 
   Terminal,
   Hash,
-  FileJson 
+  FileJson, 
+  BookOpen
 } from 'lucide-react';
+import { getAllCourses, Course } from "@/lib/courseManagement";
 
 const Courses = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  
+  useEffect(() => {
+    // Load courses from the admin system
+    const courses = getAllCourses();
+    // Only show active courses on the public page
+    const activeCourses = courses.filter(course => 
+      course.status === 'Active' || course.status === undefined
+    );
+    setAllCourses(activeCourses);
+  }, []);
 
-  const courses = [
-    {
-      id: 1,
-      title: "Python Full Stack Development",
-      description: "Master Python from basics to building full-stack web applications with Django and React.",
-      duration: "16 weeks",
-      level: "Beginner to Advanced",
-      category: "full-stack",
-      price: 1299,
-      icon: <Terminal />,
-      popular: true
-    },
-    {
-      id: 2,
-      title: "Data Science & Analytics",
-      description: "Learn to analyze and visualize complex data for business insights using Python and ML libraries.",
-      duration: "14 weeks",
-      level: "Intermediate",
-      category: "data",
-      price: 1199,
-      icon: <Database />
-    },
-    {
-      id: 3,
-      title: "MERN Stack Development",
-      description: "Build modern web applications using MongoDB, Express, React and Node.js.",
-      duration: "14 weeks",
-      level: "Intermediate",
-      category: "full-stack",
-      price: 1199,
-      icon: <Code />,
-      popular: true
-    },
-    {
-      id: 4,
-      title: "Java Backend Development",
-      description: "Master Java and Spring Boot for building robust enterprise backend systems.",
-      duration: "14 weeks",
-      level: "Intermediate to Advanced",
-      category: "backend",
-      price: 1249,
-      icon: <Server />,
-      popular: true
-    },
-    {
-      id: 5,
-      title: "Front-End Development",
-      description: "Create beautiful, responsive user interfaces with modern frameworks like React.",
-      duration: "10 weeks",
-      level: "Beginner",
-      category: "frontend",
-      price: 899,
-      icon: <Globe />
-    },
-    {
-      id: 6,
-      title: "DevOps & Cloud Computing",
-      description: "Learn to implement CI/CD pipelines and manage cloud infrastructure for scalable applications.",
-      duration: "12 weeks",
-      level: "Intermediate",
-      category: "devops",
-      price: 1299,
-      icon: <Network />
-    },
-    {
-      id: 7,
-      title: "MEAN Stack Development",
-      description: "Develop full-stack applications using MongoDB, Express, Angular and Node.js.",
-      duration: "14 weeks",
-      level: "Intermediate",
-      category: "full-stack",
-      price: 1199,
-      icon: <FileCode />,
-      popular: true
-    },
-    {
-      id: 8,
-      title: "Cybersecurity & Ethical Hacking",
-      description: "Master the techniques to identify vulnerabilities and protect systems from security threats.",
-      duration: "12 weeks",
-      level: "Intermediate to Advanced",
-      category: "security",
-      price: 1399,
-      icon: <Shield />,
-      popular: true
-    },
-    {
-      id: 9,
-      title: "Mobile App Development",
-      description: "Build native and cross-platform mobile applications for iOS and Android.",
-      duration: "12 weeks",
-      level: "Intermediate",
-      category: "mobile",
-      price: 1149,
-      icon: <Laptop />
-    },
-    {
-      id: 10,
-      title: "C Programming Fundamentals",
-      description: "Learn the foundation of programming with C language, covering memory management and low-level operations.",
-      duration: "8 weeks",
-      level: "Beginner",
-      category: "programming",
-      price: 899,
-      icon: <Hash />
-    },
-    {
-      id: 11,
-      title: "C++ Programming & OOP",
-      description: "Master C++ and object-oriented programming concepts for software development.",
-      duration: "10 weeks",
-      level: "Beginner to Intermediate",
-      category: "programming",
-      price: 999,
-      icon: <Hash />
-    },
-    {
-      id: 12,
-      title: "C# .NET Development",
-      description: "Build powerful desktop and web applications using C# and the .NET framework.",
-      duration: "12 weeks",
-      level: "Intermediate",
-      category: "full-stack",
-      price: 1099,
-      icon: <FileJson />,
-      popular: true
+  const getIconForCategory = (category?: string) => {
+    switch (category) {
+      case 'full-stack':
+        return <Code />;
+      case 'backend':
+        return <Server />;
+      case 'frontend':
+        return <Globe />;
+      case 'data':
+        return <Database />;
+      case 'devops':
+        return <Network />;
+      case 'security':
+        return <Shield />;
+      case 'mobile':
+        return <Laptop />;
+      case 'programming':
+        return <Hash />;
+      default:
+        return <BookOpen />;
     }
-  ];
+  };
 
-  const filteredCourses = courses.filter(course => 
+  const filteredCourses = allCourses.filter(course => 
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
     course.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -203,7 +110,7 @@ const Courses = () => {
                     <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                       <div className="h-40 bg-gradient-to-r from-eduBlue-600 to-eduBlue-400 flex items-center justify-center relative">
                         <div className="text-white h-16 w-16">
-                          {course.icon}
+                          {getIconForCategory(course.category)}
                         </div>
                         {course.popular && (
                           <Badge className="absolute top-2 right-2 bg-amber-500">Popular</Badge>
@@ -218,7 +125,7 @@ const Courses = () => {
                               <span className="mx-2">•</span>
                               <span>{course.level}</span>
                             </div>
-                            <div className="font-medium text-eduBlue-600">${course.price}</div>
+                            <div className="font-medium text-eduBlue-600">{course.price === 0 ? 'Free' : `₹${course.price}`}</div>
                           </div>
                         </CardDescription>
                       </CardHeader>
@@ -237,6 +144,11 @@ const Courses = () => {
                   ))
                 }
               </div>
+              {filteredCourses.filter(course => category === "all" || course.category === category).length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No courses found in this category.</p>
+                </div>
+              )}
             </TabsContent>
           ))}
         </Tabs>

@@ -13,8 +13,8 @@ export interface CourseFormData {
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   instructor: string;
   imageUrl: string;
-  status?: 'Active' | 'Inactive' | 'Coming Soon';
-  category?: string;
+  status: 'Active' | 'Inactive' | 'Coming Soon';
+  category: string;
   courseType: 'Free' | 'Paid';
 }
 
@@ -89,7 +89,8 @@ export function useCourseManagement() {
         ...formData,
         price: formData.courseType === 'Free' ? 0 : Number(formData.price),
         curriculum: [],
-        level: formData.level
+        level: formData.level,
+        status: formData.status // Ensure status is saved
       });
       
       console.log("New course created:", newCourse);
@@ -122,7 +123,8 @@ export function useCourseManagement() {
       updateCourse(selectedCourse.id, {
         ...formData,
         price: formData.courseType === 'Free' ? 0 : Number(formData.price),
-        level: formData.level
+        level: formData.level,
+        status: formData.status // Ensure status is updated
       });
       
       toast({

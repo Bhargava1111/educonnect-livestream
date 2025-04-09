@@ -125,51 +125,6 @@ const Home = () => {
       {/* Training & Placement Roadmap */}
       <TrainingRoadmap />
 
-      {/* Creative Image Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Learning Experience</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div>
-              <img 
-                src="/lovable-uploads/80b1af96-81af-443c-975e-ca241efcc354.png" 
-                alt="IT Training Platform" 
-                className="rounded-lg shadow-xl w-full"
-              />
-            </div>
-            <div className="space-y-6">
-              <h3 className="text-2xl font-semibold">LIVE IT Course Platform for All Your Career Needs</h3>
-              <p className="text-lg text-gray-700">
-                Our platform provides comprehensive IT training with live sessions, hands-on projects, and career guidance.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Interactive live sessions with industry experts</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Dedicated mentorship throughout your learning journey</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Industry-relevant projects and assignments</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Placement assistance and interview preparation</span>
-                </li>
-              </ul>
-              <Link to="/courses">
-                <Button className="mt-4 bg-eduBlue-600 hover:bg-eduBlue-700">
-                  Browse Our Courses
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Payment Methods Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
