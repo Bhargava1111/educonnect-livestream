@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -52,29 +51,24 @@ const StudentCourses = () => {
   useEffect(() => {
     const loadCourses = () => {
       try {
-        // Get all courses from the database
         const courses = getAllCourses();
         console.log("Student courses page: Loaded courses:", courses);
         setAllCourses(courses);
 
-        // Get student data to check enrolled courses
         const student = getStudentData();
         console.log("Student data:", student);
 
         if (student && student.enrolledCourses) {
-          // Filter enrolled courses
           const enrolled = courses.filter(course => 
             student.enrolledCourses.includes(course.id)
           );
           setEnrolledCourses(enrolled);
           
-          // Filter available courses (not enrolled)
           const available = courses.filter(course => 
             !student.enrolledCourses.includes(course.id)
           );
           setAvailableCourses(available);
           
-          // Calculate progress for each enrolled course
           const progress: {[key: string]: number} = {};
           if (student.enrollments) {
             student.enrollments.forEach(enrollment => {
@@ -83,7 +77,6 @@ const StudentCourses = () => {
           }
           setCourseProgress(progress);
         } else {
-          // If no enrolled courses or not logged in, show all as available
           setAvailableCourses(courses);
         }
       } catch (error) {
@@ -113,7 +106,6 @@ const StudentCourses = () => {
   const handleEnrollSubmit = (data: EnrollmentFormData) => {
     if (!selectedCourseId) return;
 
-    // Check if user has completed profile
     const student = getStudentData();
     if (!student) {
       toast({
@@ -125,7 +117,6 @@ const StudentCourses = () => {
       return;
     }
 
-    // If education details are missing, show a more specific message
     if (!student.education || !student.education.tenth || !student.education.tenth.school) {
       toast({
         title: "Profile Incomplete",
@@ -136,11 +127,9 @@ const StudentCourses = () => {
       return;
     }
 
-    // Add the course enrollment with the form data
     const success = enrollStudentInCourse(selectedCourseId, {
       aadharNumber: data.aadharNumber,
-      education: data.education.highest,
-      paymentMethod: data.payment.method
+      education: data.education.highest
     });
     
     if (success) {
@@ -149,13 +138,11 @@ const StudentCourses = () => {
         description: "You have been enrolled in this course."
       });
       
-      // Update the lists
       const course = allCourses.find(c => c.id === selectedCourseId);
       if (course) {
         setEnrolledCourses(prev => [...prev, course]);
         setAvailableCourses(prev => prev.filter(c => c.id !== selectedCourseId));
         
-        // Set initial progress
         setCourseProgress(prev => ({
           ...prev,
           [selectedCourseId]: 0
@@ -171,15 +158,13 @@ const StudentCourses = () => {
     }
   };
 
-  // Helper function to navigate to available courses tab
   const navigateToAvailableCoursesTab = () => {
     const availableTabTrigger = document.querySelector('[data-value="available"]') as HTMLElement;
     if (availableTabTrigger) {
       availableTabTrigger.click();
     }
   };
-  
-  // Helper to get material and video counts for a course
+
   const getCourseContentCounts = (course: Course) => {
     let videoCount = 0;
     let materialCount = 0;
@@ -401,7 +386,6 @@ const StudentCourses = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Enrollment Dialog */}
       <Dialog open={isEnrollmentDialogOpen} onOpenChange={setIsEnrollmentDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>

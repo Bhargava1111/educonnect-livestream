@@ -141,8 +141,9 @@ const TakeAssessment = () => {
   
   const startScreenShare = async () => {
     try {
+      // Fix the cursor property in MediaTrackConstraints
       const stream = await navigator.mediaDevices.getDisplayMedia({ 
-        video: { cursor: 'always' },
+        video: true,  // Remove the invalid cursor property
         audio: false
       });
       
