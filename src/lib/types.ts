@@ -1,4 +1,3 @@
-
 // Local Storage keys
 export const COURSES_KEY = 'career_aspire_courses';
 export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
@@ -67,6 +66,7 @@ export interface Course {
   status?: 'Active' | 'Inactive' | 'Coming Soon';
   category?: string;
   courseType?: 'Free' | 'Paid';
+  popular?: boolean;
 }
 
 export interface Question {
