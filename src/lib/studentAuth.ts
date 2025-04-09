@@ -55,11 +55,17 @@ export const registerStudent = (studentData: {
     return { success: false, error: "Email already registered" };
   }
   
+  // Check if phone already exists (if provided)
+  if (studentData.phone && students.some(s => s.phone === studentData.phone)) {
+    return { success: false, error: "Phone number already registered" };
+  }
+  
   const newStudent = {
     id: `s${Date.now()}`,
     enrolledCourses: [],
     profilePicture: "",
     skills: [],
+    isPhoneVerified: !!studentData.phone, // Mark phone as verified if provided
     education: {
       tenth: {
         school: '',
@@ -94,6 +100,43 @@ export const registerStudent = (studentData: {
     loginTime: new Date().toISOString()
   }));
   
+  return { success: true };
+};
+
+// New function to verify phone OTP (simulated)
+export const verifyPhoneOTP = (phone: string, otp: string): { success: boolean; error?: string } => {
+  // In a real app, this would call an API to verify the OTP
+  // For this simulation, we'll assume any 6-digit OTP is valid
+  if (otp.length === 6 && /^\d+$/.test(otp)) {
+    const students = getAllStudentsFromStorage();
+    const studentIndex = students.findIndex(s => s.phone === phone);
+    
+    if (studentIndex >= 0) {
+      // Update the student's isPhoneVerified status
+      students[studentIndex].isPhoneVerified = true;
+      saveStudentsToStorage(students);
+      
+      // Update the session if this student is logged in
+      const loggedInStudent = getStudentData();
+      if (loggedInStudent && loggedInStudent.id === students[studentIndex].id) {
+        const updatedStudent = { ...loggedInStudent, isPhoneVerified: true };
+        localStorage.setItem(STUDENT_AUTH_KEY, JSON.stringify(updatedStudent));
+      }
+      
+      return { success: true };
+    }
+    
+    return { success: false, error: "Student not found" };
+  }
+  
+  return { success: false, error: "Invalid OTP format" };
+};
+
+// New function to request OTP (simulated)
+export const requestOTP = (phone: string): { success: boolean; error?: string } => {
+  // In a real app, this would call an API to send an OTP to the phone
+  // For this simulation, we'll just return success
+  console.log(`OTP requested for phone: ${phone}`);
   return { success: true };
 };
 
