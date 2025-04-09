@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronRight, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { getAllCourses, getCourseById, Course } from "@/lib/courseManagement";
-import { getStudentData, enrollStudentInCourse } from '@/lib/studentAuth';
+import { getStudentData, enrollStudentInCourse, updateStudentProfile } from '@/lib/studentAuth';
 import { useToast } from "@/hooks/use-toast";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -127,10 +128,17 @@ const StudentCourses = () => {
       return;
     }
 
-    const success = enrollStudentInCourse(selectedCourseId, {
+    // Update student profile with the form data first
+    updateStudentProfile({
       aadharNumber: data.aadharNumber,
-      education: data.education.highest
+      education: {
+        ...student.education,
+        highest: data.education.highest
+      }
     });
+
+    // Then enroll the student with just the courseId
+    const success = enrollStudentInCourse(selectedCourseId);
     
     if (success) {
       toast({
