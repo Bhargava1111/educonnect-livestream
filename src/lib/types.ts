@@ -1,3 +1,4 @@
+
 // Local Storage keys
 export const COURSES_KEY = 'career_aspire_courses';
 export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
@@ -10,6 +11,7 @@ export const PLACEMENTS_KEY = 'career_aspire_placements';
 export const ASSESSMENTS_KEY = 'career_aspire_assessments';
 export const CONTACTS_KEY = 'career_aspire_contacts';
 export const EMAIL_NOTIFICATIONS_KEY = 'career_aspire_email_notifications';
+export const ATTENDANCE_KEY = 'career_aspire_attendance';
 
 // Course types
 export interface Topic {
@@ -23,12 +25,30 @@ export interface Module {
   topics: Topic[];
 }
 
+export interface Material {
+  id: string;
+  title: string;
+  type: 'video' | 'document' | 'link';
+  url: string;
+  description?: string;
+}
+
+export interface Video {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+  topicIndex?: number | null;
+}
+
 export interface RoadmapPhase {
   phase: number;
   title: string;
   duration: string;
   topics: string[];
   projects: string[];
+  materials?: Material[];
+  videos?: Video[];
 }
 
 export interface Course {
@@ -69,6 +89,8 @@ export interface Assessment {
   passingScore?: number;
   type?: 'quiz' | 'coding-challenge' | 'project' | 'exam';
   dueDate?: string;
+  requiresCamera?: boolean;
+  requiresScreenshare?: boolean;
 }
 
 export interface LiveMeeting {
@@ -111,6 +133,36 @@ export interface Placement {
   courseCompleted?: string;
 }
 
+export interface Education {
+  tenth: {
+    school: string;
+    board: string;
+    percentage: string;
+    yearOfPassing: string;
+  };
+  twelfth: {
+    school: string;
+    board: string;
+    percentage: string;
+    yearOfPassing: string;
+  };
+  degree: {
+    college: string;
+    university: string;
+    degree: string;
+    percentage: string;
+    yearOfPassing: string;
+  };
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+}
+
 export interface Enrollment {
   id: string;
   studentId: string;
@@ -119,6 +171,14 @@ export interface Enrollment {
   progress: number;
   completed: boolean;
   certificateIssued: boolean;
+  aadharNumber?: string;
+  education?: string;
+  topicProgress?: {
+    phaseId: number;
+    topicId: number;
+    completed: boolean;
+    lastAccessDate?: string;
+  }[];
 }
 
 export interface Payment {
@@ -130,6 +190,16 @@ export interface Payment {
   paymentId: string;
   status: 'pending' | 'completed' | 'failed';
   paymentMethod: string;
+}
+
+export interface Attendance {
+  id: string;
+  studentId: string;
+  courseId: string;
+  date: string;
+  punchIn: string;
+  punchOut: string | null;
+  duration: number | null; // in minutes
 }
 
 export interface EmailNotification {

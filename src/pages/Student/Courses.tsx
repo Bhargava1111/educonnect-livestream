@@ -3,14 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronRight, ExternalLink } from 'lucide-react';
-import { getAllCourses, Course } from "@/lib/courseManagement";
+import { ChevronRight, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { getAllCourses, getCourseById, Course } from "@/lib/courseManagement";
 import { getStudentData, enrollStudentInCourse } from '@/lib/studentAuth';
 import { useToast } from "@/hooks/use-toast";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 
@@ -33,6 +35,7 @@ const StudentCourses = () => {
   const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [courseProgress, setCourseProgress] = useState<{[key: string]: number}>({});
 
   const form = useForm<EnrollmentFormData>({
     defaultValues: {
@@ -70,6 +73,15 @@ const StudentCourses = () => {
             !student.enrolledCourses.includes(course.id)
           );
           setAvailableCourses(available);
+          
+          // Calculate progress for each enrolled course
+          const progress: {[key: string]: number} = {};
+          if (student.enrollments) {
+            student.enrollments.forEach(enrollment => {
+              progress[enrollment.courseId] = enrollment.progress || 0;
+            });
+          }
+          setCourseProgress(progress);
         } else {
           // If no enrolled courses or not logged in, show all as available
           setAvailableCourses(courses);
@@ -103,7 +115,18 @@ const StudentCourses = () => {
 
     // Check if user has completed profile
     const student = getStudentData();
-    if (!student || !student.education || !student.education.tenth.school) {
+    if (!student) {
+      toast({
+        title: "Not Logged In",
+        description: "Please log in to enroll in courses.",
+        variant: "destructive"
+      });
+      setIsEnrollmentDialogOpen(false);
+      return;
+    }
+
+    // If education details are missing, show a more specific message
+    if (!student.education || !student.education.tenth || !student.education.tenth.school) {
       toast({
         title: "Profile Incomplete",
         description: "Please complete your educational details in your profile before enrolling.",
@@ -113,7 +136,12 @@ const StudentCourses = () => {
       return;
     }
 
-    const success = enrollStudentInCourse(selectedCourseId);
+    // Add the course enrollment with the form data
+    const success = enrollStudentInCourse(selectedCourseId, {
+      aadharNumber: data.aadharNumber,
+      education: data.education.highest,
+      paymentMethod: data.payment.method
+    });
     
     if (success) {
       toast({
@@ -126,6 +154,12 @@ const StudentCourses = () => {
       if (course) {
         setEnrolledCourses(prev => [...prev, course]);
         setAvailableCourses(prev => prev.filter(c => c.id !== selectedCourseId));
+        
+        // Set initial progress
+        setCourseProgress(prev => ({
+          ...prev,
+          [selectedCourseId]: 0
+        }));
       }
       setIsEnrollmentDialogOpen(false);
     } else {
@@ -143,6 +177,21 @@ const StudentCourses = () => {
     if (availableTabTrigger) {
       availableTabTrigger.click();
     }
+  };
+  
+  // Helper to get material and video counts for a course
+  const getCourseContentCounts = (course: Course) => {
+    let videoCount = 0;
+    let materialCount = 0;
+    
+    if (course.roadmap) {
+      course.roadmap.forEach(phase => {
+        if (phase.videos) videoCount += phase.videos.length;
+        if (phase.materials) materialCount += phase.materials.length;
+      });
+    }
+    
+    return { videoCount, materialCount };
   };
 
   if (loading) {
@@ -172,54 +221,100 @@ const StudentCourses = () => {
               </Button>
             </div>
           ) : (
-            enrolledCourses.map(course => (
-              <Card key={course.id}>
-                <CardHeader>
-                  <CardTitle>{course.title}</CardTitle>
-                  <CardDescription>Instructor: {course.instructor || 'TBD'}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <div className="flex justify-between mb-1 text-sm">
-                      <span>Progress</span>
-                      <span>0%</span>
+            enrolledCourses.map(course => {
+              const progress = courseProgress[course.id] || 0;
+              const { videoCount, materialCount } = getCourseContentCounts(course);
+              
+              return (
+                <Card key={course.id}>
+                  <CardHeader>
+                    <CardTitle>{course.title}</CardTitle>
+                    <CardDescription>Instructor: {course.instructor || 'TBD'}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <div className="flex justify-between mb-1 text-sm">
+                        <span>Progress</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div className="bg-eduBlue-600 h-2.5 rounded-full" style={{ width: `0%` }}></div>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500">Duration</p>
-                      <p>{course.duration}</p>
+                    <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                      <div>
+                        <p className="text-gray-500">Duration</p>
+                        <p>{course.duration}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Level</p>
+                        <p>{course.level || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Type</p>
+                        <p>{course.price === 0 ? 'Free' : 'Paid'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Content</p>
+                        <div className="flex gap-2">
+                          {videoCount > 0 && (
+                            <Badge variant="outline" className="bg-blue-50">
+                              {videoCount} Videos
+                            </Badge>
+                          )}
+                          {materialCount > 0 && (
+                            <Badge variant="outline" className="bg-green-50">
+                              {materialCount} Materials
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-gray-500">Level</p>
-                      <p>{course.level || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Type</p>
-                      <p>{course.price === 0 ? 'Free' : 'Paid'}</p>
-                    </div>
-                  </div>
 
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <Button variant="outline" size="sm">
-                      Materials
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Assignments
-                    </Button>
-                    <Link to={`/courses/${course.id}/roadmap`}>
-                      <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
-                        Continue Learning <ChevronRight className="ml-1 h-4 w-4" />
+                    {course.roadmap && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium mb-2">Course Roadmap</h4>
+                        <div className="space-y-2">
+                          {course.roadmap.slice(0, 3).map((phase, index) => (
+                            <div key={index} className="flex items-center">
+                              <div className={`h-6 w-6 rounded-full flex items-center justify-center mr-2 text-xs ${
+                                progress >= ((index + 1) / course.roadmap!.length) * 100 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-gray-100 text-gray-500'
+                              }`}>
+                                {index + 1}
+                              </div>
+                              <div className="text-sm">{phase.title}</div>
+                              {progress >= ((index + 1) / course.roadmap!.length) * 100 && (
+                                <CheckCircle2 className="h-4 w-4 text-green-500 ml-auto" />
+                              )}
+                            </div>
+                          ))}
+                          {course.roadmap.length > 3 && (
+                            <div className="text-xs text-gray-500 pl-8">
+                              +{course.roadmap.length - 3} more phases
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" size="sm">
+                        Materials
                       </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                      <Button variant="outline" size="sm">
+                        Assignments
+                      </Button>
+                      <Link to={`/courses/${course.id}/roadmap`}>
+                        <Button className="bg-eduBlue-600 hover:bg-eduBlue-700" size="sm">
+                          Continue Learning <ChevronRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </TabsContent>
 
@@ -230,49 +325,71 @@ const StudentCourses = () => {
                 <p className="text-gray-500">No available courses at the moment.</p>
               </div>
             ) : (
-              availableCourses.map(course => (
-                <Card key={course.id}>
-                  <CardHeader>
-                    <CardTitle>{course.title}</CardTitle>
-                    <CardDescription>Instructor: {course.instructor || 'TBD'}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="mb-3 line-clamp-2 text-sm text-gray-600">{course.description}</p>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-500">Duration</p>
-                        <p>{course.duration}</p>
+              availableCourses.map(course => {
+                const { videoCount, materialCount } = getCourseContentCounts(course);
+                
+                return (
+                  <Card key={course.id}>
+                    <CardHeader>
+                      <CardTitle>{course.title}</CardTitle>
+                      <CardDescription>Instructor: {course.instructor || 'TBD'}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="mb-3 line-clamp-2 text-sm text-gray-600">{course.description}</p>
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                        <div>
+                          <p className="text-gray-500">Duration</p>
+                          <p>{course.duration}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Level</p>
+                          <p>{course.level || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Price</p>
+                          <p>{course.price === 0 ? 'Free' : `₹${course.price?.toLocaleString()}`}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Type</p>
+                          <p>{course.courseType || (course.price === 0 ? 'Free' : 'Paid')}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-gray-500">Level</p>
-                        <p>{course.level || 'Not specified'}</p>
+                      
+                      <div className="flex gap-2 mb-3">
+                        {videoCount > 0 && (
+                          <Badge variant="outline" className="bg-blue-50">
+                            {videoCount} Videos
+                          </Badge>
+                        )}
+                        {materialCount > 0 && (
+                          <Badge variant="outline" className="bg-green-50">
+                            {materialCount} Materials
+                          </Badge>
+                        )}
+                        {course.roadmap && (
+                          <Badge variant="outline" className="bg-purple-50">
+                            {course.roadmap.length} Phases
+                          </Badge>
+                        )}
                       </div>
-                      <div>
-                        <p className="text-gray-500">Price</p>
-                        <p>{course.price === 0 ? 'Free' : `₹${course.price?.toLocaleString()}`}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Type</p>
-                        <p>{course.price === 0 ? 'Free' : 'Paid'}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Link to={`/courses/${course.id}/roadmap`}>
-                      <Button variant="outline" size="sm">
-                        View Details <ExternalLink className="ml-1 h-3 w-3" />
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <Link to={`/courses/${course.id}/roadmap`}>
+                        <Button variant="outline" size="sm">
+                          View Details <ExternalLink className="ml-1 h-3 w-3" />
+                        </Button>
+                      </Link>
+                      <Button 
+                        className="bg-eduBlue-600 hover:bg-eduBlue-700" 
+                        size="sm"
+                        onClick={() => handleEnrollClick(course.id)}
+                      >
+                        Enroll Now
                       </Button>
-                    </Link>
-                    <Button 
-                      className="bg-eduBlue-600 hover:bg-eduBlue-700" 
-                      size="sm"
-                      onClick={() => handleEnrollClick(course.id)}
-                    >
-                      Enroll Now
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))
+                    </CardFooter>
+                  </Card>
+                );
+              })
             )}
           </div>
         </TabsContent>
