@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { EditIcon, Save, Upload } from 'lucide-react';
 import { getStudentData, updateStudentProfile } from '@/lib/studentAuth';
 import { useToast } from "@/hooks/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 const StudentProfile = () => {
   const { toast } = useToast();
@@ -19,7 +21,26 @@ const StudentProfile = () => {
     phone: '',
     address: '',
     profilePicture: '',
-    skills: [] as string[]
+    skills: [] as string[],
+    education: {
+      tenth: {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      },
+      twelfth: {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      },
+      degree: {
+        university: '',
+        course: '',
+        percentage: '',
+        yearOfCompletion: ''
+      }
+    },
+    aadharNumber: ''
   });
   const [newSkill, setNewSkill] = useState('');
 
@@ -33,17 +54,51 @@ const StudentProfile = () => {
         phone: studentData.phone || '',
         address: studentData.address || '',
         profilePicture: studentData.profilePicture || '',
-        skills: studentData.skills || []
+        skills: studentData.skills || [],
+        education: studentData.education || {
+          tenth: {
+            school: '',
+            percentage: '',
+            yearOfCompletion: ''
+          },
+          twelfth: {
+            school: '',
+            percentage: '',
+            yearOfCompletion: ''
+          },
+          degree: {
+            university: '',
+            course: '',
+            percentage: '',
+            yearOfCompletion: ''
+          }
+        },
+        aadharNumber: studentData.aadharNumber || ''
       });
     }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name.includes('.')) {
+      // Handle nested properties (for education fields)
+      const [category, field] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        education: {
+          ...prev.education,
+          [category]: {
+            ...prev.education[category as keyof typeof prev.education],
+            [field]: value
+          }
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleAddSkill = () => {
@@ -69,7 +124,9 @@ const StudentProfile = () => {
       phone: formData.phone,
       address: formData.address,
       profilePicture: formData.profilePicture,
-      skills: formData.skills
+      skills: formData.skills,
+      education: formData.education,
+      aadharNumber: formData.aadharNumber
     });
 
     if (success) {
@@ -85,7 +142,9 @@ const StudentProfile = () => {
         phone: formData.phone,
         address: formData.address,
         profilePicture: formData.profilePicture,
-        skills: formData.skills
+        skills: formData.skills,
+        education: formData.education,
+        aadharNumber: formData.aadharNumber
       });
     } else {
       toast({
@@ -224,6 +283,17 @@ const StudentProfile = () => {
                   />
                 </div>
                 <div>
+                  <label className="text-sm font-medium">Aadhar Number</label>
+                  <Input 
+                    className="mt-1" 
+                    name="aadharNumber"
+                    value={formData.aadharNumber} 
+                    onChange={handleInputChange}
+                    disabled={!isEditing} 
+                    placeholder="Enter your Aadhar number"
+                  />
+                </div>
+                <div>
                   <label className="text-sm font-medium">Profile Picture URL</label>
                   <Input 
                     className="mt-1" 
@@ -233,6 +303,147 @@ const StudentProfile = () => {
                     disabled={!isEditing} 
                     placeholder="Enter image URL for your profile"
                   />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Educational Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Educational Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* 10th Education */}
+                <div>
+                  <h3 className="font-medium mb-2">10th Standard</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">School Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="tenth.school"
+                        value={formData.education.tenth.school} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter school name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Percentage/CGPA</label>
+                      <Input 
+                        className="mt-1" 
+                        name="tenth.percentage"
+                        value={formData.education.tenth.percentage} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter percentage or CGPA"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Year of Completion</label>
+                      <Input 
+                        className="mt-1" 
+                        name="tenth.yearOfCompletion"
+                        value={formData.education.tenth.yearOfCompletion} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter year of completion"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 12th Education */}
+                <div>
+                  <h3 className="font-medium mb-2">12th Standard</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">School/College Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="twelfth.school"
+                        value={formData.education.twelfth.school} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter school/college name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Percentage/CGPA</label>
+                      <Input 
+                        className="mt-1" 
+                        name="twelfth.percentage"
+                        value={formData.education.twelfth.percentage} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter percentage or CGPA"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Year of Completion</label>
+                      <Input 
+                        className="mt-1" 
+                        name="twelfth.yearOfCompletion"
+                        value={formData.education.twelfth.yearOfCompletion} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter year of completion"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Degree Education */}
+                <div>
+                  <h3 className="font-medium mb-2">Degree/Graduation</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">University/College Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.university"
+                        value={formData.education.degree.university} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter university/college name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Course/Degree Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.course"
+                        value={formData.education.degree.course} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter course name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Percentage/CGPA</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.percentage"
+                        value={formData.education.degree.percentage} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter percentage or CGPA"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Year of Completion</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.yearOfCompletion"
+                        value={formData.education.degree.yearOfCompletion} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter year of completion"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -15,6 +15,7 @@ export interface CourseFormData {
   imageUrl: string;
   status?: 'Active' | 'Inactive' | 'Coming Soon';
   category?: string;
+  courseType: 'Free' | 'Paid';
 }
 
 export const initialFormData: CourseFormData = {
@@ -26,7 +27,8 @@ export const initialFormData: CourseFormData = {
   instructor: '',
   imageUrl: '',
   status: 'Active',
-  category: ''
+  category: '',
+  courseType: 'Paid'
 };
 
 export function useCourseManagement() {
@@ -68,15 +70,24 @@ export function useCourseManagement() {
     });
   };
   
-  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced' | 'Active' | 'Inactive' | 'Coming Soon') => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced' | 'Active' | 'Inactive' | 'Coming Soon' | 'Free' | 'Paid') => {
+    setFormData(prev => {
+      const newFormData = { ...prev, [name]: value };
+      
+      // If courseType is changed to Free, set price to 0
+      if (name === 'courseType' && value === 'Free') {
+        return { ...newFormData, price: 0 };
+      }
+      
+      return newFormData;
+    });
   };
   
   const handleAddCourse = () => {
     try {
       const newCourse = createCourse({
         ...formData,
-        price: Number(formData.price),
+        price: formData.courseType === 'Free' ? 0 : Number(formData.price),
         curriculum: [],
         level: formData.level
       });
@@ -110,7 +121,7 @@ export function useCourseManagement() {
     try {
       updateCourse(selectedCourse.id, {
         ...formData,
-        price: Number(formData.price),
+        price: formData.courseType === 'Free' ? 0 : Number(formData.price),
         level: formData.level
       });
       
@@ -169,7 +180,8 @@ export function useCourseManagement() {
       instructor: course.instructor || '',
       imageUrl: course.imageUrl || '',
       status: course.status || 'Active',
-      category: course.category || ''
+      category: course.category || '',
+      courseType: course.price === 0 ? 'Free' : 'Paid'
     });
     setIsEditModalOpen(true);
   };

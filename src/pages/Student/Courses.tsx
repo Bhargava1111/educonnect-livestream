@@ -8,6 +8,21 @@ import { getAllCourses, Course } from "@/lib/courseManagement";
 import { getStudentData, enrollStudentInCourse } from '@/lib/studentAuth';
 import { useToast } from "@/hooks/use-toast";
 import { Link } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+
+interface EnrollmentFormData {
+  aadharNumber: string;
+  education: {
+    highest: string;
+  };
+  payment: {
+    method: string;
+  };
+}
 
 const StudentCourses = () => {
   const { toast } = useToast();
@@ -15,6 +30,21 @@ const StudentCourses = () => {
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+
+  const form = useForm<EnrollmentFormData>({
+    defaultValues: {
+      aadharNumber: "",
+      education: {
+        highest: ""
+      },
+      payment: {
+        method: "online"
+      }
+    }
+  });
 
   useEffect(() => {
     const loadCourses = () => {
@@ -59,8 +89,31 @@ const StudentCourses = () => {
     loadCourses();
   }, [toast]);
 
-  const handleEnroll = (courseId: string) => {
-    const success = enrollStudentInCourse(courseId);
+  const handleEnrollClick = (courseId: string) => {
+    const course = allCourses.find(c => c.id === courseId);
+    if (course) {
+      setSelectedCourseId(courseId);
+      setSelectedCourse(course);
+      setIsEnrollmentDialogOpen(true);
+    }
+  };
+
+  const handleEnrollSubmit = (data: EnrollmentFormData) => {
+    if (!selectedCourseId) return;
+
+    // Check if user has completed profile
+    const student = getStudentData();
+    if (!student || !student.education || !student.education.tenth.school) {
+      toast({
+        title: "Profile Incomplete",
+        description: "Please complete your educational details in your profile before enrolling.",
+        variant: "destructive"
+      });
+      setIsEnrollmentDialogOpen(false);
+      return;
+    }
+
+    const success = enrollStudentInCourse(selectedCourseId);
     
     if (success) {
       toast({
@@ -69,11 +122,12 @@ const StudentCourses = () => {
       });
       
       // Update the lists
-      const course = allCourses.find(c => c.id === courseId);
+      const course = allCourses.find(c => c.id === selectedCourseId);
       if (course) {
         setEnrolledCourses(prev => [...prev, course]);
-        setAvailableCourses(prev => prev.filter(c => c.id !== courseId));
+        setAvailableCourses(prev => prev.filter(c => c.id !== selectedCourseId));
       }
+      setIsEnrollmentDialogOpen(false);
     } else {
       toast({
         title: "Enrollment Failed",
@@ -144,6 +198,10 @@ const StudentCourses = () => {
                       <p className="text-gray-500">Level</p>
                       <p>{course.level || 'Not specified'}</p>
                     </div>
+                    <div>
+                      <p className="text-gray-500">Type</p>
+                      <p>{course.price === 0 ? 'Free' : 'Paid'}</p>
+                    </div>
                   </div>
 
                   <div className="mt-4 flex justify-end space-x-2">
@@ -191,7 +249,11 @@ const StudentCourses = () => {
                       </div>
                       <div>
                         <p className="text-gray-500">Price</p>
-                        <p>₹{course.price?.toLocaleString() || 'Free'}</p>
+                        <p>{course.price === 0 ? 'Free' : `₹${course.price?.toLocaleString()}`}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Type</p>
+                        <p>{course.price === 0 ? 'Free' : 'Paid'}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -204,7 +266,7 @@ const StudentCourses = () => {
                     <Button 
                       className="bg-eduBlue-600 hover:bg-eduBlue-700" 
                       size="sm"
-                      onClick={() => handleEnroll(course.id)}
+                      onClick={() => handleEnrollClick(course.id)}
                     >
                       Enroll Now
                     </Button>
@@ -221,6 +283,78 @@ const StudentCourses = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Enrollment Dialog */}
+      <Dialog open={isEnrollmentDialogOpen} onOpenChange={setIsEnrollmentDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Enroll in {selectedCourse?.title}</DialogTitle>
+            <DialogDescription>
+              Please confirm your details to enroll in this course.
+              {selectedCourse?.price !== 0 && (
+                <span className="font-medium block mt-2">
+                  Course fee: ₹{selectedCourse?.price?.toLocaleString()}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={form.handleSubmit(handleEnrollSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="aadharNumber">Aadhar Number (for verification)</Label>
+              <Input 
+                id="aadharNumber"
+                placeholder="Enter your 12-digit Aadhar number"
+                {...form.register("aadharNumber")}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="education">Highest Education</Label>
+              <Input 
+                id="education"
+                placeholder="E.g., Bachelor of Science"
+                {...form.register("education.highest")}
+              />
+              <p className="text-sm text-gray-500">
+                Note: You can manage your complete education details in your profile.
+              </p>
+            </div>
+
+            {selectedCourse?.price !== 0 && (
+              <div className="space-y-2">
+                <Label>Payment Method</Label>
+                <div className="flex flex-col space-y-2">
+                  <label className="flex items-center space-x-2">
+                    <input 
+                      type="radio" 
+                      value="online" 
+                      {...form.register("payment.method")} 
+                      defaultChecked
+                    />
+                    <span>Online Payment (Credit/Debit Card, UPI)</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input 
+                      type="radio" 
+                      value="bank" 
+                      {...form.register("payment.method")}
+                    />
+                    <span>Bank Transfer</span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsEnrollmentDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Confirm Enrollment</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

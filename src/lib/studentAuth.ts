@@ -60,6 +60,25 @@ export const registerStudent = (studentData: {
     enrolledCourses: [],
     profilePicture: "",
     skills: [],
+    education: {
+      tenth: {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      },
+      twelfth: {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      },
+      degree: {
+        university: '',
+        course: '',
+        percentage: '',
+        yearOfCompletion: ''
+      }
+    },
+    aadharNumber: '',
     registrationDate: new Date().toISOString(),
     ...studentData
   };
@@ -111,6 +130,25 @@ export const updateStudentProfile = (profileData: {
   address?: string;
   profilePicture?: string;
   skills?: string[];
+  education?: {
+    tenth: {
+      school: string;
+      percentage: string;
+      yearOfCompletion: string;
+    };
+    twelfth: {
+      school: string;
+      percentage: string;
+      yearOfCompletion: string;
+    };
+    degree: {
+      university: string;
+      course: string;
+      percentage: string;
+      yearOfCompletion: string;
+    };
+  };
+  aadharNumber?: string;
 }): boolean => {
   const studentData = getStudentData();
   if (!studentData) return false;
