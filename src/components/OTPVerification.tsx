@@ -108,13 +108,14 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
             value={otp} 
             onChange={setOtp}
             disabled={isVerifying || isVerified}
-          >
-            <InputOTPGroup>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <InputOTPSlot key={i} index={i} />
-              ))}
-            </InputOTPGroup>
-          </InputOTP>
+            render={({ slots }) => (
+              <InputOTPGroup>
+                {slots.map((slot, i) => (
+                  <InputOTPSlot key={i} {...slot} index={i} />
+                ))}
+              </InputOTPGroup>
+            )}
+          />
         </div>
 
         <div className="flex flex-col space-y-2">
