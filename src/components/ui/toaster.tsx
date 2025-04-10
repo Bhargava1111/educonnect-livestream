@@ -1,3 +1,4 @@
+
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
@@ -9,7 +10,12 @@ import {
 } from "@/components/ui/toast"
 
 export function Toaster() {
+  // Safely get toast state, handle case where React might not be initialized
   const { toasts } = useToast()
+
+  if (!toasts || !Array.isArray(toasts)) {
+    return null
+  }
 
   return (
     <ToastProvider>

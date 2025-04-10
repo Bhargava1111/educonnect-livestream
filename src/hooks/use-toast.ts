@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -169,6 +170,16 @@ function toast({ ...props }: Toast) {
 }
 
 function useToast() {
+  // Make sure we're in a browser environment where React is available
+  if (typeof window === 'undefined' || !React) {
+    // Return a dummy state if not in browser or if React is not available
+    return {
+      toasts: [],
+      toast,
+      dismiss: () => {},
+    }
+  }
+
   const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
