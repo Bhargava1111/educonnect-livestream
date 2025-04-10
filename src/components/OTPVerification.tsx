@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   InputOTP,
   InputOTPGroup,
@@ -25,6 +25,21 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [timer, setTimer] = useState(30);
+
+  // Start the timer when component mounts
+  useEffect(() => {
+    const countdown = setInterval(() => {
+      setTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(countdown);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(countdown);
+  }, []);
 
   const handleVerifyOTP = () => {
     if (otp.length !== 6) {
@@ -93,14 +108,13 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
             value={otp} 
             onChange={setOtp}
             disabled={isVerifying || isVerified}
-            render={({ slots }) => (
-              <InputOTPGroup>
-                {slots.map((slot, i) => (
-                  <InputOTPSlot key={i} {...slot} index={i} />
-                ))}
-              </InputOTPGroup>
-            )}
-          />
+          >
+            <InputOTPGroup>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <InputOTPSlot key={i} index={i} />
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
         </div>
 
         <div className="flex flex-col space-y-2">
