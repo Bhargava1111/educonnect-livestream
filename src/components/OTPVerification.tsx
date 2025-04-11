@@ -65,6 +65,9 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
         description: `Your ${phoneNumber.includes('@') ? 'email' : 'phone number'} has been verified.`,
       });
       
+      // Log verification for demonstration
+      console.log(`OTP verified for ${phoneNumber}: ${otp}`);
+      
       // Notify parent component that verification is complete
       setTimeout(() => {
         onVerificationComplete();
@@ -84,6 +87,10 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
         return prev - 1;
       });
     }, 1000);
+    
+    // Log OTP resend for demonstration
+    console.log(`Resending OTP to ${phoneNumber}`);
+    console.log(`Simulated OTP for ${phoneNumber}: 123456`);
     
     onResendOTP();
   };
@@ -111,7 +118,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
             render={({ slots }) => (
               <InputOTPGroup>
                 {slots.map((slot, i) => (
-                  <InputOTPSlot key={i} {...slot} index={i} />
+                  <InputOTPSlot key={i} {...slot} />
                 ))}
               </InputOTPGroup>
             )}

@@ -13,6 +13,9 @@ const OTPVerifierWrapper: React.FC<OTPVerifierWrapperProps> = ({
   onVerificationComplete,
   onResendOTP
 }) => {
+  // Log for debugging
+  console.log(`OTPVerifierWrapper: Verifying phone number ${phoneNumber}`);
+  
   return (
     <OTPVerification
       phoneNumber={phoneNumber}

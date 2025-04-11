@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { trackFormSubmission } from "@/lib/courseManagement";
+import { trackFormSubmission } from "@/lib/contactService";
 import { getContactDetails } from "@/lib/contactService";
 import WhatsAppContact from '@/components/WhatsAppContact';
 import { Mail, MapPin, Phone } from 'lucide-react';

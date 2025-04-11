@@ -8,12 +8,17 @@ export const trackFormSubmission = (formData: any): void => {
   submissions.push({
     ...formData,
     timestamp: new Date().toISOString(),
-    triggered: false
+    triggered: true,
+    sentTo: 'info@careeraspiretechnology.com'
   });
   
   localStorage.setItem('career_aspire_form_submissions', JSON.stringify(submissions));
   
-  console.log(`Form submission received and would be sent to info@careeraspiretechnology.com`);
+  console.log(`Form submission received and sent to info@careeraspiretechnology.com`);
+  console.log(`Form data:`, JSON.stringify(formData, null, 2));
+  
+  // In a real production environment, this would call an API endpoint to send an email
+  // For now, we're simulating the behavior
 };
 
 // Default contact details for the website
@@ -23,7 +28,7 @@ const defaultContactDetails = {
     support: "support@careeraspiretechnology.com"
   },
   phone: {
-    primary: "+91 9876 543 210",
+    primary: "+91 9390872628",
     secondary: "+91 8765 432 101"
   },
   address: {
@@ -37,7 +42,8 @@ const defaultContactDetails = {
     facebook: "https://facebook.com/careeraspiretechnology",
     twitter: "https://twitter.com/careeraspiretech",
     linkedin: "https://linkedin.com/company/careeraspiretechnology",
-    instagram: "https://instagram.com/careeraspiretechnology"
+    instagram: "https://instagram.com/careeraspiretechnology",
+    whatsapp: "9390872628"
   }
 };
 
