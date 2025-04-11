@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getAllStudents, resetStudentPassword } from '@/lib/studentAuth';
+import { getAllStudents, resetStudentPassword, requestPasswordResetOTP } from '@/lib/studentAuth';
 
 const ForgotPassword = () => {
   const { toast } = useToast();
