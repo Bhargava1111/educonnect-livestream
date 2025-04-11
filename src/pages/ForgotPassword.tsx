@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getStudentByEmail, updateStudentPassword } from '@/lib/studentAuth';
+import { getAllStudents, resetStudentPassword } from '@/lib/studentAuth';
 
 const ForgotPassword = () => {
   const { toast } = useToast();
@@ -32,10 +32,11 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     
     try {
-      // Check if the email exists in our system
-      const student = getStudentByEmail(email);
+      // Check if the email exists in our system by getting all students and finding a match
+      const students = getAllStudents();
+      const foundStudent = students.find(s => s.email.toLowerCase() === email.toLowerCase());
       
-      if (student) {
+      if (foundStudent) {
         setIsRequestSent(true);
         toast({
           title: "Email Verified",
@@ -94,9 +95,9 @@ const ForgotPassword = () => {
     
     try {
       // Update the student's password in our system
-      const success = updateStudentPassword(email, newPassword);
+      const result = resetStudentPassword(email, newPassword);
       
-      if (success) {
+      if (result.success) {
         toast({
           title: "Password Reset Successful",
           description: "Your password has been reset. You can now login with your new password.",
@@ -105,7 +106,7 @@ const ForgotPassword = () => {
       } else {
         toast({
           title: "Reset Failed",
-          description: "An error occurred. Please try again.",
+          description: result.error || "An error occurred. Please try again.",
           variant: "destructive",
         });
       }
