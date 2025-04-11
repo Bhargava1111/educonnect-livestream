@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { loginStudent, isStudentLoggedIn, requestOTP } from '@/lib/studentAuth';
-import OTPVerifierWrapper from '@/components/OTPVerifierWrapper';
+import { loginStudent, isStudentLoggedIn } from '@/lib/studentAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Login = () => {
@@ -17,7 +16,6 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showOTPVerification, setShowOTPVerification] = useState(false);
   
   // Redirect if already logged in
   useEffect(() => {
@@ -88,53 +86,35 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Request OTP for phone verification
-      const otpResult = requestOTP(phoneNumber);
+      // Direct login with phone number
+      const result = loginStudent(phoneNumber, "", true);
       
-      if (otpResult.success) {
-        setShowOTPVerification(true);
+      if (result.success) {
         toast({
-          title: "OTP Sent",
-          description: `A verification code has been sent to ${phoneNumber}`,
+          title: "Login Successful",
+          description: "Welcome back! You have been logged in successfully.",
         });
+        
+        // Small delay to allow toast to be seen before redirect
+        setTimeout(() => {
+          navigate('/');
+        }, 500);
       } else {
         toast({
-          title: "OTP Request Failed",
-          description: otpResult.error || "Failed to send verification code. Please try again.",
+          title: "Login Failed",
+          description: result.error || "Phone number not registered. Please register first.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("OTP request error:", error);
+      console.error("Phone login error:", error);
       toast({
-        title: "OTP Request Error",
-        description: "An error occurred. Please try again.",
+        title: "Login Error",
+        description: "An error occurred while logging in. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleOTPVerificationComplete = () => {
-    toast({
-      title: "Login Successful",
-      description: "You have been logged in successfully.",
-    });
-    
-    // Small delay to allow toast to be seen before redirect
-    setTimeout(() => {
-      navigate('/');
-    }, 500);
-  };
-
-  const handleResendOTP = () => {
-    if (phoneNumber) {
-      requestOTP(phoneNumber);
-      toast({
-        title: "OTP Resent",
-        description: `A new verification code has been sent to ${phoneNumber}`,
-      });
     }
   };
 
@@ -149,88 +129,80 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            {showOTPVerification ? (
-              <OTPVerifierWrapper
-                phoneNumber={phoneNumber}
-                onVerificationComplete={handleOTPVerificationComplete}
-                onResendOTP={handleResendOTP}
-              />
-            ) : (
-              <Tabs defaultValue="email" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="email">Email</TabsTrigger>
-                  <TabsTrigger value="phone">Phone</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="email">
-                  <form onSubmit={handleEmailLogin}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email" 
-                          type="email" 
-                          placeholder="john@example.com" 
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required 
-                          className="border-purple-100 focus-visible:ring-eduBlue-500"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="password">Password</Label>
-                          <Link to="/forgot-password" className="text-sm text-eduBlue-600 hover:text-eduBlue-700">
-                            Forgot your password?
-                          </Link>
-                        </div>
-                        <Input 
-                          id="password" 
-                          type="password" 
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required 
-                          className="border-purple-100 focus-visible:ring-eduBlue-500"
-                        />
-                      </div>
-                      <Button 
-                        className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
-                        type="submit"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? "Logging in..." : "Login"}
-                      </Button>
+            <Tabs defaultValue="email" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="email">Email</TabsTrigger>
+                <TabsTrigger value="phone">Phone</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="email">
+                <form onSubmit={handleEmailLogin}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="john@example.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required 
+                        className="border-purple-100 focus-visible:ring-eduBlue-500"
+                      />
                     </div>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="phone">
-                  <form onSubmit={handlePhoneLogin}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input 
-                          id="phone" 
-                          type="tel" 
-                          placeholder="1234567890" 
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          required 
-                          className="border-purple-100 focus-visible:ring-eduBlue-500"
-                        />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password</Label>
+                        <Link to="/forgot-password" className="text-sm text-eduBlue-600 hover:text-eduBlue-700">
+                          Forgot your password?
+                        </Link>
                       </div>
-                      <Button 
-                        className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
-                        type="submit"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? "Sending OTP..." : "Send OTP"}
-                      </Button>
+                      <Input 
+                        id="password" 
+                        type="password" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required 
+                        className="border-purple-100 focus-visible:ring-eduBlue-500"
+                      />
                     </div>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            )}
+                    <Button 
+                      className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
+                      type="submit"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Logging in..." : "Login"}
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="phone">
+                <form onSubmit={handlePhoneLogin}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input 
+                        id="phone" 
+                        type="tel" 
+                        placeholder="1234567890" 
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        required 
+                        className="border-purple-100 focus-visible:ring-eduBlue-500"
+                      />
+                    </div>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
+                      type="submit"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Logging in..." : "Login"}
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
+            </Tabs>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 bg-gray-50 rounded-b-lg">
             <div className="text-center text-sm">

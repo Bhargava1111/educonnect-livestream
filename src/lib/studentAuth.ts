@@ -15,32 +15,39 @@ const saveStudentsToStorage = (students: any[]): void => {
   localStorage.setItem("career_aspire_students", JSON.stringify(students));
 };
 
-export const loginStudent = (email: string, password: string): { success: boolean; studentData?: any; error?: string } => {
+export const loginStudent = (email: string, password: string, isPhoneLogin = false): { success: boolean; studentData?: any; error?: string } => {
   const students = getAllStudentsFromStorage();
   
-  // Make comparison case-insensitive for email
-  const student = students.find(
-    (s) => s.email.toLowerCase() === email.toLowerCase() && s.password === password
-  );
+  let student;
   
-  if (student) {
-    // Check if user is already logged in on another device/browser
-    // For now, we'll just allow the login (in a real app, you might implement session tracking)
+  if (isPhoneLogin) {
+    // Login with phone number
+    student = students.find(s => s.phone === email);
+    if (!student) {
+      return { success: false, error: "Phone number not registered" };
+    }
+  } else {
+    // Login with email and password
+    student = students.find(
+      (s) => s.email.toLowerCase() === email.toLowerCase() && s.password === password
+    );
     
-    // Don't store password in localStorage for security
-    const { password, ...safeStudentData } = student;
-    
-    // Store student session in localStorage
-    localStorage.setItem(STUDENT_AUTH_KEY, JSON.stringify({
-      ...safeStudentData,
-      isStudent: true,
-      loginTime: new Date().toISOString()
-    }));
-    
-    return { success: true, studentData: safeStudentData };
+    if (!student) {
+      return { success: false, error: "Invalid email or password" };
+    }
   }
   
-  return { success: false, error: "Invalid email or password. Please try again." };
+  // Don't store password in localStorage for security
+  const { password: pwd, ...safeStudentData } = student;
+  
+  // Store student session in localStorage
+  localStorage.setItem(STUDENT_AUTH_KEY, JSON.stringify({
+    ...safeStudentData,
+    isStudent: true,
+    loginTime: new Date().toISOString()
+  }));
+  
+  return { success: true, studentData: safeStudentData };
 };
 
 export const registerStudent = (studentData: {
@@ -67,7 +74,7 @@ export const registerStudent = (studentData: {
     enrolledCourses: [],
     profilePicture: "",
     skills: [],
-    isPhoneVerified: !!studentData.phone, // Mark phone as verified if provided
+    isPhoneVerified: true, // Set as verified by default now
     education: {
       tenth: {
         school: '',
@@ -105,47 +112,6 @@ export const registerStudent = (studentData: {
   return { success: true };
 };
 
-// New function to verify phone OTP (simulated)
-export const verifyPhoneOTP = (phone: string, otp: string): { success: boolean; error?: string } => {
-  // In a real app, this would call an API to verify the OTP
-  // For this simulation, we'll assume any 6-digit OTP is valid
-  if (otp.length === 6 && /^\d+$/.test(otp)) {
-    const students = getAllStudentsFromStorage();
-    const studentIndex = students.findIndex(s => s.phone === phone);
-    
-    if (studentIndex >= 0) {
-      // Update the student's isPhoneVerified status
-      students[studentIndex].isPhoneVerified = true;
-      saveStudentsToStorage(students);
-      
-      // Update the session if this student is logged in
-      const loggedInStudent = getStudentData();
-      if (loggedInStudent && loggedInStudent.id === students[studentIndex].id) {
-        const updatedStudent = { ...loggedInStudent, isPhoneVerified: true };
-        localStorage.setItem(STUDENT_AUTH_KEY, JSON.stringify(updatedStudent));
-      }
-      
-      return { success: true };
-    }
-    
-    return { success: false, error: "Student not found" };
-  }
-  
-  return { success: false, error: "Invalid OTP format" };
-};
-
-// New function to request OTP (simulated)
-export const requestOTP = (phone: string): { success: boolean; error?: string } => {
-  // In a real app, this would call an API to send an OTP to the phone
-  // For this simulation, we'll just return success
-  console.log(`OTP requested for phone: ${phone}`);
-  
-  // For testing, we can log what would be the OTP (in a real app, this would be sent via SMS)
-  console.log(`Simulated OTP for ${phone}: 123456`);
-  
-  return { success: true };
-};
-
 // Function to request password reset OTP
 export const requestPasswordResetOTP = (email: string): { success: boolean; error?: string } => {
   const students = getAllStudentsFromStorage();
@@ -156,8 +122,7 @@ export const requestPasswordResetOTP = (email: string): { success: boolean; erro
   }
   
   // In a real app, this would send an email with OTP or reset link
-  console.log(`Password reset OTP requested for: ${email}`);
-  console.log(`Simulated password reset OTP for ${email}: 123456`);
+  console.log(`Password reset requested for: ${email}`);
   
   return { success: true };
 };

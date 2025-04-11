@@ -3,15 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerStudent, isStudentLoggedIn, requestOTP } from "@/lib/studentAuth";
-import OTPVerifierWrapper from '@/components/OTPVerifierWrapper';
+import { registerStudent, isStudentLoggedIn } from "@/lib/studentAuth";
+import { Input } from "@/components/ui/input";
 
 const phoneRegex = /^[0-9]{10}$/;
 
@@ -38,9 +36,6 @@ const Register = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [showOTPVerification, setShowOTPVerification] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [formValues, setFormValues] = useState<z.infer<typeof formSchema> | null>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -64,46 +59,12 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Store form values for later registration
-      setFormValues(values);
-      setPhoneNumber(values.phone);
-      
-      // Request OTP for phone verification
-      const otpResult = requestOTP(values.phone);
-      
-      if (otpResult.success) {
-        setShowOTPVerification(true);
-        toast({
-          title: "OTP Sent",
-          description: `A verification code has been sent to ${values.phone}`,
-        });
-      } else {
-        toast({
-          title: "OTP Request Failed",
-          description: otpResult.error || "Failed to send verification code. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast({
-        title: "Registration Error",
-        description: "An error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  const handleOTPVerificationComplete = () => {
-    // Complete registration after OTP verification
-    if (formValues) {
+      // Directly register the user without OTP verification
       const result = registerStudent({
-        name: formValues.name,
-        email: formValues.email,
-        password: formValues.password,
-        phone: formValues.phone,
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        phone: values.phone,
       });
       
       if (result.success) {
@@ -121,18 +82,17 @@ const Register = () => {
           variant: "destructive",
         });
       }
-    }
-  };
-
-  const handleResendOTP = () => {
-    if (phoneNumber) {
-      requestOTP(phoneNumber);
+    } catch (error) {
+      console.error("Registration error:", error);
       toast({
-        title: "OTP Resent",
-        description: `A new verification code has been sent to ${phoneNumber}`,
+        title: "Registration Error",
+        description: "An error occurred. Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12 bg-gradient-to-br from-blue-50 to-purple-50">
@@ -145,101 +105,93 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            {showOTPVerification ? (
-              <OTPVerifierWrapper
-                phoneNumber={phoneNumber}
-                onVerificationComplete={handleOTPVerificationComplete}
-                onResendOTP={handleResendOTP}
-              />
-            ) : (
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="john@example.com" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="1234567890" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
-                        </FormControl>
-                        <FormDescription>
-                          Your 10-digit mobile number for verification
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
-                        </FormControl>
-                        <FormDescription>
-                          Password must be at least 8 characters.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button
-                    className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all"
-                    type="submit"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
-              </Form>
-            )}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="john@example.com" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="1234567890" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
+                      </FormControl>
+                      <FormDescription>
+                        Your 10-digit mobile number
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
+                      </FormControl>
+                      <FormDescription>
+                        Password must be at least 8 characters.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} className="border-purple-100 focus-visible:ring-eduBlue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <Button
+                  className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all"
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creating account..." : "Create Account"}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
           <CardFooter className="flex justify-center bg-gray-50 rounded-b-lg">
             <div className="text-center text-sm">
