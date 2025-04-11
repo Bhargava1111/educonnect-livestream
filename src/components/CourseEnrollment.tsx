@@ -8,6 +8,7 @@ import { Check, ExternalLink } from 'lucide-react';
 import RazorpayPayment from './RazorpayPayment';
 import { isStudentLoggedIn } from '@/lib/studentAuth';
 import { getPaymentLink } from '@/lib/paymentService';
+import { createEnrollment } from '@/lib/enrollmentService';
 
 interface CourseEnrollmentProps {
   courseId: string | number;
@@ -37,13 +38,31 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   }, [courseId]);
 
   const handlePaymentSuccess = (response: any) => {
-    toast({
-      title: "Enrollment Successful",
-      description: `You have successfully enrolled in ${title}`,
-    });
-    
-    // Navigate to the course
-    navigate(`/student/courses`);
+    // Get the student data and enroll them in the course
+    if (isLoggedIn) {
+      const studentData = localStorage.getItem('career_aspire_student');
+      if (studentData) {
+        const student = JSON.parse(studentData);
+        // Create the enrollment record
+        const enrollment = createEnrollment(student.id, String(courseId));
+        
+        if (enrollment) {
+          toast({
+            title: "Enrollment Successful",
+            description: `You have successfully enrolled in ${title}`,
+          });
+          
+          // Navigate to the student's courses page
+          navigate(`/student/courses`);
+        } else {
+          toast({
+            title: "Enrollment Failed",
+            description: "There was an error enrolling you in this course. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }
+    }
   };
 
   const handleEnroll = () => {
@@ -54,6 +73,12 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
         variant: "destructive",
       });
       navigate('/login');
+      return;
+    }
+
+    // If this is a free course, directly enroll the student
+    if (price === 0) {
+      handlePaymentSuccess(null);
       return;
     }
 

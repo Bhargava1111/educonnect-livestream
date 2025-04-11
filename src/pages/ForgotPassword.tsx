@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { requestPasswordReset, resetStudentPassword } from '@/lib/studentAuth';
+import { getStudentByEmail, updateStudentPassword } from '@/lib/studentAuth';
 
 const ForgotPassword = () => {
   const { toast } = useToast();
@@ -32,18 +32,19 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     
     try {
-      const result = requestPasswordReset(email);
+      // Check if the email exists in our system
+      const student = getStudentByEmail(email);
       
-      if (result.success) {
+      if (student) {
         setIsRequestSent(true);
         toast({
-          title: "Reset Request Sent",
-          description: "If your email is registered with us, you'll be able to reset your password.",
+          title: "Email Verified",
+          description: "You can now reset your password.",
         });
       } else {
         toast({
-          title: "Request Failed",
-          description: result.error || "Email not found. Please check your email address.",
+          title: "Email Not Found",
+          description: "This email is not registered in our system.",
           variant: "destructive",
         });
       }
@@ -92,9 +93,10 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     
     try {
-      const result = resetStudentPassword(email, newPassword);
+      // Update the student's password in our system
+      const success = updateStudentPassword(email, newPassword);
       
-      if (result.success) {
+      if (success) {
         toast({
           title: "Password Reset Successful",
           description: "Your password has been reset. You can now login with your new password.",
@@ -103,7 +105,7 @@ const ForgotPassword = () => {
       } else {
         toast({
           title: "Reset Failed",
-          description: result.error || "An error occurred. Please try again.",
+          description: "An error occurred. Please try again.",
           variant: "destructive",
         });
       }
