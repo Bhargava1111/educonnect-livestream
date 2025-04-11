@@ -31,7 +31,7 @@ InputOTPGroup.displayName = "InputOTPGroup"
 
 const InputOTPSlot = React.forwardRef<
   React.ElementRef<"div">,
-  SlotProps & { index: number; className?: string }
+  SlotProps & { className?: string }
 >(({ char, hasFakeCaret, isActive, className, ...props }, ref) => {
   return (
     <div
