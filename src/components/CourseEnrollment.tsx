@@ -9,6 +9,7 @@ import RazorpayPayment from './RazorpayPayment';
 import { isStudentLoggedIn } from '@/lib/studentAuth';
 import { getPaymentLink } from '@/lib/paymentService';
 import { createEnrollment } from '@/lib/enrollmentService';
+import { getCourseById } from '@/lib/courseManagement';
 
 interface CourseEnrollmentProps {
   courseId: string | number;
@@ -30,12 +31,25 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   const isLoggedIn = isStudentLoggedIn();
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [customPaymentLink, setCustomPaymentLink] = useState('');
+  const [courseExists, setCourseExists] = useState(true);
 
   useEffect(() => {
+    // Check if course exists
+    const courseData = getCourseById(String(courseId));
+    if (!courseData) {
+      setCourseExists(false);
+      toast({
+        title: "Course Not Found",
+        description: "The requested course could not be found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Check if there's a custom payment link for this course
     const paymentLink = getPaymentLink(String(courseId));
     setCustomPaymentLink(paymentLink);
-  }, [courseId]);
+  }, [courseId, toast]);
 
   const handlePaymentSuccess = (response: any) => {
     // Get the student data and enroll them in the course
@@ -66,6 +80,15 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   };
 
   const handleEnroll = () => {
+    if (!courseExists) {
+      toast({
+        title: "Course Not Found",
+        description: "The requested course could not be found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!isLoggedIn) {
       toast({
         title: "Login Required",
@@ -86,6 +109,15 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   };
 
   const handleExternalPayment = () => {
+    if (!courseExists) {
+      toast({
+        title: "Course Not Found",
+        description: "The requested course could not be found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!isLoggedIn) {
       toast({
         title: "Login Required",
@@ -99,6 +131,27 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
     // Open custom payment link in a new tab
     window.open(customPaymentLink, '_blank');
   };
+
+  if (!courseExists) {
+    return (
+      <Card className="shadow-lg border-2 border-gray-100">
+        <CardHeader className="text-center border-b pb-6">
+          <CardTitle className="text-2xl">Course Not Found</CardTitle>
+          <CardDescription className="text-gray-500 mt-2">
+            The requested course could not be found. Please check the course ID and try again.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter className="flex justify-center pt-4">
+          <Button 
+            onClick={() => navigate('/courses')} 
+            className="bg-eduBlue-600 hover:bg-eduBlue-700"
+          >
+            Browse Courses
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-lg border-2 border-gray-100">

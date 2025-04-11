@@ -11,110 +11,42 @@ import { getAllStudents, resetStudentPassword, requestPasswordResetOTP } from '@
 const ForgotPassword = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRequestSent, setIsRequestSent] = useState(false);
-  const [isReset, setIsReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
-  const handleRequestReset = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your registered email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setIsSubmitting(true);
-    
-    try {
-      // Check if the email exists in our system by getting all students and finding a match
-      const students = getAllStudents();
-      const foundStudent = students.find(s => s.email.toLowerCase() === email.toLowerCase());
-      
-      if (foundStudent) {
-        setIsRequestSent(true);
-        toast({
-          title: "Email Verified",
-          description: "You can now reset your password.",
-        });
-      } else {
-        toast({
-          title: "Email Not Found",
-          description: "This email is not registered in our system.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Password reset request error:", error);
+
+    // Check if the student exists
+    const students = getAllStudents();
+    const studentExists = students.some(student => student.email === email);
+
+    if (!studentExists) {
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: "No account found with this email address.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newPassword) {
-      toast({
-        title: "Password Required",
-        description: "Please enter your new password.",
-        variant: "destructive",
-      });
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "New password and confirmation do not match.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
     try {
-      // Update the student's password in our system
-      const result = resetStudentPassword(email, newPassword);
+      // Send password reset request
+      requestPasswordResetOTP(email);
       
-      if (result.success) {
-        toast({
-          title: "Password Reset Successful",
-          description: "Your password has been reset. You can now login with your new password.",
-        });
-        setIsReset(true);
-      } else {
-        toast({
-          title: "Reset Failed",
-          description: result.error || "An error occurred. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Password reset error:", error);
+      // Show success message
       toast({
-        title: "Reset Error",
-        description: "An error occurred. Please try again.",
+        title: "Reset Link Sent",
+        description: "If your email is registered, you will receive a password reset link shortly.",
+      });
+      
+      setResetSent(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "There was a problem sending the reset link. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -123,103 +55,57 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12 bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container max-w-md">
-        <Card className="border border-purple-100 shadow-lg">
-          <CardHeader className="space-y-1 bg-gradient-to-r from-eduBlue-500 to-purple-500 text-white rounded-t-lg">
-            <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
-            <CardDescription className="text-center text-white/80">
-              {isReset 
-                ? "Your password has been reset successfully!"
-                : isRequestSent 
-                  ? "Enter your new password"
-                  : "Enter your email to reset your password"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            {isReset ? (
-              <div className="flex flex-col items-center justify-center py-4">
-                <p className="text-center mb-4">
-                  You can now log in with your new password.
-                </p>
-                <Link to="/login">
-                  <Button className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all">
-                    Go to Login
-                  </Button>
-                </Link>
-              </div>
-            ) : isRequestSent ? (
-              <form onSubmit={handleResetPassword}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input 
-                      id="newPassword" 
-                      type="password" 
-                      placeholder="Enter new password" 
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required 
-                      className="border-purple-100 focus-visible:ring-eduBlue-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <Input 
-                      id="confirmPassword" 
-                      type="password" 
-                      placeholder="Confirm new password" 
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required 
-                      className="border-purple-100 focus-visible:ring-eduBlue-500"
-                    />
-                  </div>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Processing..." : "Reset Password"}
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <form onSubmit={handleRequestReset}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="Your registered email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required 
-                      className="border-purple-100 focus-visible:ring-eduBlue-500"
-                    />
-                  </div>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Processing..." : "Reset Password"}
-                  </Button>
-                </div>
-              </form>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-center bg-gray-50 rounded-b-lg">
-            <div className="text-center text-sm">
-              Remember your password?{" "}
-              <Link to="/login" className="text-eduBlue-600 hover:text-eduBlue-700 font-medium">
-                Back to Login
-              </Link>
+    <div className="max-w-md mx-auto py-12">
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
+          <CardDescription>
+            Enter your email address and we'll send you a link to reset your password.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {resetSent ? (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-medium mb-2">Check Your Email</h3>
+              <p className="text-gray-500 mb-4">
+                We've sent a password reset link to {email}. Please check your inbox and follow the instructions.
+              </p>
+              <p className="text-sm text-gray-500">
+                Didn't receive the email? Check your spam folder or try again.
+              </p>
             </div>
-          </CardFooter>
-        </Card>
-      </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="student@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Sending..." : "Send Reset Link"}
+              </Button>
+            </form>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <div className="text-sm text-gray-500">
+            Remember your password?{" "}
+            <Link to="/login" className="text-blue-600 hover:underline">
+              Back to login
+            </Link>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
