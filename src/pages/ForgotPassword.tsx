@@ -6,18 +6,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { requestPasswordResetOTP, resetStudentPassword } from '@/lib/studentAuth';
-import OTPVerification from "@/components/OTPVerification";
+import { requestPasswordReset, resetStudentPassword } from '@/lib/studentAuth';
 
 const ForgotPassword = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isRequestSent, setIsRequestSent] = useState(false);
   const [isReset, setIsReset] = useState(false);
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email) {
@@ -32,13 +32,13 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     
     try {
-      const result = requestPasswordResetOTP(email);
+      const result = requestPasswordReset(email);
       
       if (result.success) {
-        setIsOtpSent(true);
+        setIsRequestSent(true);
         toast({
-          title: "OTP Sent",
-          description: "A verification code has been sent to your email. Please check and enter the code.",
+          title: "Reset Request Sent",
+          description: "If your email is registered with us, you'll be able to reset your password.",
         });
       } else {
         toast({
@@ -48,7 +48,7 @@ const ForgotPassword = () => {
         });
       }
     } catch (error) {
-      console.error("OTP request error:", error);
+      console.error("Password reset request error:", error);
       toast({
         title: "Error",
         description: "An error occurred. Please try again.",
@@ -59,23 +59,6 @@ const ForgotPassword = () => {
     }
   };
 
-  const handleVerificationComplete = () => {
-    // Once OTP is verified, allow user to reset password
-    setIsReset(true);
-    toast({
-      title: "Verification Successful",
-      description: "Please enter your new password.",
-    });
-  };
-
-  const handleResendOTP = () => {
-    requestPasswordResetOTP(email);
-    toast({
-      title: "OTP Resent",
-      description: "A new verification code has been sent to your email.",
-    });
-  };
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -83,6 +66,24 @@ const ForgotPassword = () => {
       toast({
         title: "Password Required",
         description: "Please enter your new password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords Don't Match",
+        description: "New password and confirmation do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
         variant: "destructive",
       });
       return;
@@ -98,7 +99,6 @@ const ForgotPassword = () => {
           title: "Password Reset Successful",
           description: "Your password has been reset. You can now login with your new password.",
         });
-        setIsOtpSent(false);
         setIsReset(true);
       } else {
         toast({
@@ -120,65 +120,69 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12 bg-gradient-to-br from-blue-50 to-purple-50">
       <div className="container max-w-md">
-        <Card>
-          <CardHeader className="space-y-1">
+        <Card className="border border-purple-100 shadow-lg">
+          <CardHeader className="space-y-1 bg-gradient-to-r from-eduBlue-500 to-purple-500 text-white rounded-t-lg">
             <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-white/80">
               {isReset 
                 ? "Your password has been reset successfully!"
-                : isOtpSent 
-                  ? "Enter the verification code sent to your email"
-                  : "Enter your email to receive a verification code"}
+                : isRequestSent 
+                  ? "Enter your new password"
+                  : "Enter your email to reset your password"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {isReset ? (
               <div className="flex flex-col items-center justify-center py-4">
                 <p className="text-center mb-4">
                   You can now log in with your new password.
                 </p>
                 <Link to="/login">
-                  <Button className="w-full bg-eduBlue-600 hover:bg-eduBlue-700">
+                  <Button className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all">
                     Go to Login
                   </Button>
                 </Link>
               </div>
-            ) : isOtpSent ? (
-              <div className="space-y-4">
-                <OTPVerification 
-                  phoneNumber={email} // We're using email instead of phone here
-                  onVerificationComplete={handleVerificationComplete}
-                  onResendOTP={handleResendOTP}
-                />
-                {isReset && (
-                  <form onSubmit={handleResetPassword}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="newPassword">New Password</Label>
-                        <Input 
-                          id="newPassword" 
-                          type="password" 
-                          placeholder="Your new password"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          required 
-                        />
-                      </div>
-                      <Button 
-                        className="w-full bg-eduBlue-600 hover:bg-eduBlue-700" 
-                        type="submit"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Processing..." : "Reset Password"}
-                      </Button>
-                    </div>
-                  </form>
-                )}
-              </div>
+            ) : isRequestSent ? (
+              <form onSubmit={handleResetPassword}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input 
+                      id="newPassword" 
+                      type="password" 
+                      placeholder="Enter new password" 
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required 
+                      className="border-purple-100 focus-visible:ring-eduBlue-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Input 
+                      id="confirmPassword" 
+                      type="password" 
+                      placeholder="Confirm new password" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required 
+                      className="border-purple-100 focus-visible:ring-eduBlue-500"
+                    />
+                  </div>
+                  <Button 
+                    className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Processing..." : "Reset Password"}
+                  </Button>
+                </div>
+              </form>
             ) : (
-              <form onSubmit={handleSendOTP}>
+              <form onSubmit={handleRequestReset}>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -189,20 +193,21 @@ const ForgotPassword = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required 
+                      className="border-purple-100 focus-visible:ring-eduBlue-500"
                     />
                   </div>
                   <Button 
-                    className="w-full bg-eduBlue-600 hover:bg-eduBlue-700" 
+                    className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
                     type="submit"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Processing..." : "Send Verification Code"}
+                    {isSubmitting ? "Processing..." : "Reset Password"}
                   </Button>
                 </div>
               </form>
             )}
           </CardContent>
-          <CardFooter className="flex justify-center">
+          <CardFooter className="flex justify-center bg-gray-50 rounded-b-lg">
             <div className="text-center text-sm">
               Remember your password?{" "}
               <Link to="/login" className="text-eduBlue-600 hover:text-eduBlue-700 font-medium">
