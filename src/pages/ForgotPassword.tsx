@@ -6,22 +6,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { resetStudentPassword } from '@/lib/studentAuth';
+import { requestPasswordResetOTP, resetStudentPassword } from '@/lib/studentAuth';
+import OTPVerification from "@/components/OTPVerification";
 
 const ForgotPassword = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOtpSent, setIsOtpSent] = useState(false);
   const [isReset, setIsReset] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !newPassword) {
+    if (!email) {
       toast({
-        title: "Input Error",
-        description: "Please enter both email and new password.",
+        title: "Email Required",
+        description: "Please enter your registered email address.",
         variant: "destructive",
       });
       return;
@@ -30,18 +32,78 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     
     try {
-      const success = resetStudentPassword(email, newPassword);
+      const result = requestPasswordResetOTP(email);
       
-      if (success) {
-        setIsReset(true);
+      if (result.success) {
+        setIsOtpSent(true);
+        toast({
+          title: "OTP Sent",
+          description: "A verification code has been sent to your email. Please check and enter the code.",
+        });
+      } else {
+        toast({
+          title: "Request Failed",
+          description: result.error || "Email not found. Please check your email address.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("OTP request error:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerificationComplete = () => {
+    // Once OTP is verified, allow user to reset password
+    setIsReset(true);
+    toast({
+      title: "Verification Successful",
+      description: "Please enter your new password.",
+    });
+  };
+
+  const handleResendOTP = () => {
+    requestPasswordResetOTP(email);
+    toast({
+      title: "OTP Resent",
+      description: "A new verification code has been sent to your email.",
+    });
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newPassword) {
+      toast({
+        title: "Password Required",
+        description: "Please enter your new password.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const result = resetStudentPassword(email, newPassword);
+      
+      if (result.success) {
         toast({
           title: "Password Reset Successful",
           description: "Your password has been reset. You can now login with your new password.",
         });
+        setIsOtpSent(false);
+        setIsReset(true);
       } else {
         toast({
           title: "Reset Failed",
-          description: "Email not found. Please check your email address.",
+          description: result.error || "An error occurred. Please try again.",
           variant: "destructive",
         });
       }
@@ -66,7 +128,9 @@ const ForgotPassword = () => {
             <CardDescription className="text-center">
               {isReset 
                 ? "Your password has been reset successfully!"
-                : "Enter your email and new password to reset your account"}
+                : isOtpSent 
+                  ? "Enter the verification code sent to your email"
+                  : "Enter your email to receive a verification code"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -81,8 +145,40 @@ const ForgotPassword = () => {
                   </Button>
                 </Link>
               </div>
+            ) : isOtpSent ? (
+              <div className="space-y-4">
+                <OTPVerification 
+                  phoneNumber={email} // We're using email instead of phone here
+                  onVerificationComplete={handleVerificationComplete}
+                  onResendOTP={handleResendOTP}
+                />
+                {isReset && (
+                  <form onSubmit={handleResetPassword}>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="newPassword">New Password</Label>
+                        <Input 
+                          id="newPassword" 
+                          type="password" 
+                          placeholder="Your new password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          required 
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-eduBlue-600 hover:bg-eduBlue-700" 
+                        type="submit"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Processing..." : "Reset Password"}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+              </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSendOTP}>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -95,23 +191,12 @@ const ForgotPassword = () => {
                       required 
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input 
-                      id="newPassword" 
-                      type="password" 
-                      placeholder="Your new password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required 
-                    />
-                  </div>
                   <Button 
                     className="w-full bg-eduBlue-600 hover:bg-eduBlue-700" 
                     type="submit"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Processing..." : "Reset Password"}
+                    {isSubmitting ? "Processing..." : "Send Verification Code"}
                   </Button>
                 </div>
               </form>

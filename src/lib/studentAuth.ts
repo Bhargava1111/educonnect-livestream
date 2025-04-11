@@ -1,4 +1,3 @@
-
 // Student authentication utility
 import { createEnrollment, getEnrollmentsByStudentId } from './courseManagement';
 
@@ -16,7 +15,7 @@ const saveStudentsToStorage = (students: any[]): void => {
   localStorage.setItem("career_aspire_students", JSON.stringify(students));
 };
 
-export const loginStudent = (email: string, password: string): { success: boolean; studentData?: any } => {
+export const loginStudent = (email: string, password: string): { success: boolean; studentData?: any; error?: string } => {
   const students = getAllStudentsFromStorage();
   
   // Make comparison case-insensitive for email
@@ -25,6 +24,9 @@ export const loginStudent = (email: string, password: string): { success: boolea
   );
   
   if (student) {
+    // Check if user is already logged in on another device/browser
+    // For now, we'll just allow the login (in a real app, you might implement session tracking)
+    
     // Don't store password in localStorage for security
     const { password, ...safeStudentData } = student;
     
@@ -38,7 +40,7 @@ export const loginStudent = (email: string, password: string): { success: boolea
     return { success: true, studentData: safeStudentData };
   }
   
-  return { success: false };
+  return { success: false, error: "Invalid email or password. Please try again." };
 };
 
 export const registerStudent = (studentData: {
@@ -50,7 +52,7 @@ export const registerStudent = (studentData: {
 }): { success: boolean; error?: string } => {
   const students = getAllStudentsFromStorage();
   
-  // Check if email already exists
+  // Check if email already exists (case-insensitive)
   if (students.some(s => s.email.toLowerCase() === studentData.email.toLowerCase())) {
     return { success: false, error: "Email already registered" };
   }
@@ -137,6 +139,26 @@ export const requestOTP = (phone: string): { success: boolean; error?: string } 
   // In a real app, this would call an API to send an OTP to the phone
   // For this simulation, we'll just return success
   console.log(`OTP requested for phone: ${phone}`);
+  
+  // For testing, we can log what would be the OTP (in a real app, this would be sent via SMS)
+  console.log(`Simulated OTP for ${phone}: 123456`);
+  
+  return { success: true };
+};
+
+// Function to request password reset OTP
+export const requestPasswordResetOTP = (email: string): { success: boolean; error?: string } => {
+  const students = getAllStudentsFromStorage();
+  const student = students.find(s => s.email.toLowerCase() === email.toLowerCase());
+  
+  if (!student) {
+    return { success: false, error: "Email not found" };
+  }
+  
+  // In a real app, this would send an email with OTP or reset link
+  console.log(`Password reset OTP requested for: ${email}`);
+  console.log(`Simulated password reset OTP for ${email}: 123456`);
+  
   return { success: true };
 };
 
@@ -328,13 +350,24 @@ export const getStudentsByEnrolledCourse = (courseId: string | number) => {
   });
 };
 
-export const resetStudentPassword = (email: string, newPassword: string): boolean => {
+export const resetStudentPassword = (email: string, newPassword: string): { success: boolean; error?: string } => {
+  if (!email || !newPassword) {
+    return { success: false, error: "Email and new password are required" };
+  }
+  
   const students = getAllStudentsFromStorage();
   const studentIndex = students.findIndex(s => s.email.toLowerCase() === email.toLowerCase());
   
-  if (studentIndex === -1) return false;
+  if (studentIndex === -1) {
+    return { success: false, error: "Email not found" };
+  }
   
+  // Update password
   students[studentIndex].password = newPassword;
   saveStudentsToStorage(students);
-  return true;
+  
+  // Log the action (in a real app, you would send a confirmation email)
+  console.log(`Password reset successful for email: ${email}`);
+  
+  return { success: true };
 };

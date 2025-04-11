@@ -57,7 +57,7 @@ const Login = () => {
       } else {
         toast({
           title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
+          description: result.error || "Invalid email or password. Please try again.",
           variant: "destructive",
         });
       }

@@ -54,13 +54,15 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
     setIsVerifying(true);
     
     // Simulate API call for OTP verification
+    // In a real app, this would verify with a backend
     setTimeout(() => {
+      // For demo purposes, accept any 6-digit OTP
       setIsVerifying(false);
       setIsVerified(true);
       
       toast({
-        title: "Phone Verified Successfully",
-        description: "Your phone number has been verified.",
+        title: "Verification Successful",
+        description: `Your ${phoneNumber.includes('@') ? 'email' : 'phone number'} has been verified.`,
       });
       
       // Notify parent component that verification is complete
@@ -84,19 +86,17 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
     }, 1000);
     
     onResendOTP();
-    
-    toast({
-      title: "OTP Sent",
-      description: `A new OTP has been sent to ${phoneNumber}`,
-    });
   };
 
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
-        <h3 className="text-lg font-medium">Phone Verification</h3>
+        <h3 className="text-lg font-medium">Verification</h3>
         <p className="text-sm text-gray-500">
-          Enter the 6-digit code sent to {phoneNumber}
+          {phoneNumber.includes('@')
+            ? `Enter the 6-digit code sent to ${phoneNumber}`
+            : `Enter the 6-digit code sent to ${phoneNumber}`
+          }
         </p>
       </div>
 
@@ -133,7 +133,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
                 <Check className="mr-2 h-4 w-4" /> Verified
               </>
             ) : (
-              "Verify OTP"
+              "Verify Code"
             )}
           </Button>
           
@@ -145,7 +145,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
               size="sm"
               className="text-xs"
             >
-              {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
+              {timer > 0 ? `Resend code in ${timer}s` : "Resend code"}
             </Button>
           </div>
         </div>
