@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,72 +9,47 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Clock, FileText, Video, Check } from 'lucide-react';
 import CourseEnrollment from '@/components/CourseEnrollment';
 import { isStudentLoggedIn, getStudentData } from '@/lib/studentAuth';
-
-// Mock course data
-const coursesData = {
-  '1': {
-    id: 1,
-    title: 'Full-Stack Web Development',
-    description: 'Master front-end and back-end technologies for complete web applications.',
-    price: 12999,
-    instructor: {
-      name: 'Dr. Kumar',
-      avatar: '',
-      bio: 'Senior Developer with 10+ years of industry experience',
-    },
-    features: [
-      'Access to 60+ hours of video content',
-      'Hands-on projects and assignments',
-      'Personal mentor support',
-      'Industry-recognized certification',
-      'Job placement assistance',
-      '24/7 doubt resolution'
-    ],
-    curriculum: [
-      {
-        title: 'Module 1: HTML & CSS Fundamentals',
-        lessons: [
-          { title: 'Introduction to HTML', type: 'video', duration: '45 min' },
-          { title: 'CSS Styling Basics', type: 'video', duration: '55 min' },
-          { title: 'Building Your First Webpage', type: 'exercise', duration: '2 hours' },
-        ]
-      },
-      {
-        title: 'Module 2: JavaScript Fundamentals',
-        lessons: [
-          { title: 'JavaScript Syntax & Variables', type: 'video', duration: '60 min' },
-          { title: 'Functions & Objects', type: 'video', duration: '75 min' },
-          { title: 'DOM Manipulation', type: 'video', duration: '60 min' },
-          { title: 'Building an Interactive Web App', type: 'exercise', duration: '3 hours' },
-        ]
-      },
-      {
-        title: 'Module 3: React Frontend Development',
-        lessons: [
-          { title: 'React Introduction', type: 'video', duration: '45 min' },
-          { title: 'Components & Props', type: 'video', duration: '60 min' },
-          { title: 'State & Lifecycle', type: 'video', duration: '60 min' },
-          { title: 'Building a React App', type: 'exercise', duration: '4 hours' },
-        ]
-      },
-    ]
-  },
-  // Add more courses as needed
-};
+import { getCourseById } from '@/lib/courseManagement';
 
 const CourseCurriculum = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const course = coursesData[courseId as keyof typeof coursesData];
+  const [course, setCourse] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const isLoggedIn = isStudentLoggedIn();
   const studentData = isLoggedIn ? getStudentData() : null;
   
   // Check if student is enrolled in this course
-  const isEnrolled = studentData?.enrolledCourses?.includes(Number(courseId));
+  const isEnrolled = studentData?.enrolledCourses?.includes(courseId);
   
+  useEffect(() => {
+    if (courseId) {
+      // Fetch the course data from the course management service
+      const courseData = getCourseById(courseId);
+      console.log("Fetched course data:", courseData);
+      setCourse(courseData || null);
+      setLoading(false);
+    }
+  }, [courseId]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <h2 className="text-xl font-medium mb-4">Loading course information...</h2>
+      </div>
+    );
+  }
+
   if (!course) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-4">Course not found</h2>
+        <Card className="shadow-lg border-2 border-gray-100">
+          <CardHeader className="text-center border-b pb-6">
+            <CardTitle className="text-2xl">Course Not Found</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p className="text-center mb-4">The requested course could not be found. Please check the course ID and try again.</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -104,35 +79,31 @@ const CourseCurriculum = () => {
                   <CardTitle>Course Curriculum</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                    {course.curriculum.map((module, moduleIndex) => (
-                      <AccordionItem key={moduleIndex} value={`module-${moduleIndex}`}>
-                        <AccordionTrigger>
-                          {module.title}
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-2">
-                            {module.lessons.map((lesson, lessonIndex) => (
-                              <div key={lessonIndex} className="flex items-center justify-between p-2 rounded hover:bg-gray-50">
-                                <div className="flex items-center">
-                                  {lesson.type === 'video' ? (
-                                    <Video className="h-4 w-4 mr-2 text-eduBlue-600" />
-                                  ) : (
+                  {course.curriculum && course.curriculum.length > 0 ? (
+                    <Accordion type="single" collapsible className="w-full">
+                      {course.curriculum.map((module: any, moduleIndex: number) => (
+                        <AccordionItem key={moduleIndex} value={`module-${moduleIndex}`}>
+                          <AccordionTrigger>
+                            {module.title}
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <div className="space-y-2">
+                              {module.topics && module.topics.map((topic: any, topicIndex: number) => (
+                                <div key={topicIndex} className="flex items-center justify-between p-2 rounded hover:bg-gray-50">
+                                  <div className="flex items-center">
                                     <FileText className="h-4 w-4 mr-2 text-eduBlue-600" />
-                                  )}
-                                  <span>{lesson.title}</span>
+                                    <span>{topic.title}</span>
+                                  </div>
                                 </div>
-                                <div className="flex items-center text-gray-500 text-sm">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  {lesson.duration}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  ) : (
+                    <p className="text-gray-500">No curriculum available for this course yet.</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -145,15 +116,11 @@ const CourseCurriculum = () => {
                 <CardContent>
                   <div className="flex items-center mb-4">
                     <Avatar className="h-12 w-12 mr-4">
-                      {course.instructor.avatar ? (
-                        <AvatarImage src={course.instructor.avatar} />
-                      ) : (
-                        <AvatarFallback>{course.instructor.name.charAt(0)}</AvatarFallback>
-                      )}
+                      <AvatarFallback>{course.instructor ? course.instructor.charAt(0) : 'I'}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold text-lg">{course.instructor.name}</h3>
-                      <p className="text-gray-500">{course.instructor.bio}</p>
+                      <h3 className="font-semibold text-lg">{course.instructor || 'Instructor information not available'}</h3>
+                      <p className="text-gray-500">{course.instructorBio || 'Experienced educator in this field'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -205,10 +172,16 @@ const CourseCurriculum = () => {
             </Card>
           ) : (
             <CourseEnrollment
-              courseId={course.id}
+              courseId={courseId || ''}
               title={course.title}
               price={course.price}
-              features={course.features}
+              features={[
+                "Access to all course materials",
+                "Certificate of completion",
+                "Instructor support",
+                "Lifetime access",
+                "Job placement assistance"
+              ]}
             />
           )}
         </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,9 +33,14 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   const [courseExists, setCourseExists] = useState(true);
 
   useEffect(() => {
-    // Check if course exists
-    const courseData = getCourseById(String(courseId));
+    const courseIdStr = String(courseId);
+    console.log("Checking course existence for ID:", courseIdStr);
+    
+    const courseData = getCourseById(courseIdStr);
+    console.log("Course data retrieved:", courseData);
+    
     if (!courseData) {
+      console.warn("Course not found with ID:", courseIdStr);
       setCourseExists(false);
       toast({
         title: "Course Not Found",
@@ -46,18 +50,15 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
       return;
     }
 
-    // Check if there's a custom payment link for this course
-    const paymentLink = getPaymentLink(String(courseId));
+    const paymentLink = getPaymentLink(courseIdStr);
     setCustomPaymentLink(paymentLink);
   }, [courseId, toast]);
 
   const handlePaymentSuccess = (response: any) => {
-    // Get the student data and enroll them in the course
     if (isLoggedIn) {
       const studentData = localStorage.getItem('career_aspire_student');
       if (studentData) {
         const student = JSON.parse(studentData);
-        // Create the enrollment record
         const enrollment = createEnrollment(student.id, String(courseId));
         
         if (enrollment) {
@@ -66,7 +67,6 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
             description: `You have successfully enrolled in ${title}`,
           });
           
-          // Navigate to the student's courses page
           navigate(`/student/courses`);
         } else {
           toast({
@@ -99,7 +99,6 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
       return;
     }
 
-    // If this is a free course, directly enroll the student
     if (price === 0) {
       handlePaymentSuccess(null);
       return;
@@ -128,7 +127,6 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
       return;
     }
 
-    // Open custom payment link in a new tab
     window.open(customPaymentLink, '_blank');
   };
 
@@ -175,7 +173,6 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col space-y-3 pt-4">
         {customPaymentLink ? (
-          // Show external payment button if custom payment link exists
           <>
             <Button 
               onClick={handleExternalPayment} 
@@ -188,7 +185,6 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
             </p>
           </>
         ) : isEnrolling ? (
-          // Show Razorpay payment button
           <div className="w-full">
             <RazorpayPayment 
               amount={price} 
@@ -207,7 +203,6 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
             </Button>
           </div>
         ) : (
-          // Show default enroll button
           <Button 
             onClick={handleEnroll} 
             className="w-full bg-eduBlue-600 hover:bg-eduBlue-700"
