@@ -34,6 +34,7 @@ export const JobTable: React.FC<JobTableProps> = ({ jobs, onEdit, onDelete, onVi
             <TableHead>Company</TableHead>
             <TableHead>Location</TableHead>
             <TableHead>Experience</TableHead>
+            <TableHead>Category</TableHead>
             <TableHead>Salary</TableHead>
             <TableHead>Last Date</TableHead>
             <TableHead>Status</TableHead>
@@ -43,7 +44,7 @@ export const JobTable: React.FC<JobTableProps> = ({ jobs, onEdit, onDelete, onVi
         <TableBody>
           {jobs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4">No jobs found. Add a new job to get started.</TableCell>
+              <TableCell colSpan={9} className="text-center py-4">No jobs found. Add a new job to get started.</TableCell>
             </TableRow>
           ) : (
             jobs.map((job) => (
@@ -51,11 +52,20 @@ export const JobTable: React.FC<JobTableProps> = ({ jobs, onEdit, onDelete, onVi
                 <TableCell className="font-medium">{job.title}</TableCell>
                 <TableCell>{job.company}</TableCell>
                 <TableCell>{job.location}</TableCell>
-                <TableCell>{job.experienceLevel}</TableCell>
+                <TableCell>{job.experienceLevel || 'N/A'}</TableCell>
+                <TableCell>
+                  {job.category ? (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      {job.category}
+                    </Badge>
+                  ) : (
+                    'N/A'
+                  )}
+                </TableCell>
                 <TableCell>{job.salary || 'N/A'}</TableCell>
                 <TableCell>{formatDate(job.lastDate)}</TableCell>
                 <TableCell>
-                  {new Date(job.lastDate || '') > new Date() ? (
+                  {job.lastDate && new Date(job.lastDate) > new Date() ? (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
                   ) : (
                     <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Expired</Badge>

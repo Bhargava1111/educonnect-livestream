@@ -15,3 +15,11 @@ export * from './enrollmentService';
 export * from './paymentService';
 export * from './contactService';
 
+// Export student activity tracking functions
+export {
+  getStudentLoginHistory,
+  getStudentActivity,
+  getStudentTotalActiveTime,
+  formatActiveTime,
+  getStudentLastActiveTime
+} from './studentAuth';

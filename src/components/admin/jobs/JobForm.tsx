@@ -49,7 +49,7 @@ export const JobForm: React.FC<JobFormProps> = ({
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Job Title</Label>
+              <Label htmlFor="title">Job Title*</Label>
               <Input
                 id="title"
                 name="title"
@@ -59,7 +59,7 @@ export const JobForm: React.FC<JobFormProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="company">Company</Label>
+              <Label htmlFor="company">Company*</Label>
               <Input
                 id="company"
                 name="company"
@@ -72,7 +72,7 @@ export const JobForm: React.FC<JobFormProps> = ({
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location*</Label>
               <Input
                 id="location"
                 name="location"
@@ -89,14 +89,13 @@ export const JobForm: React.FC<JobFormProps> = ({
                 placeholder="e.g. 6-10 LPA"
                 value={formData.salary}
                 onChange={onInputChange}
-                required
               />
             </div>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="jobType">Job Type</Label>
+              <Label htmlFor="jobType">Job Type*</Label>
               <Select 
                 value={formData.jobType} 
                 onValueChange={(value) => onSelectChange('jobType', value)}
@@ -114,7 +113,7 @@ export const JobForm: React.FC<JobFormProps> = ({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="experienceLevel">Experience Level</Label>
+              <Label htmlFor="experienceLevel">Experience Level*</Label>
               <Select 
                 value={formData.experienceLevel} 
                 onValueChange={(value) => onSelectChange('experienceLevel', value)}
@@ -133,7 +132,7 @@ export const JobForm: React.FC<JobFormProps> = ({
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="lastDate">Last Date to Apply</Label>
+              <Label htmlFor="lastDate">Last Date to Apply*</Label>
               <Input
                 id="lastDate"
                 name="lastDate"
@@ -143,6 +142,30 @@ export const JobForm: React.FC<JobFormProps> = ({
                 required
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="category">Category/Industry</Label>
+              <Select 
+                value={formData.category || ''} 
+                onValueChange={(value) => onSelectChange('category', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Information Technology">Information Technology</SelectItem>
+                  <SelectItem value="Finance">Finance</SelectItem>
+                  <SelectItem value="Healthcare">Healthcare</SelectItem>
+                  <SelectItem value="Education">Education</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Sales">Sales</SelectItem>
+                  <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="externalLink">External Application Link</Label>
               <Input
@@ -154,27 +177,26 @@ export const JobForm: React.FC<JobFormProps> = ({
                 onChange={onInputChange}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select 
+                value={formData.status || 'Active'} 
+                onValueChange={(value) => onSelectChange('status', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="Draft">Draft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select 
-              value={formData.status || 'Active'} 
-              onValueChange={(value) => onSelectChange('status', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-                <SelectItem value="Draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Job Description</Label>
+            <Label htmlFor="description">Job Description*</Label>
             <Textarea
               id="description"
               name="description"
@@ -182,6 +204,7 @@ export const JobForm: React.FC<JobFormProps> = ({
               value={formData.description}
               onChange={onInputChange}
               required
+              className="min-h-[100px]"
             />
           </div>
           

@@ -1,5 +1,5 @@
 
-import { Job, JOBS_KEY } from './types';
+import { Job, JOBS_KEY, STUDENT_ACTIVITY_KEY } from './types';
 
 // Re-export the Job type
 export type { Job };
@@ -31,7 +31,8 @@ const initializeJobsIfNeeded = (): Job[] => {
         jobType: 'Full-time',
         experienceLevel: 'Mid',
         status: 'Active',
-        externalLink: 'https://example.com/apply'
+        externalLink: 'https://example.com/apply',
+        category: 'Information Technology'
       },
       {
         id: 'job_2',
@@ -52,7 +53,8 @@ const initializeJobsIfNeeded = (): Job[] => {
         jobType: 'Full-time',
         experienceLevel: 'Senior',
         status: 'Active',
-        externalLink: 'https://example.com/apply'
+        externalLink: 'https://example.com/apply',
+        category: 'Information Technology'
       }
     ];
     localStorage.setItem(JOBS_KEY, JSON.stringify(defaultJobs));
@@ -76,6 +78,11 @@ export const getActiveJobs = (): Job[] => {
 export const getJobById = (id: string): Job | undefined => {
   const jobs = getAllJobs();
   return jobs.find(job => job.id === id);
+};
+
+export const getJobsByCategory = (category: string): Job[] => {
+  const jobs = getActiveJobs();
+  return jobs.filter(job => job.category === category);
 };
 
 export const createJob = (job: Omit<Job, 'id'>): Job => {
@@ -133,16 +140,53 @@ export const incrementJobApplyCount = (id: string): boolean => {
   return false;
 };
 
+// Function to handle job application
+export const applyForJob = (jobId: string, studentId: string): { success: boolean; url?: string } => {
+  // Increment the application count
+  const success = incrementJobApplyCount(jobId);
+  
+  if (!success) {
+    return { success: false };
+  }
+  
+  // Get the job to retrieve the external link
+  const job = getJobById(jobId);
+  
+  if (!job || !job.externalLink) {
+    return { success: true }; // Application counted but no redirect URL
+  }
+  
+  // Log the student activity
+  const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
+  let activityLog = activities ? JSON.parse(activities) : [];
+  
+  activityLog.push({
+    id: `activity_${Date.now()}`,
+    studentId,
+    action: 'job_application',
+    jobId,
+    timestamp: new Date().toISOString(),
+    details: {
+      jobTitle: job.title,
+      company: job.company
+    }
+  });
+  
+  localStorage.setItem(STUDENT_ACTIVITY_KEY, JSON.stringify(activityLog));
+  
+  return { success: true, url: job.externalLink };
+};
+
 // Export job data as CSV
 export const exportJobsAsCSV = (): string => {
   const jobs = getAllJobs();
   
   // CSV header
-  let csv = 'ID,Title,Company,Location,Salary,Job Type,Experience Level,Last Date,Applied Count,Status\n';
+  let csv = 'ID,Title,Company,Location,Category,Salary,Job Type,Experience Level,Last Date,Applied Count,Status\n';
   
   // Add rows
   jobs.forEach(job => {
-    csv += `${job.id},"${job.title}","${job.company}","${job.location}","${job.salary || 'N/A'}","${job.jobType || 'N/A'}","${job.experienceLevel || 'N/A'}","${job.lastDate || 'N/A'}",${job.appliedCount || 0},"${job.status || 'Active'}"\n`;
+    csv += `${job.id},"${job.title}","${job.company}","${job.location}","${job.category || 'N/A'}","${job.salary || 'N/A'}","${job.jobType || 'N/A'}","${job.experienceLevel || 'N/A'}","${job.lastDate || 'N/A'}",${job.appliedCount || 0},"${job.status || 'Active'}"\n`;
   });
   
   return csv;
