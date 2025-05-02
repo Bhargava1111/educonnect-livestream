@@ -140,10 +140,10 @@ export function useCourseManagement() {
         shortDescription: formData.shortDescription || formData.description.substring(0, 150) + "...",
         price: formData.courseType === 'Free' ? 0 : Number(formData.price),
         duration: formData.duration,
-        level: formData.level as "Beginner" | "Intermediate" | "Advanced",
+        level: formData.level,
         instructor: formData.instructor,
         imageUrl: formData.imageUrl,
-        status: formData.status as "Active" | "Inactive" | "Coming Soon",
+        status: formData.status,
         category: formData.category
       });
       

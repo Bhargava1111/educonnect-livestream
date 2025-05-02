@@ -45,7 +45,7 @@ export const createPayment = (payment: Omit<Payment, 'id'>): Payment => {
 
 export const updatePayment = (
   paymentId: string, 
-  status: 'pending' | 'completed' | 'failed',
+  status: 'success' | 'pending' | 'failed',
   paymentDetails?: Partial<Payment>
 ): Payment | undefined => {
   const payments = getAllPayments();
@@ -60,7 +60,7 @@ export const updatePayment = (
     
     localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
     
-    if (status === 'completed') {
+    if (status === 'success') {
       createEnrollment(payments[index].studentId, payments[index].courseId);
     }
     

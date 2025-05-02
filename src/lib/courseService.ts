@@ -111,15 +111,22 @@ const initializeCoursesIfNeeded = (): Course[] => {
       {
         id: 'course_web_dev',
         title: 'Full-Stack Web Development',
+        shortDescription: 'Master front-end and back-end technologies for complete web applications',
         description: 'Master front-end and back-end technologies for complete web applications',
         duration: '14 weeks',
         price: 29999,
         level: 'Intermediate',
         students: 210,
-        rating: 4.9,
+        ratings: 4.9,
         instructor: 'Rahul Khanna',
         status: 'Active',
+        category: 'Web Development',
         imageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
         curriculum: [
           {
             id: 'module_1',
@@ -174,15 +181,22 @@ const initializeCoursesIfNeeded = (): Course[] => {
       {
         id: 'course_python',
         title: 'Python Full Stack Development',
+        shortDescription: 'Learn Python programming and build full-stack web applications',
         description: 'Learn Python programming and build full-stack web applications',
         duration: '16 weeks',
         price: 27999,
         level: 'Beginner',
         students: 145,
-        rating: 4.7,
+        ratings: 4.7,
         instructor: 'Sameer Khan',
         status: 'Active',
+        category: 'Programming',
         imageUrl: 'https://images.unsplash.com/photo-1526379879527-8559ecfcb0c8?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
         curriculum: [
           {
             id: 'module_1',
@@ -244,119 +258,191 @@ const initializeCoursesIfNeeded = (): Course[] => {
       {
         id: 'course_mern',
         title: 'MERN Stack Development',
+        shortDescription: 'Become a full-stack developer with MongoDB, Express, React, and Node.js',
         description: 'Become a full-stack developer with MongoDB, Express, React, and Node.js',
         duration: '14 weeks',
         price: 28999,
         level: 'Intermediate',
         students: 132,
-        rating: 4.8,
+        ratings: 4.8,
         instructor: 'Alisha Patel',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&h=400'
+        category: 'Web Development',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_cyber',
         title: 'Cybersecurity & Ethical Hacking',
+        shortDescription: 'Learn cybersecurity principles and ethical hacking techniques',
         description: 'Learn cybersecurity principles and ethical hacking techniques',
         duration: '12 weeks',
         price: 29999,
         level: 'Intermediate',
         students: 128,
-        rating: 4.9,
+        ratings: 4.9,
         instructor: 'Vikram Singh',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&h=400'
+        category: 'Security',
+        imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_java',
         title: 'Java Backend Development',
+        shortDescription: 'Master Java and Spring Boot for enterprise application development',
         description: 'Master Java and Spring Boot for enterprise application development',
         duration: '14 weeks',
         price: 26999,
         level: 'Intermediate',
         students: 118,
-        rating: 4.7,
+        ratings: 4.7,
         instructor: 'Ravi Kumar',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&h=400'
+        category: 'Programming',
+        imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_data',
         title: 'Data Science & Analytics',
+        shortDescription: 'Learn data analysis, visualization, and machine learning techniques',
         description: 'Learn data analysis, visualization, and machine learning techniques',
         duration: '14 weeks',
         price: 32999,
         level: 'Intermediate',
         students: 105,
-        rating: 4.8,
+        ratings: 4.8,
         instructor: 'Neha Gupta',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&h=400'
+        category: 'Data Science',
+        imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_mean',
         title: 'MEAN Stack Development',
+        shortDescription: 'Build modern web applications with MongoDB, Express, Angular, and Node.js',
         description: 'Build modern web applications with MongoDB, Express, Angular, and Node.js',
         duration: '14 weeks',
         price: 28999,
         level: 'Intermediate',
         students: 98,
-        rating: 4.6,
+        ratings: 4.6,
         instructor: 'Arun Mehta',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=800&h=400'
+        category: 'Web Development',
+        imageUrl: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_frontend',
         title: 'Front-End Development',
+        shortDescription: 'Master HTML, CSS, JavaScript, and modern frontend frameworks',
         description: 'Master HTML, CSS, JavaScript, and modern frontend frameworks',
         duration: '10 weeks',
         price: 22999,
         level: 'Beginner',
         students: 87,
-        rating: 4.7,
+        ratings: 4.7,
         instructor: 'Sneha Sharma',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1581276879432-15e50529f34b?auto=format&fit=crop&w=800&h=400'
+        category: 'Web Development',
+        imageUrl: 'https://images.unsplash.com/photo-1581276879432-15e50529f34b?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_mobile',
         title: 'Mobile App Development',
+        shortDescription: 'Build cross-platform mobile applications with React Native',
         description: 'Build cross-platform mobile applications with React Native',
         duration: '12 weeks',
         price: 27999,
         level: 'Intermediate',
         students: 75,
-        rating: 4.8,
+        ratings: 4.8,
         instructor: 'Rohit Verma',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1526925539332-aa3b66e35444?auto=format&fit=crop&w=800&h=400'
+        category: 'Mobile Development',
+        imageUrl: 'https://images.unsplash.com/photo-1526925539332-aa3b66e35444?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_devops',
         title: 'DevOps & Cloud Computing',
+        shortDescription: 'Learn DevOps practices and cloud infrastructure management',
         description: 'Learn DevOps practices and cloud infrastructure management',
         duration: '12 weeks',
         price: 29999,
         level: 'Advanced',
         students: 62,
-        rating: 4.9,
+        ratings: 4.9,
         instructor: 'Amit Sharma',
         status: 'Coming Soon',
-        imageUrl: 'https://images.unsplash.com/photo-1508830524289-0adcbe822b40?auto=format&fit=crop&w=800&h=400'
+        category: 'DevOps',
+        imageUrl: 'https://images.unsplash.com/photo-1508830524289-0adcbe822b40?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       },
       {
         id: 'course_mca',
         title: 'MCA Program',
+        shortDescription: 'Comprehensive Master of Computer Applications program with industry-focused curriculum',
         description: 'Comprehensive Master of Computer Applications program with industry-focused curriculum',
         duration: '2 years',
         price: 120000,
         level: 'Advanced',
         students: 45,
-        rating: 4.9,
+        ratings: 4.9,
         instructor: 'Dr. Rajesh Kumar',
         status: 'Active',
-        imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&h=400'
+        category: 'Academic Program',
+        imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
+        curriculum: []
       }
     ];
     localStorage.setItem(COURSES_KEY, JSON.stringify(defaultCourses));
@@ -418,15 +504,8 @@ export const deleteCourse = (id: string): boolean => {
   return false;
 };
 
-// Function to get enrollments for a course - directly imported from module
-import { getEnrollmentsByCourseId } from './enrollmentService';
-
-// Function to get payments for a course - directly imported from module
-import { getPaymentsByCourseId } from './paymentService';
-
 // Utility function to generate course statistics
 export const getCourseStatistics = (courseId: string) => {
-  // Use imported functions directly instead of require
   const enrollments = getEnrollmentsByCourseId(courseId);
   const payments = getPaymentsByCourseId(courseId);
   

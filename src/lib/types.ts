@@ -1,4 +1,3 @@
-
 // Storage keys
 export const JOBS_KEY = "career_aspire_jobs";
 export const PLACEMENTS_KEY = "career_aspire_placements";
@@ -332,4 +331,50 @@ export interface EducationDetail {
   totalMarks: string;
   obtainedMarks: string;
   documentUrl?: string;
+}
+
+// Update AssessmentQuestion to include correctAnswerIndex for compatibility
+export interface AssessmentQuestion {
+  id: string;
+  text: string;
+  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
+  options?: string[];
+  correctAnswer?: string | string[];
+  correctAnswerIndex?: number; // Added for compatibility
+  marks?: number;
+  points?: number; // Added for compatibility
+  codingTemplate?: string; // Added for coding questions
+}
+
+// Question type (for assessment service)
+export interface Question {
+  id: string;
+  text: string;
+  type: string;
+  options?: string[];
+  correctAnswerIndex?: number;
+  correctAnswer?: string | string[];
+  marks?: number;
+  points?: number; // Added for compatibility
+  codingTemplate?: string; // Added for coding questions
+}
+
+// Update RoadmapPhase to include phase for compatibility
+export interface RoadmapPhase {
+  id?: string; 
+  order?: number;
+  phase: number; // Made required for compatibility
+  title: string;
+  description?: string;
+  duration: string;
+  topics: string[];
+  projects: string[];
+  milestones?: string[];
+}
+
+// Update CourseModule interface
+export interface CourseModule {
+  id: string;
+  title: string;
+  topics: { id: string; title: string }[];
 }
