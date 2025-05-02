@@ -10,6 +10,7 @@ export const CONTACTS_KEY = "career_aspire_contacts";
 export const ASSESSMENTS_KEY = "career_aspire_assessments";
 export const EMAIL_NOTIFICATIONS_KEY = "career_aspire_email_notifications";
 export const STUDENT_ACTIVITY_KEY = "career_aspire_student_activity";
+export const ENROLLMENT_FORMS_KEY = "career_aspire_enrollment_forms";
 
 // Job type definition
 export interface Job {
@@ -65,6 +66,11 @@ export interface Course {
   reviewCount?: number;
   createdAt: string;
   updatedAt: string;
+  students?: number; // Added for student count
+  status?: string; // Added for course status
+  instructor?: string; // Added for instructor name
+  curriculum?: string[]; // Added for curriculum
+  roadmap?: RoadmapPhase[]; // Added for course roadmap
 }
 
 // Course topic definition
@@ -84,6 +90,16 @@ export interface CourseMaterial {
   url: string;
   size?: string;
   uploadedAt: string;
+}
+
+// Roadmap Phase for course roadmap
+export interface RoadmapPhase {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  order: number;
+  milestones: string[];
 }
 
 // Live meeting definition
@@ -114,6 +130,8 @@ export interface Enrollment {
   certificateIssued?: boolean;
   certificateUrl?: string;
   lastAccessedDate?: string;
+  progress?: number; // Added for tracking progress
+  completed?: boolean; // Added to track completion
 }
 
 // Payment definition
@@ -127,6 +145,7 @@ export interface Payment {
   status: 'success' | 'pending' | 'failed';
   transactionId?: string;
   invoiceUrl?: string;
+  paymentId?: string; // Added for payment gateway reference
 }
 
 // Contact form submission
@@ -166,6 +185,17 @@ export interface AssessmentQuestion {
   marks: number;
 }
 
+// Question type (for assessment service)
+export interface Question {
+  id: string;
+  text: string;
+  type: string;
+  options?: string[];
+  correctAnswerIndex?: number;
+  correctAnswer?: string | string[];
+  marks: number;
+}
+
 // Student submission for assessment
 export interface AssessmentSubmission {
   id: string;
@@ -188,7 +218,8 @@ export interface EmailNotification {
   body: string;
   sentDate: string;
   status: 'sent' | 'failed' | 'pending';
-  type: 'welcome' | 'reset-password' | 'enrollment-confirmation' | 'assignment' | 'general';
+  type: 'welcome' | 'reset-password' | 'enrollment-confirmation' | 'assignment' | 'general' | 'enrollment';
+  relatedId?: string;
 }
 
 // Student activity tracking
@@ -221,4 +252,67 @@ export interface LoginHistory {
   ipAddress?: string;
   userAgent?: string;
   failureReason?: string;
+}
+
+// Enrollment form data
+export interface EnrollmentForm {
+  id: string;
+  studentId: string;
+  formType: 'course' | 'job';
+  relatedId: string; // courseId or jobId
+  submittedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  
+  // Basic Information
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: 'male' | 'female' | 'other';
+  
+  // Identification Details
+  aadharNumber: string;
+  certificateId?: string;
+  
+  // Address Information
+  permanentAddress: Address;
+  currentAddress: Address;
+  isSameAddress: boolean;
+  
+  // Parent/Guardian Details
+  fatherName: string;
+  motherName: string;
+  guardianPhone: string;
+  guardianEmail: string;
+  
+  // Educational Details
+  tenthGrade: EducationDetail;
+  twelfthGrade: EducationDetail;
+  degree?: EducationDetail;
+  postGraduation?: EducationDetail;
+  
+  // Document Uploads
+  certificateUrl?: string;
+  photographUrl?: string;
+}
+
+// Address interface
+export interface Address {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+// Education detail interface
+export interface EducationDetail {
+  institutionName: string;
+  boardUniversity: string;
+  yearOfPassing: string;
+  totalMarks: string;
+  obtainedMarks: string;
+  documentUrl?: string;
 }

@@ -14,6 +14,7 @@ export * from './assessmentService';
 export * from './enrollmentService';
 export * from './paymentService';
 export * from './contactService';
+export * from './enrollmentFormService';
 
 // Export student activity tracking functions
 export {

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -38,6 +37,8 @@ import CourseRoadmap from "./pages/CourseRoadmap";
 import CourseCurriculum from "./pages/CourseCurriculum";
 import LiveMeetings from "./pages/LiveMeetings";
 import NotFound from "./pages/NotFound";
+import CourseEnrollmentPage from "./pages/CourseEnrollmentPage";
+import JobDetail from "./pages/JobDetail";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,8 @@ const App = () => (
             <Route path="/student/courses" element={<StudentCourses />} />
             <Route path="/student/profile" element={<StudentProfile />} />
             <Route path="/student/*" element={<StudentDashboard />} />
+            <Route path="/course-enrollment/:courseId" element={<CourseEnrollmentPage />} />
+            <Route path="/job/:jobId" element={<JobDetail />} />
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
         </TooltipProvider>
