@@ -131,16 +131,46 @@ export const JobForm: React.FC<JobFormProps> = ({
             </div>
           </div>
           
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="lastDate">Last Date to Apply</Label>
+              <Input
+                id="lastDate"
+                name="lastDate"
+                type="date"
+                value={formData.lastDate}
+                onChange={onInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="externalLink">External Application Link</Label>
+              <Input
+                id="externalLink"
+                name="externalLink"
+                type="url"
+                placeholder="https://example.com/apply"
+                value={formData.externalLink || ''}
+                onChange={onInputChange}
+              />
+            </div>
+          </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="lastDate">Last Date to Apply</Label>
-            <Input
-              id="lastDate"
-              name="lastDate"
-              type="date"
-              value={formData.lastDate}
-              onChange={onInputChange}
-              required
-            />
+            <Label htmlFor="status">Status</Label>
+            <Select 
+              value={formData.status || 'Active'} 
+              onValueChange={(value) => onSelectChange('status', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="Draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">
@@ -162,6 +192,7 @@ export const JobForm: React.FC<JobFormProps> = ({
                 value={requirementInput}
                 onChange={onRequirementInputChange}
                 placeholder="Add a requirement"
+                onKeyDown={(e) => e.key === 'Enter' && onAddRequirement()}
               />
               <Button type="button" onClick={onAddRequirement} variant="outline">
                 Add

@@ -13,6 +13,9 @@ export type JobFormData = {
   experienceLevel: 'Entry' | 'Mid' | 'Senior';
   lastDate: string;
   requirements: string[];
+  status?: 'Active' | 'Inactive' | 'Draft';
+  externalLink?: string;
+  category?: string;
 };
 
 export const initialFormData: JobFormData = {
@@ -24,7 +27,10 @@ export const initialFormData: JobFormData = {
   jobType: 'Full-time',
   experienceLevel: 'Entry',
   lastDate: '',
-  requirements: []
+  requirements: [],
+  status: 'Active',
+  externalLink: '',
+  category: '',
 };
 
 export const useJobManagement = () => {
@@ -35,14 +41,27 @@ export const useJobManagement = () => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [formData, setFormData] = useState<JobFormData>(initialFormData);
   const [requirementInput, setRequirementInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
     loadJobs();
   }, []);
   
   const loadJobs = () => {
-    const allJobs = getAllJobs();
-    setJobs(allJobs);
+    setIsLoading(true);
+    try {
+      const allJobs = getAllJobs();
+      setJobs(allJobs);
+    } catch (error) {
+      console.error("Error loading jobs:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load job listings.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -60,6 +79,16 @@ export const useJobManagement = () => {
       setFormData(prev => ({ 
         ...prev, 
         [name]: value as 'Entry' | 'Mid' | 'Senior' 
+      }));
+    } else if (name === 'status') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [name]: value as 'Active' | 'Inactive' | 'Draft' 
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
       }));
     }
   };
@@ -87,7 +116,22 @@ export const useJobManagement = () => {
   };
   
   const handleAddJob = () => {
+    setIsLoading(true);
     try {
+      // Validate required fields
+      if (!formData.title.trim()) {
+        toast({ title: "Error", description: "Job title is required", variant: "destructive" });
+        return;
+      }
+      if (!formData.company.trim()) {
+        toast({ title: "Error", description: "Company name is required", variant: "destructive" });
+        return;
+      }
+      if (!formData.description.trim()) {
+        toast({ title: "Error", description: "Job description is required", variant: "destructive" });
+        return;
+      }
+      
       const newJob = createJob({
         ...formData,
         createdAt: new Date().toISOString(),
@@ -103,18 +147,36 @@ export const useJobManagement = () => {
       setIsAddModalOpen(false);
       loadJobs();
     } catch (error) {
+      console.error("Error adding job:", error);
       toast({
         title: "Error",
         description: "Failed to add job. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const handleEditJob = () => {
     if (!selectedJob) return;
+    setIsLoading(true);
     
     try {
+      // Validate required fields
+      if (!formData.title.trim()) {
+        toast({ title: "Error", description: "Job title is required", variant: "destructive" });
+        return;
+      }
+      if (!formData.company.trim()) {
+        toast({ title: "Error", description: "Company name is required", variant: "destructive" });
+        return;
+      }
+      if (!formData.description.trim()) {
+        toast({ title: "Error", description: "Job description is required", variant: "destructive" });
+        return;
+      }
+      
       updateJob(selectedJob.id, formData);
       
       toast({
@@ -127,16 +189,20 @@ export const useJobManagement = () => {
       setIsEditModalOpen(false);
       loadJobs();
     } catch (error) {
+      console.error("Error updating job:", error);
       toast({
         title: "Error",
         description: "Failed to update job. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const handleDeleteJob = (jobId: string) => {
     if (confirm("Are you sure you want to delete this job?")) {
+      setIsLoading(true);
       try {
         deleteJob(jobId);
         
@@ -147,11 +213,14 @@ export const useJobManagement = () => {
         
         loadJobs();
       } catch (error) {
+        console.error("Error deleting job:", error);
         toast({
           title: "Error",
           description: "Failed to delete job. Please try again.",
           variant: "destructive"
         });
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -167,9 +236,43 @@ export const useJobManagement = () => {
       jobType: job.jobType || 'Full-time',
       experienceLevel: job.experienceLevel || 'Entry',
       lastDate: job.lastDate || '',
-      requirements: job.requirements || []
+      requirements: job.requirements || [],
+      status: job.status || 'Active',
+      externalLink: job.externalLink || '',
+      category: job.category || ''
     });
     setIsEditModalOpen(true);
+  };
+  
+  const exportJobsToCSV = () => {
+    try {
+      const { exportJobsAsCSV } = require('@/lib/jobService');
+      const csvContent = exportJobsAsCSV();
+      
+      // Create a blob from the CSV content
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a link and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `jobs_export_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Export Successful",
+        description: "Job listings have been exported to CSV."
+      });
+    } catch (error) {
+      console.error("Error exporting jobs:", error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export job listings. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return {
@@ -179,6 +282,7 @@ export const useJobManagement = () => {
     isAddModalOpen,
     isEditModalOpen,
     selectedJob,
+    isLoading,
     setFormData,
     setRequirementInput,
     setIsAddModalOpen,
@@ -191,6 +295,7 @@ export const useJobManagement = () => {
     handleEditJob,
     handleDeleteJob,
     openEditModal,
-    resetForm
+    resetForm,
+    exportJobsToCSV
   };
 };

@@ -1,3 +1,4 @@
+
 // Local Storage keys
 export const COURSES_KEY = 'career_aspire_courses';
 export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
@@ -11,6 +12,7 @@ export const ASSESSMENTS_KEY = 'career_aspire_assessments';
 export const CONTACTS_KEY = 'career_aspire_contacts';
 export const EMAIL_NOTIFICATIONS_KEY = 'career_aspire_email_notifications';
 export const ATTENDANCE_KEY = 'career_aspire_attendance';
+export const USER_ACTIVITY_KEY = 'career_aspire_user_activity';
 
 // Course types
 export interface Topic {
@@ -67,6 +69,22 @@ export interface Course {
   category?: string;
   courseType?: 'Free' | 'Paid';
   popular?: boolean;
+  isFree?: boolean;
+  customPaymentLink?: string;
+  enrollmentCount?: number;
+  learningMaterials?: CourseMaterial[];
+}
+
+export interface CourseMaterial {
+  id: string;
+  courseId: string;
+  topicId?: string;
+  title: string;
+  description?: string;
+  fileUrl: string;
+  fileType: 'pdf' | 'doc' | 'ppt' | 'video' | 'other';
+  uploadDate: string;
+  size?: number; // in KB
 }
 
 export interface Question {
@@ -119,6 +137,12 @@ export interface Job {
   lastDate?: string;
   jobType?: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
   experienceLevel?: 'Entry' | 'Mid' | 'Senior';
+  status?: 'Active' | 'Inactive' | 'Draft';
+  externalLink?: string;
+  category?: string;
+  compensation?: string;
+  skills?: string[];
+  benefits?: string[];
 }
 
 export interface Placement {
@@ -131,6 +155,8 @@ export interface Placement {
   imageUrl?: string;
   testimonial?: string;
   courseCompleted?: string;
+  placementDate?: string;
+  linkedinProfile?: string;
 }
 
 export interface Education {
@@ -179,6 +205,9 @@ export interface Enrollment {
     completed: boolean;
     lastAccessDate?: string;
   }[];
+  paymentId?: string;
+  paymentStatus?: 'pending' | 'completed' | 'failed';
+  paymentAmount?: number;
 }
 
 export interface Payment {
@@ -211,4 +240,16 @@ export interface EmailNotification {
   status: 'sent' | 'failed' | 'pending';
   type: 'enrollment' | 'payment' | 'assessment' | 'general';
   relatedId?: string;
+}
+
+export interface UserActivity {
+  id: string;
+  userId: string;
+  userType: 'student' | 'admin';
+  action: string;
+  timestamp: string;
+  details?: string;
+  ipAddress?: string;
+  sessionId?: string;
+  duration?: number; // in seconds
 }

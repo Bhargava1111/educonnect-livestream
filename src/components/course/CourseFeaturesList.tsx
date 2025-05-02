@@ -7,6 +7,11 @@ interface CourseFeatureListProps {
 }
 
 const CourseFeaturesList: React.FC<CourseFeatureListProps> = ({ features }) => {
+  // If no features are provided, return null
+  if (!features || features.length === 0) {
+    return null;
+  }
+  
   return (
     <ul className="space-y-3">
       {features.map((feature, index) => (

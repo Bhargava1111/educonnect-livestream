@@ -29,7 +29,9 @@ const initializeJobsIfNeeded = (): Job[] => {
         createdAt: new Date().toISOString(),
         lastDate: '2023-12-31',
         jobType: 'Full-time',
-        experienceLevel: 'Mid'
+        experienceLevel: 'Mid',
+        status: 'Active',
+        externalLink: 'https://example.com/apply'
       },
       {
         id: 'job_2',
@@ -48,7 +50,9 @@ const initializeJobsIfNeeded = (): Job[] => {
         createdAt: new Date().toISOString(),
         lastDate: '2023-12-15',
         jobType: 'Full-time',
-        experienceLevel: 'Senior'
+        experienceLevel: 'Senior',
+        status: 'Active',
+        externalLink: 'https://example.com/apply'
       }
     ];
     localStorage.setItem(JOBS_KEY, JSON.stringify(defaultJobs));
@@ -61,6 +65,14 @@ export const getAllJobs = (): Job[] => {
   return initializeJobsIfNeeded();
 };
 
+export const getActiveJobs = (): Job[] => {
+  const jobs = getAllJobs();
+  return jobs.filter(job => {
+    const hasExpired = job.lastDate && new Date(job.lastDate) < new Date();
+    return !hasExpired && (job.status !== 'Inactive');
+  });
+};
+
 export const getJobById = (id: string): Job | undefined => {
   const jobs = getAllJobs();
   return jobs.find(job => job.id === id);
@@ -71,6 +83,9 @@ export const createJob = (job: Omit<Job, 'id'>): Job => {
   const newJob = {
     ...job,
     id: `job_${Date.now()}`,
+    createdAt: job.createdAt || new Date().toISOString(),
+    appliedCount: job.appliedCount || 0,
+    status: job.status || 'Active'
   };
   
   jobs.push(newJob);
@@ -101,4 +116,34 @@ export const deleteJob = (id: string): boolean => {
   }
   
   return false;
+};
+
+// Function to track job application clicks
+export const incrementJobApplyCount = (id: string): boolean => {
+  const jobs = getAllJobs();
+  const index = jobs.findIndex(job => job.id === id);
+  
+  if (index !== -1) {
+    const currentCount = jobs[index].appliedCount || 0;
+    jobs[index].appliedCount = currentCount + 1;
+    localStorage.setItem(JOBS_KEY, JSON.stringify(jobs));
+    return true;
+  }
+  
+  return false;
+};
+
+// Export job data as CSV
+export const exportJobsAsCSV = (): string => {
+  const jobs = getAllJobs();
+  
+  // CSV header
+  let csv = 'ID,Title,Company,Location,Salary,Job Type,Experience Level,Last Date,Applied Count,Status\n';
+  
+  // Add rows
+  jobs.forEach(job => {
+    csv += `${job.id},"${job.title}","${job.company}","${job.location}","${job.salary || 'N/A'}","${job.jobType || 'N/A'}","${job.experienceLevel || 'N/A'}","${job.lastDate || 'N/A'}",${job.appliedCount || 0},"${job.status || 'Active'}"\n`;
+  });
+  
+  return csv;
 };

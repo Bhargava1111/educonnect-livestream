@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from 'lucide-react';
 import RazorpayPayment from '../RazorpayPayment';
@@ -11,6 +11,7 @@ interface CoursePaymentOptionsProps {
   price: number;
   title: string;
   courseId: string;
+  isFree?: boolean;
   onPaymentSuccess: (response: any) => void;
   handleExternalPayment: () => void;
   handleEnroll: () => void;
@@ -23,10 +24,12 @@ const CoursePaymentOptions: React.FC<CoursePaymentOptionsProps> = ({
   price,
   title,
   courseId,
+  isFree = false,
   onPaymentSuccess,
   handleExternalPayment,
   handleEnroll
 }) => {
+  // If the course has a custom payment link
   if (customPaymentLink) {
     return (
       <>
@@ -34,16 +37,19 @@ const CoursePaymentOptions: React.FC<CoursePaymentOptionsProps> = ({
           onClick={handleExternalPayment} 
           className="w-full bg-eduBlue-600 hover:bg-eduBlue-700 flex items-center justify-center"
         >
-          Pay Now <ExternalLink className="ml-2 h-4 w-4" />
+          {isFree ? 'Enroll Now' : 'Pay Now'} <ExternalLink className="ml-2 h-4 w-4" />
         </Button>
-        <p className="text-xs text-center text-gray-500">
-          You will be redirected to our payment partner
-        </p>
+        {!isFree && (
+          <p className="text-xs text-center text-gray-500">
+            You will be redirected to our payment partner
+          </p>
+        )}
       </>
     );
   }
   
-  if (isEnrolling) {
+  // If currently in the enrollment process and it's a paid course
+  if (isEnrolling && !isFree) {
     return (
       <div className="w-full">
         <RazorpayPayment 
@@ -65,12 +71,13 @@ const CoursePaymentOptions: React.FC<CoursePaymentOptionsProps> = ({
     );
   }
   
+  // For free courses or initial enrollment button
   return (
     <Button 
       onClick={handleEnroll} 
-      className="w-full bg-eduBlue-600 hover:bg-eduBlue-700"
+      className={`w-full ${isFree ? "bg-green-600 hover:bg-green-700" : "bg-eduBlue-600 hover:bg-eduBlue-700"}`}
     >
-      Enroll Now
+      {isFree ? 'Enroll for Free' : 'Enroll Now'}
     </Button>
   );
 };
