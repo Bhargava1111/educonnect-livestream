@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -218,27 +217,57 @@ const EnrollmentForm: React.FC<EnrollmentFormProps> = ({
         gender: values.gender,
         aadharNumber: values.aadharNumber,
         certificateId: values.certificateId,
-        permanentAddress: values.permanentAddress,
-        currentAddress: values.currentAddress,
+        permanentAddress: {
+          line1: values.permanentAddress.line1,
+          line2: values.permanentAddress.line2,
+          city: values.permanentAddress.city,
+          state: values.permanentAddress.state,
+          postalCode: values.permanentAddress.postalCode,
+          country: values.permanentAddress.country
+        },
+        currentAddress: {
+          line1: values.currentAddress.line1,
+          line2: values.currentAddress.line2,
+          city: values.currentAddress.city,
+          state: values.currentAddress.state,
+          postalCode: values.currentAddress.postalCode,
+          country: values.currentAddress.country
+        },
         isSameAddress: values.isSameAddress,
         fatherName: values.fatherName,
         motherName: values.motherName,
         guardianPhone: values.guardianPhone,
         guardianEmail: values.guardianEmail || '',
         tenthGrade: {
-          ...values.tenthGrade,
+          institutionName: values.tenthGrade.institutionName,
+          boardUniversity: values.tenthGrade.boardUniversity,
+          yearOfPassing: values.tenthGrade.yearOfPassing,
+          totalMarks: values.tenthGrade.totalMarks,
+          obtainedMarks: values.tenthGrade.obtainedMarks,
           documentUrl: uploads.tenthGradeDoc || '',
         },
         twelfthGrade: {
-          ...values.twelfthGrade,
+          institutionName: values.twelfthGrade.institutionName,
+          boardUniversity: values.twelfthGrade.boardUniversity,
+          yearOfPassing: values.twelfthGrade.yearOfPassing,
+          totalMarks: values.twelfthGrade.totalMarks,
+          obtainedMarks: values.twelfthGrade.obtainedMarks,
           documentUrl: uploads.twelfthGradeDoc || '',
         },
         degree: values.degree ? {
-          ...values.degree,
+          institutionName: values.degree.institutionName,
+          boardUniversity: values.degree.boardUniversity,
+          yearOfPassing: values.degree.yearOfPassing,
+          totalMarks: values.degree.totalMarks,
+          obtainedMarks: values.degree.obtainedMarks,
           documentUrl: uploads.degreeDoc || '',
         } : undefined,
         postGraduation: values.postGraduation ? {
-          ...values.postGraduation,
+          institutionName: values.postGraduation.institutionName,
+          boardUniversity: values.postGraduation.boardUniversity,
+          yearOfPassing: values.postGraduation.yearOfPassing,
+          totalMarks: values.postGraduation.totalMarks,
+          obtainedMarks: values.postGraduation.obtainedMarks,
           documentUrl: uploads.postGradDoc || '',
         } : undefined,
         certificateUrl: uploads.certificate || '',

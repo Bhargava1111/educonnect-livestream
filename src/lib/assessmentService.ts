@@ -1,5 +1,5 @@
 
-import { Assessment, ASSESSMENTS_KEY, Question } from './types';
+import { Assessment, ASSESSMENTS_KEY, Question, AssessmentQuestion } from './types';
 
 // Assessment CRUD operations
 export const getAllAssessments = (): Assessment[] => {
@@ -67,7 +67,7 @@ export const createQuestion = (
     text,
     options,
     correctAnswerIndex,
-    points,
+    points, // This is valid now with updated Question type
     type
   };
 };
@@ -128,22 +128,25 @@ export const initializeAssessments = (): void => {
             id: 'q1_python',
             text: 'What is the output of print(2 ** 3)?',
             options: ['6', '8', '9', '5'],
-            correctAnswerIndex: 1,
-            points: 10
+            correctAnswerIndex: 1, // Now valid with updated AssessmentQuestion type
+            points: 10,
+            type: 'multiple-choice'
           },
           {
             id: 'q2_python',
             text: 'Which of the following is used to create a list in Python?',
             options: ['{}', '[]', '()', '<>'],
-            correctAnswerIndex: 1,
-            points: 10
+            correctAnswerIndex: 1, // Now valid with updated AssessmentQuestion type
+            points: 10,
+            type: 'multiple-choice'
           },
           {
             id: 'q3_python',
             text: 'What is the correct file extension for Python files?',
             options: ['.py', '.pt', '.pyth', '.p'],
-            correctAnswerIndex: 0,
-            points: 10
+            correctAnswerIndex: 0, // Now valid with updated AssessmentQuestion type
+            points: 10,
+            type: 'multiple-choice'
           }
         ],
         timeLimit: 30,
@@ -162,15 +165,17 @@ export const initializeAssessments = (): void => {
             id: 'q1_web',
             text: 'Which HTML tag is used to create a hyperlink?',
             options: ['<link>', '<a>', '<href>', '<url>'],
-            correctAnswerIndex: 1,
-            points: 10
+            correctAnswerIndex: 1, // Now valid with updated AssessmentQuestion type
+            points: 10,
+            type: 'multiple-choice'
           },
           {
             id: 'q2_web',
             text: 'Which CSS property is used to change the text color?',
             options: ['text-color', 'font-color', 'color', 'foreground-color'],
-            correctAnswerIndex: 2,
-            points: 10
+            correctAnswerIndex: 2, // Now valid with updated AssessmentQuestion type
+            points: 10,
+            type: 'multiple-choice'
           }
         ],
         timeLimit: 20,

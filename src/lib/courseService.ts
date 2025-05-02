@@ -1,11 +1,11 @@
-
 import { 
   Course, 
   RoadmapPhase, 
   COURSES_KEY,
-  Enrollment,
-  Payment
+  CourseModule
 } from './types';
+import { getEnrollmentsByCourseId } from './enrollmentService';
+import { getPaymentsByCourseId } from './paymentService';
 
 // Initialize with some default courses if not present
 const initializeCoursesIfNeeded = (): Course[] => {
@@ -18,15 +18,22 @@ const initializeCoursesIfNeeded = (): Course[] => {
       {
         id: 'course_testing',
         title: 'Software Testing & QA',
+        shortDescription: 'Learn manual testing, automation testing, and quality assurance practices',
         description: 'Learn manual testing, automation testing, and quality assurance practices',
         duration: '12 weeks',
         price: 24999,
         level: 'Beginner',
         students: 125,
-        rating: 4.8,
+        ratings: 4.8,
         instructor: 'Priya Sharma',
         status: 'Active',
+        category: 'Testing',
         imageUrl: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&h=400',
+        isFeatured: true,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        topics: [],
         curriculum: [
           {
             id: 'module_1',
@@ -374,8 +381,7 @@ export const createCourse = (course: Omit<Course, 'id'>): Course => {
     id: `course_${Date.now()}`,
     imageUrl: course.imageUrl || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
     students: course.students || 0,
-    rating: course.rating || 0,
-    status: course.status || 'Active'
+    ratings: course.ratings || 0
   };
   
   courses.push(newCourse);
@@ -425,14 +431,14 @@ export const getCourseStatistics = (courseId: string) => {
   const payments = getPaymentsByCourseId(courseId);
   
   const totalRevenue = payments
-    .filter(p => p.status === 'completed')
+    .filter(p => p.status === 'success')
     .reduce((sum, payment) => sum + payment.amount, 0);
   
   const activeStudents = enrollments.filter(e => !e.completed).length;
   const completedStudents = enrollments.filter(e => e.completed).length;
   
   const avgProgress = enrollments.length > 0 
-    ? enrollments.reduce((sum, e) => sum + e.progress, 0) / enrollments.length
+    ? enrollments.reduce((sum, e) => sum + (e.progress || 0), 0) / enrollments.length
     : 0;
   
   return {

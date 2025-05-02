@@ -16,11 +16,13 @@ export interface CourseFormData {
   status: 'Active' | 'Inactive' | 'Coming Soon';
   category: string;
   courseType: 'Free' | 'Paid';
+  shortDescription?: string;
 }
 
 export const initialFormData: CourseFormData = {
   title: '',
   description: '',
+  shortDescription: '',
   duration: '',
   price: 0,
   level: 'Beginner',
@@ -86,11 +88,23 @@ export function useCourseManagement() {
   const handleAddCourse = () => {
     try {
       const newCourse = createCourse({
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        shortDescription: formData.shortDescription || formData.description.substring(0, 150) + "...",
         price: formData.courseType === 'Free' ? 0 : Number(formData.price),
-        curriculum: [],
+        duration: formData.duration,
         level: formData.level,
-        status: formData.status // Ensure status is saved
+        instructor: formData.instructor,
+        imageUrl: formData.imageUrl,
+        status: formData.status,
+        category: formData.category,
+        topics: [],
+        isFeatured: false,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        curriculum: [],
+        roadmap: []
       });
       
       console.log("New course created:", newCourse);
@@ -121,10 +135,16 @@ export function useCourseManagement() {
     
     try {
       updateCourse(selectedCourse.id, {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        shortDescription: formData.shortDescription || formData.description.substring(0, 150) + "...",
         price: formData.courseType === 'Free' ? 0 : Number(formData.price),
-        level: formData.level,
-        status: formData.status // Ensure status is updated
+        duration: formData.duration,
+        level: formData.level as "Beginner" | "Intermediate" | "Advanced",
+        instructor: formData.instructor,
+        imageUrl: formData.imageUrl,
+        status: formData.status as "Active" | "Inactive" | "Coming Soon",
+        category: formData.category
       });
       
       toast({
@@ -176,9 +196,10 @@ export function useCourseManagement() {
     setFormData({
       title: course.title,
       description: course.description,
+      shortDescription: course.shortDescription,
       duration: course.duration,
       price: course.price,
-      level: course.level || 'Beginner',
+      level: course.level,
       instructor: course.instructor || '',
       imageUrl: course.imageUrl || '',
       status: course.status || 'Active',

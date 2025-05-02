@@ -54,7 +54,7 @@ export interface Course {
   price: number;
   discountedPrice?: number;
   duration: string;
-  level: string;
+  level: "Beginner" | "Intermediate" | "Advanced";
   category: string;
   topics: CourseTopic[];
   imageUrl?: string;
@@ -67,10 +67,17 @@ export interface Course {
   createdAt: string;
   updatedAt: string;
   students?: number; // Added for student count
-  status?: string; // Added for course status
+  status?: "Active" | "Inactive" | "Coming Soon"; // Added for course status
   instructor?: string; // Added for instructor name
-  curriculum?: string[]; // Added for curriculum
+  curriculum?: CourseModule[]; // Changed type from string[] to CourseModule[]
   roadmap?: RoadmapPhase[]; // Added for course roadmap
+}
+
+// Course module definition
+export interface CourseModule {
+  id: string;
+  title: string;
+  topics: { id: string; title: string }[];
 }
 
 // Course topic definition
@@ -94,12 +101,15 @@ export interface CourseMaterial {
 
 // Roadmap Phase for course roadmap
 export interface RoadmapPhase {
-  id: string;
+  id?: string; // Made optional to maintain compatibility
+  order?: number; // Made optional to maintain compatibility
+  phase: number; // Added to match existing code
   title: string;
-  description: string;
+  description?: string;
   duration: string;
-  order: number;
-  milestones: string[];
+  topics: string[]; // Added to match existing code
+  projects: string[]; // Added to match existing code
+  milestones?: string[]; // Made optional for backward compatibility
 }
 
 // Live meeting definition
@@ -168,11 +178,15 @@ export interface Assessment {
   courseId: string;
   description?: string;
   type: 'quiz' | 'assignment' | 'project' | 'exam';
-  totalMarks: number;
-  passingMarks: number;
+  totalMarks?: number;
+  passingMarks?: number;
+  passingScore?: number; // Added for compatibility
   dueDate?: string;
   questions?: AssessmentQuestion[];
-  createdAt: string;
+  createdAt?: string;
+  timeLimit?: number; // Added for compatibility
+  requiresCamera?: boolean; // Added for compatibility
+  requiresScreenshare?: boolean; // Added for compatibility
 }
 
 // Assessment question
@@ -182,7 +196,9 @@ export interface AssessmentQuestion {
   type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive';
   options?: string[];
   correctAnswer?: string | string[];
-  marks: number;
+  correctAnswerIndex?: number; // Added for compatibility
+  marks?: number;
+  points?: number; // Added for compatibility
 }
 
 // Question type (for assessment service)
@@ -193,7 +209,8 @@ export interface Question {
   options?: string[];
   correctAnswerIndex?: number;
   correctAnswer?: string | string[];
-  marks: number;
+  marks?: number;
+  points?: number; // Added for compatibility
 }
 
 // Student submission for assessment
