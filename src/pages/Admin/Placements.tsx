@@ -1,341 +1,469 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { getAllPlacements, createPlacement, updatePlacement, deletePlacement, Placement } from "@/lib/courseManagement";
-import { Plus, Edit, Trash } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getAllStudents } from '@/lib/studentAuth';
+import { addPlacement, getAllPlacements, updatePlacement, deletePlacement } from '@/lib/placementService';
+import { Placement } from '@/lib/types';
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { Edit, Trash2, Plus } from 'lucide-react';
 
-const AdminPlacements = () => {
+const AdminPlacementsPage = () => {
   const { toast } = useToast();
   const [placements, setPlacements] = useState<Placement[]>([]);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedPlacement, setSelectedPlacement] = useState<Placement | null>(null);
+  const [isAddingPlacement, setIsAddingPlacement] = useState(false);
   const [formData, setFormData] = useState({
-    studentName: '',
+    studentId: '',
     company: '',
     position: '',
-    year: new Date().getFullYear(),
-    salary: '',
+    packageAmount: '',
+    placementDate: new Date().toISOString().split('T')[0],
+    description: '',
     testimonial: '',
-    courseCompleted: ''
+    imageUrl: ''
   });
-  
+  const [studentNames, setStudentNames] = useState<{ [key: string]: string }>({});
+  const [editingPlacement, setEditingPlacement] = useState<Placement | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    company: '',
+    position: '',
+    packageAmount: '',
+    placementDate: new Date().toISOString().split('T')[0],
+    description: '',
+    testimonial: '',
+    imageUrl: ''
+  });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   useEffect(() => {
-    loadPlacements();
+    fetchPlacements();
+    fetchStudentNames();
   }, []);
-  
-  const loadPlacements = () => {
-    const allPlacements = getAllPlacements();
-    setPlacements(allPlacements);
+
+  const fetchPlacements = () => {
+    const placementsData = getAllPlacements();
+    setPlacements(placementsData);
   };
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+  const fetchStudentNames = () => {
+    const students = getAllStudents();
+    const names: { [key: string]: string } = {};
+    students.forEach(student => {
+      names[student.id] = `${student.firstName} ${student.lastName}`;
+    });
+    setStudentNames(names);
   };
-  
-  const resetForm = () => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
-      studentName: '',
-      company: '',
-      position: '',
-      year: new Date().getFullYear(),
-      salary: '',
-      testimonial: '',
-      courseCompleted: ''
+      ...formData,
+      [e.target.name]: e.target.value
     });
   };
-  
-  const handleAddPlacement = () => {
-    try {
-      const packageAmount = formData.salary; // Assuming packageAmount is stored in salary
-      const packageAmountStr = String(packageAmount);
-      
-      const newPlacement = createPlacement({
-        ...formData,
-        year: Number(formData.year),
-        packageAmount: packageAmountStr
-      });
-      
-      toast({
-        title: "Placement Added",
-        description: `${newPlacement.studentName}'s placement record has been added successfully.`
-      });
-      
-      resetForm();
-      setIsAddModalOpen(false);
-      loadPlacements();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add placement record. Please try again.",
-        variant: "destructive"
-      });
-    }
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditFormData({
+      ...editFormData,
+      [e.target.name]: e.target.value
+    });
   };
-  
-  const handleEditPlacement = (id: string) => {
-    if (!selectedPlacement) return;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    try {
-      const packageAmount = selectedPlacement.packageAmount; // Assuming packageAmount is stored in packageAmount
-      const packageAmountStr = String(packageAmount);
-      
-      updatePlacement(selectedPlacement.id, {
-        ...formData,
-        year: Number(formData.year),
-        packageAmount: packageAmountStr
-      });
-      
+    if (!formData.studentId || !formData.company || !formData.position || !formData.packageAmount) {
       toast({
-        title: "Placement Updated",
-        description: `${formData.studentName}'s placement record has been updated successfully.`
+        title: "Missing Fields",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
       });
-      
-      setSelectedPlacement(null);
-      resetForm();
-      setIsEditModalOpen(false);
-      loadPlacements();
-    } catch (error) {
+      return;
+    }
+    
+    const newPlacement: Omit<Placement, 'id'> = {
+      studentId: formData.studentId,
+      company: formData.company,
+      position: formData.position,
+      packageAmount: formData.packageAmount.toString(), // Convert to string
+      placementDate: formData.placementDate,
+      description: formData.description || '',
+      testimonial: formData.testimonial || '',
+      imageUrl: formData.imageUrl || '',
+      studentName: studentNames[formData.studentId] || 'Unknown Student'
+    };
+    
+    const result = addPlacement(newPlacement);
+    
+    if (result) {
+      toast({
+        title: "Success",
+        description: "Placement record added successfully."
+      });
+      setFormData({
+        studentId: '',
+        company: '',
+        position: '',
+        packageAmount: '',
+        placementDate: new Date().toISOString().split('T')[0],
+        description: '',
+        testimonial: '',
+        imageUrl: ''
+      });
+      setIsAddingPlacement(false);
+      fetchPlacements();
+    } else {
       toast({
         title: "Error",
-        description: "Failed to update placement record. Please try again.",
+        description: "Failed to add placement record.",
         variant: "destructive"
       });
     }
   };
-  
-  const handleDeletePlacement = (placementId: string) => {
-    if (confirm("Are you sure you want to delete this placement record?")) {
-      try {
-        deletePlacement(placementId);
-        
-        toast({
-          title: "Placement Deleted",
-          description: "The placement record has been deleted successfully."
-        });
-        
-        loadPlacements();
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to delete placement record. Please try again.",
-          variant: "destructive"
-        });
-      }
-    }
-  };
-  
-  const openEditModal = (placement: Placement) => {
-    setSelectedPlacement(placement);
-    setFormData({
-      studentName: placement.studentName,
+
+  const handleOpenEditModal = (placement: Placement) => {
+    setEditingPlacement(placement);
+    setEditFormData({
       company: placement.company,
       position: placement.position,
-      year: placement.year,
-      salary: placement.salary,
+      packageAmount: placement.packageAmount,
+      placementDate: placement.placementDate,
+      description: placement.description || '',
       testimonial: placement.testimonial || '',
-      courseCompleted: placement.courseCompleted
+      imageUrl: placement.imageUrl || ''
     });
     setIsEditModalOpen(true);
   };
-  
-  const PlacementForm = ({ onSubmit, onCancel, title, submitLabel }: any) => (
-    <Dialog open={true} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            Fill out the form below to {submitLabel === "Add Placement" ? "create a new placement record" : "update the placement record"}.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="studentName">Student Name</Label>
-              <Input
-                id="studentName"
-                name="studentName"
-                value={formData.studentName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Company</Label>
-              <Input
-                id="company"
-                name="company"
-                value={formData.company}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="position">Position</Label>
-              <Input
-                id="position"
-                name="position"
-                value={formData.position}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="salary">Salary/Package</Label>
-              <Input
-                id="salary"
-                name="salary"
-                placeholder="e.g. 6 LPA"
-                value={formData.salary}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="year">Year</Label>
-              <Input
-                id="year"
-                name="year"
-                type="number"
-                value={formData.year}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="courseCompleted">Course Completed</Label>
-              <Input
-                id="courseCompleted"
-                name="courseCompleted"
-                value={formData.courseCompleted}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="testimonial">Testimonial</Label>
-            <Textarea
-              id="testimonial"
-              name="testimonial"
-              rows={4}
-              value={formData.testimonial}
-              onChange={handleInputChange}
-              placeholder="Student testimonial (optional)"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={onSubmit}>
-            {submitLabel}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-  
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingPlacement(null);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingPlacement) return;
+    
+    const updatedPlacement: Placement = {
+      ...editingPlacement,
+      company: editFormData.company,
+      position: editFormData.position,
+      packageAmount: editFormData.packageAmount.toString(), // Convert to string
+      placementDate: editFormData.placementDate,
+      description: editFormData.description || '',
+      testimonial: editFormData.testimonial || '',
+      imageUrl: editFormData.imageUrl || ''
+    };
+    
+    const result = updatePlacement(updatedPlacement.id, updatedPlacement);
+    
+    if (result) {
+      toast({
+        title: "Success",
+        description: "Placement record updated successfully."
+      });
+      fetchPlacements();
+      handleCloseEditModal();
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update placement record.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeletePlacement = (id: string) => {
+    const result = deletePlacement(id);
+    if (result) {
+      toast({
+        title: "Success",
+        description: "Placement record deleted successfully."
+      });
+      fetchPlacements();
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to delete placement record.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Manage Placement Records</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Placement Record
-        </Button>
-      </div>
-      
+    <div className="container mx-auto py-6">
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Student Name</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead>Position</TableHead>
-                <TableHead>Year</TableHead>
-                <TableHead>Package</TableHead>
-                <TableHead>Course Completed</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {placements.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">No placement records found. Add a new record to get started.</TableCell>
-                </TableRow>
-              ) : (
-                placements.map((placement) => (
-                  <TableRow key={placement.id}>
-                    <TableCell className="font-medium">{placement.studentName}</TableCell>
-                    <TableCell>{placement.company}</TableCell>
-                    <TableCell>{placement.position}</TableCell>
-                    <TableCell>{placement.year}</TableCell>
-                    <TableCell>{placement.salary}</TableCell>
-                    <TableCell>{placement.courseCompleted}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => openEditModal(placement)}
-                          title="Edit Placement"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleDeletePlacement(placement.id)}
-                          title="Delete Placement"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Placements Management</CardTitle>
+            <Button onClick={() => setIsAddingPlacement(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Placement
+            </Button>
+          </div>
+          <CardDescription>Manage student placements</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isAddingPlacement && (
+            <form onSubmit={handleSubmit} className="grid gap-4">
+              <div>
+                <Label htmlFor="studentId">Student</Label>
+                <select
+                  id="studentId"
+                  name="studentId"
+                  onChange={handleChange}
+                  value={formData.studentId}
+                  className="w-full border rounded-md py-2 px-3"
+                >
+                  <option value="">Select Student</option>
+                  {Object.entries(studentNames).map(([id, name]) => (
+                    <option key={id} value={id}>{name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="company">Company</Label>
+                <Input
+                  type="text"
+                  id="company"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="position">Position</Label>
+                <Input
+                  type="text"
+                  id="position"
+                  name="position"
+                  value={formData.position}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="packageAmount">Package Amount</Label>
+                <Input
+                  type="number"
+                  id="packageAmount"
+                  name="packageAmount"
+                  value={formData.packageAmount}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <Label>Placement Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.placementDate && "text-muted-foreground"
+                      )}
+                    >
+                      {formData.placementDate ? format(new Date(formData.placementDate), "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.placementDate ? new Date(formData.placementDate) : undefined}
+                      onSelect={(date) => date ? handleChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any : null}
+                      disabled={(date) =>
+                        date > new Date()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  type="textarea"
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="testimonial">Testimonial</Label>
+                <Input
+                  type="textarea"
+                  id="testimonial"
+                  name="testimonial"
+                  value={formData.testimonial}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input
+                  type="text"
+                  id="imageUrl"
+                  name="imageUrl"
+                  value={formData.imageUrl}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button variant="ghost" onClick={() => setIsAddingPlacement(false)}>Cancel</Button>
+                <Button type="submit">Add Placement</Button>
+              </div>
+            </form>
+          )}
+
+          {!isAddingPlacement && (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Package</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {placements.map((placement) => (
+                    <TableRow key={placement.id}>
+                      <TableCell>{studentNames[placement.studentId] || 'Unknown'}</TableCell>
+                      <TableCell>{placement.company}</TableCell>
+                      <TableCell>{placement.position}</TableCell>
+                      <TableCell>{placement.packageAmount}</TableCell>
+                      <TableCell>{new Date(placement.placementDate).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenEditModal(placement)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeletePlacement(placement.id)}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
-      
-      {isAddModalOpen && (
-        <PlacementForm
-          onSubmit={handleAddPlacement}
-          onCancel={() => setIsAddModalOpen(false)}
-          title="Add New Placement Record"
-          submitLabel="Add Placement"
-        />
-      )}
-      
-      {isEditModalOpen && (
-        <PlacementForm
-          onSubmit={handleEditPlacement}
-          onCancel={() => setIsEditModalOpen(false)}
-          title="Edit Placement Record"
-          submitLabel="Update Placement"
-        />
+
+      {/* Edit Placement Modal */}
+      {isEditModalOpen && editingPlacement && (
+        <div className="fixed inset-0 z-50 overflow-auto bg-zinc-500/50 flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Edit Placement</h2>
+            <form onSubmit={handleEditSubmit} className="grid gap-4">
+              <div>
+                <Label htmlFor="company">Company</Label>
+                <Input
+                  type="text"
+                  id="company"
+                  name="company"
+                  value={editFormData.company}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="position">Position</Label>
+                <Input
+                  type="text"
+                  id="position"
+                  name="position"
+                  value={editFormData.position}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="packageAmount">Package Amount</Label>
+                <Input
+                  type="number"
+                  id="packageAmount"
+                  name="packageAmount"
+                  value={editFormData.packageAmount}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div>
+                <Label>Placement Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !editFormData.placementDate && "text-muted-foreground"
+                      )}
+                    >
+                      {editFormData.placementDate ? format(new Date(editFormData.placementDate), "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={editFormData.placementDate ? new Date(editFormData.placementDate) : undefined}
+                      onSelect={(date) => date ? handleEditChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any : null}
+                      disabled={(date) =>
+                        date > new Date()
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  type="textarea"
+                  id="description"
+                  name="description"
+                  value={editFormData.description}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="testimonial">Testimonial</Label>
+                <Input
+                  type="textarea"
+                  id="testimonial"
+                  name="testimonial"
+                  value={editFormData.testimonial}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input
+                  type="text"
+                  id="imageUrl"
+                  name="imageUrl"
+                  value={editFormData.imageUrl}
+                  onChange={handleEditChange}
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button variant="ghost" onClick={handleCloseEditModal}>Cancel</Button>
+                <Button type="submit">Update Placement</Button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
-export default AdminPlacements;
+export default AdminPlacementsPage;

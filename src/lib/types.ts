@@ -1,4 +1,3 @@
-
 // Define common interfaces
 export const COURSES_KEY = 'career_aspire_courses';
 export const JOBS_KEY = 'career_aspire_jobs';
@@ -12,7 +11,7 @@ export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
 export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
 export const EMAIL_NOTIFICATIONS_KEY = 'career_aspire_email_notifications';
 
-// Student interface (updated)
+// Student interface (updated with additional properties)
 export interface Student {
   id: string;
   firstName: string;
@@ -25,6 +24,32 @@ export interface Student {
   lastLoginAt?: string;
   name?: string;
   enrolledCourses?: string[]; // Track enrolled courses
+  address?: string;
+  skills?: string[];
+  education?: {
+    tenth?: {
+      school: string;
+      percentage: string;
+      yearOfCompletion: string;
+    };
+    twelfth?: {
+      school: string;
+      percentage: string;
+      yearOfCompletion: string;
+    };
+    degree?: {
+      university: string;
+      course: string;
+      percentage: string;
+      yearOfCompletion: string;
+    };
+    highest?: string;
+  };
+  aadharNumber?: string;
+  enrollments?: Array<{
+    courseId: string;
+    progress: number;
+  }>;
 }
 
 // Course interface
@@ -50,6 +75,7 @@ export interface Course {
   updatedAt?: string;
   curriculum?: CourseModule[];
   roadmap?: RoadmapPhase[];
+  courseType?: string; // Added for Student/Courses.tsx
 }
 
 // Course module
@@ -145,12 +171,13 @@ export interface AssessmentQuestion {
   id: string;
   question: string;
   text?: string; // Added for compatibility
-  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
+  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'essay'; // Added 'essay' type
   options?: string[];
   correctAnswer?: string | string[];
   correctAnswerIndex?: number; // Added for compatibility
   marks: number;
   points?: number; // Added for compatibility
+  codingTemplate?: string; // Added for TakeAssessment.tsx
 }
 
 // Live meeting interface

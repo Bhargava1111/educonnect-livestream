@@ -17,5 +17,8 @@ export {
   verifyPasswordResetOTP,
   resetPassword,
   getCurrentStudent,
-  getStudentById
+  getStudentById,
+  getAllStudents,
+  registerStudent,
+  updateStudentProfile
 } from './courseManagement';

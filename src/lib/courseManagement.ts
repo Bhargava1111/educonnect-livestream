@@ -36,7 +36,10 @@ import {
   getStudentData,
   getStudentsByEnrolledCourse,
   enrollStudentInCourse,
-  getStudentById 
+  getStudentById,
+  getAllStudents,
+  registerStudent,
+  updateStudentProfile
 } from './auth/studentService';
 
 import {
@@ -67,7 +70,10 @@ export {
   verifyPasswordResetOTP,
   resetPassword,
   getCurrentStudent,
-  getStudentById
+  getStudentById,
+  getAllStudents,
+  registerStudent,
+  updateStudentProfile
 };
 
 // For backward compatibility
@@ -88,5 +94,8 @@ export const studentAuth = {
   getStudentById,
   requestPasswordResetOTP,
   verifyPasswordResetOTP,
-  resetPassword
+  resetPassword,
+  getAllStudents,
+  registerStudent,
+  updateStudentProfile
 };

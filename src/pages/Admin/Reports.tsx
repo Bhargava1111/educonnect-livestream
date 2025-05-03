@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import {
 import { getAllEnrollments } from '@/lib/enrollmentService';
 import { getAllPayments } from '@/lib/paymentService';
 
-const AdminReports = () => {
+const AdminReportsPage = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -155,6 +156,28 @@ const AdminReports = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+  
+  // Fix the status comparison in formatPaymentStatus function
+  const formatPaymentStatus = (status: string) => {
+    if (status === "success") {
+      return {
+        label: "Completed",
+        color: "bg-green-100 text-green-800"
+      };
+    }
+    
+    if (status === "pending") {
+      return {
+        label: "Pending",
+        color: "bg-yellow-100 text-yellow-800"
+      };
+    }
+    
+    return {
+      label: "Failed",
+      color: "bg-red-100 text-red-800"
+    };
   };
   
   return (
@@ -345,4 +368,4 @@ const AdminReports = () => {
   );
 };
 
-export default AdminReports;
+export default AdminReportsPage;

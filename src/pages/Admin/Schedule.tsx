@@ -38,20 +38,24 @@ const AdminSchedule = () => {
       return;
     }
 
-    // Update to include all required fields for LiveMeeting
+    // Format the date and time properly for the scheduledDate field
+    const formattedDate = meetingDate ? meetingDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    const scheduledDate = `${formattedDate}T${meetingTime}:00`;
+
+    // Create a new meeting with all required fields
     const newMeetingData: Omit<LiveMeeting, "id"> = {
       courseId: selectedCourse,
       title: meetingTitle,
       description: meetingDescription,
-      hostName: meetingInstructor, // Use hostName instead of instructor
-      scheduledDate: `${meetingDate}T${meetingTime}`, // Combined date and time
+      hostName: meetingInstructor,
+      scheduledDate: scheduledDate,
       duration: meetingDuration,
-      meetingLink: meetingLink, // Use meetingLink instead of link
+      meetingLink: meetingLink,
       status: 'upcoming',
       createdAt: new Date().toISOString(),
       // For backward compatibility
       instructor: meetingInstructor,
-      date: meetingDate,
+      date: formattedDate,
       time: meetingTime,
       link: meetingLink
     };

@@ -1,4 +1,3 @@
-
 import { Student } from '../types';
 import { 
   getAllStudents, 
@@ -22,34 +21,16 @@ export const addStudent = (student: Omit<Student, 'id'>): Student => {
   return newStudent;
 };
 
-// Function to update a student
-export const updateStudent = (id: string, updatedStudent: Partial<Student>): Student | undefined => {
+// Export getStudentById function to fix the missing export error
+export const getStudentById = (id: string): Student | undefined => {
   const students = getAllStudents();
-  const index = students.findIndex(student => student.id === id);
-  
-  if (index !== -1) {
-    students[index] = { ...students[index], ...updatedStudent };
-    localStorage.setItem('career_aspire_students', JSON.stringify(students));
-    return students[index];
-  }
-  
-  return undefined;
+  return students.find(student => student.id === id);
 };
 
-// Function to delete a student from localStorage
-export const deleteStudent = (id: string): boolean => {
-  const students = getAllStudents();
-  const filteredStudents = students.filter(student => student.id !== id);
-  
-  if (filteredStudents.length < students.length) {
-    localStorage.setItem('career_aspire_students', JSON.stringify(filteredStudents));
-    return true;
-  }
-  
-  return false;
-};
+// Export getAllStudents for backward compatibility
+export { getAllStudents };
 
-// Function to simulate student registration
+// Function to register a student - make sure this is exported
 export const registerStudent = (
   firstName: string,
   lastName: string,
@@ -100,6 +81,33 @@ export const registerStudent = (
       error: "An error occurred during registration"
     };
   }
+};
+
+// Function to update a student
+export const updateStudent = (id: string, updatedStudent: Partial<Student>): Student | undefined => {
+  const students = getAllStudents();
+  const index = students.findIndex(student => student.id === id);
+  
+  if (index !== -1) {
+    students[index] = { ...students[index], ...updatedStudent };
+    localStorage.setItem('career_aspire_students', JSON.stringify(students));
+    return students[index];
+  }
+  
+  return undefined;
+};
+
+// Function to delete a student from localStorage
+export const deleteStudent = (id: string): boolean => {
+  const students = getAllStudents();
+  const filteredStudents = students.filter(student => student.id !== id);
+  
+  if (filteredStudents.length < students.length) {
+    localStorage.setItem('career_aspire_students', JSON.stringify(filteredStudents));
+    return true;
+  }
+  
+  return false;
 };
 
 // Function to enroll a student in a course
