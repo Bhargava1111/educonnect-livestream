@@ -16,24 +16,33 @@ export * from './paymentService';
 export * from './contactService';
 export * from './enrollmentFormService';
 
-// Import and re-export student auth functions
+// Import and re-export student auth related functions from the new modules
 import {
   isStudentLoggedIn,
   loginStudent,
-  logoutStudent,
+  logoutStudent
+} from './auth/authService';
+
+import {
   getStudentLoginHistory,
   getStudentActivity,
   getStudentTotalActiveTime,
   formatActiveTime,
-  getStudentLastActiveTime,
+  getStudentLastActiveTime
+} from './auth/activityService';
+
+import {
   getStudentEnrollments,
   getStudentData,
   getStudentsByEnrolledCourse,
-  enrollStudentInCourse,
+  enrollStudentInCourse
+} from './auth/studentService';
+
+import {
   requestPasswordResetOTP,
   verifyPasswordResetOTP,
   resetPassword
-} from './studentAuth';
+} from './auth/passwordService';
 
 // Re-export them
 export {
