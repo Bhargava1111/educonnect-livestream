@@ -8,7 +8,8 @@ export * from './types';
 // rather than using re-exports
 export * from './courseService';
 export * from './liveMeetingService';
-export * from './jobService';
+// Explicitly re-export JOBS_KEY to resolve ambiguity
+export { JOBS_KEY, getAllJobs, getActiveJobs, getJobById, getJobsByCategory, createJob, updateJob, deleteJob, incrementJobApplyCount, applyForJob, exportJobsAsCSV } from './jobService';
 export * from './placementService';
 export * from './assessmentService';
 export * from './enrollmentService';

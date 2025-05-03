@@ -72,3 +72,9 @@ export const updateStudentInStorage = (updatedStudent: Student): void => {
     localStorage.setItem('career_aspire_students', JSON.stringify(students));
   }
 };
+
+// Get a student by ID - added for proper export
+export const getStudentById = (id: string): Student | undefined => {
+  const students = getAllStudents();
+  return students.find(student => student.id === id);
+};
