@@ -264,6 +264,10 @@ const Login = () => {
     setOtp('');
   };
 
+  // Import the OTP component here to avoid TypeScript errors
+  // The key fix is to import the component directly instead of using it from another file
+  const { InputOTP, InputOTPGroup, InputOTPSlot } = require("@/components/ui/input-otp");
+
   return (
     <>
       <Dialog open={isCountryDialogOpen} onOpenChange={setIsCountryDialogOpen}>
@@ -442,16 +446,38 @@ const Login = () => {
                         <div className="space-y-2">
                           <Label htmlFor="otp" className="block text-center mb-4">Enter Login Code</Label>
                           <div className="flex justify-center">
-                            <InputOTP maxLength={6} value={otp} onChange={handleOTPChange}>
-                              <InputOTPGroup>
-                                <InputOTPSlot />
-                                <InputOTPSlot />
-                                <InputOTPSlot />
-                                <InputOTPSlot />
-                                <InputOTPSlot />
-                                <InputOTPSlot />
-                              </InputOTPGroup>
-                            </InputOTP>
+                            {/* Use a custom OtpInput instead of the problematic InputOTP component */}
+                            <div className="flex gap-2">
+                              {Array.from({ length: 6 }).map((_, index) => (
+                                <Input
+                                  key={index}
+                                  className="w-10 h-10 text-center p-0"
+                                  maxLength={1}
+                                  value={otp[index] || ""}
+                                  onChange={(e) => {
+                                    const newOtp = otp.split("");
+                                    newOtp[index] = e.target.value;
+                                    setOtp(newOtp.join(""));
+                                    
+                                    // Auto-focus next input if there's a value
+                                    if (e.target.value && index < 5) {
+                                      const nextInput = document.querySelector(`input[name="otp-${index + 1}"]`);
+                                      if (nextInput) (nextInput as HTMLInputElement).focus();
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    // Handle backspace to go to previous input
+                                    if (e.key === "Backspace" && !otp[index] && index > 0) {
+                                      const prevInput = document.querySelector(`input[name="otp-${index - 1}"]`);
+                                      if (prevInput) (prevInput as HTMLInputElement).focus();
+                                    }
+                                  }}
+                                  name={`otp-${index}`}
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                />
+                              ))}
+                            </div>
                           </div>
                         </div>
                         <Button 
