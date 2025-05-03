@@ -176,7 +176,7 @@ export interface Assessment {
   title: string;
   courseId: string;
   description?: string;
-  type: 'quiz' | 'assignment' | 'project' | 'exam';
+  type: 'quiz' | 'assignment' | 'project' | 'exam' | 'coding-challenge';
   totalMarks?: number;
   passingMarks?: number;
   passingScore?: number; // Added for compatibility
@@ -192,12 +192,13 @@ export interface Assessment {
 export interface AssessmentQuestion {
   id: string;
   text: string;
-  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive';
+  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
   options?: string[];
   correctAnswer?: string | string[];
   correctAnswerIndex?: number; // Added for compatibility
   marks?: number;
   points?: number; // Added for compatibility
+  codingTemplate?: string; // Added for coding questions
 }
 
 // Question type (for assessment service)
@@ -210,6 +211,7 @@ export interface Question {
   correctAnswer?: string | string[];
   marks?: number;
   points?: number; // Added for compatibility
+  codingTemplate?: string; // Added for coding questions
 }
 
 // Student submission for assessment

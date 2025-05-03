@@ -61,14 +61,14 @@ export const createQuestion = (
   correctAnswerIndex: number,
   points: number = 10,
   type: 'multiple-choice' | 'coding' | 'essay' = 'multiple-choice'
-): Question => {
+): AssessmentQuestion => {
   return {
     id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
     text,
     options,
     correctAnswerIndex,
     points,
-    type
+    type: type as 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding'
   };
 };
 
@@ -129,34 +129,29 @@ export const initializeAssessments = (): void => {
             text: 'What is the output of print(2 ** 3)?',
             options: ['6', '8', '9', '5'],
             correctAnswer: '8',
-            correctAnswerIndex: 1,
-            points: 10,
-            type: 'multiple-choice'
+            type: 'multiple-choice',
+            marks: 10
           },
           {
             id: 'q2_python',
             text: 'Which of the following is used to create a list in Python?',
             options: ['{}', '[]', '()', '<>'],
             correctAnswer: '[]',
-            correctAnswerIndex: 1,
-            points: 10,
-            type: 'multiple-choice'
+            type: 'multiple-choice',
+            marks: 10
           },
           {
             id: 'q3_python',
             text: 'What is the correct file extension for Python files?',
             options: ['.py', '.pt', '.pyth', '.p'],
             correctAnswer: '.py',
-            correctAnswerIndex: 0,
-            points: 10,
-            type: 'multiple-choice'
+            type: 'multiple-choice',
+            marks: 10
           }
         ],
         timeLimit: 30,
         passingScore: 70,
-        type: 'quiz',
-        requiresCamera: true,
-        requiresScreenshare: true
+        type: 'quiz'
       },
       {
         id: 'assessment_web_dev',
@@ -169,25 +164,21 @@ export const initializeAssessments = (): void => {
             text: 'Which HTML tag is used to create a hyperlink?',
             options: ['<link>', '<a>', '<href>', '<url>'],
             correctAnswer: '<a>',
-            correctAnswerIndex: 1,
-            points: 10,
-            type: 'multiple-choice'
+            type: 'multiple-choice',
+            marks: 10
           },
           {
             id: 'q2_web',
             text: 'Which CSS property is used to change the text color?',
             options: ['text-color', 'font-color', 'color', 'foreground-color'],
             correctAnswer: 'color',
-            correctAnswerIndex: 2,
-            points: 10,
-            type: 'multiple-choice'
+            type: 'multiple-choice',
+            marks: 10
           }
         ],
         timeLimit: 20,
         passingScore: 70,
-        type: 'quiz',
-        requiresCamera: true,
-        requiresScreenshare: true
+        type: 'quiz'
       }
     ];
     

@@ -15,9 +15,10 @@ import { submitEnrollmentForm } from '@/lib/enrollmentFormService';
 interface EnrollmentFormProps {
   formType: 'course' | 'job';
   relatedId: string;
+  onSuccess?: () => void;
 }
 
-const EnrollmentForm = ({ formType, relatedId }: EnrollmentFormProps) => {
+const EnrollmentForm = ({ formType, relatedId, onSuccess }: EnrollmentFormProps) => {
   const { toast } = useToast();
   const form = useForm();
   const [isSameAddress, setIsSameAddress] = useState(false);
@@ -57,72 +58,72 @@ const EnrollmentForm = ({ formType, relatedId }: EnrollmentFormProps) => {
         
         // Address Information
         permanentAddress: {
-          line1: data.permanentAddress.line1,
-          line2: data.permanentAddress.line2,
-          city: data.permanentAddress.city,
-          state: data.permanentAddress.state,
-          postalCode: data.permanentAddress.postalCode,
-          country: data.permanentAddress.country,
+          line1: data.permanentAddress?.line1 || '',
+          line2: data.permanentAddress?.line2 || '',
+          city: data.permanentAddress?.city || '',
+          state: data.permanentAddress?.state || '',
+          postalCode: data.permanentAddress?.postalCode || '',
+          country: data.permanentAddress?.country || '',
         } as Address,
         
         currentAddress: {
-          line1: data.currentAddress.line1,
-          line2: data.currentAddress.line2,
-          city: data.currentAddress.city,
-          state: data.currentAddress.state,
-          postalCode: data.currentAddress.postalCode,
-          country: data.currentAddress.country,
+          line1: data.currentAddress?.line1 || '',
+          line2: data.currentAddress?.line2 || '',
+          city: data.currentAddress?.city || '',
+          state: data.currentAddress?.state || '',
+          postalCode: data.currentAddress?.postalCode || '',
+          country: data.currentAddress?.country || '',
         } as Address,
         
         isSameAddress,
         
         // Parent/Guardian Details
-        fatherName: data.fatherName,
-        motherName: data.motherName,
-        guardianPhone: data.guardianPhone,
-        guardianEmail: data.guardianEmail,
+        fatherName: data.fatherName || '',
+        motherName: data.motherName || '',
+        guardianPhone: data.guardianPhone || '',
+        guardianEmail: data.guardianEmail || '',
         
         // Educational Details
         tenthGrade: {
-          institutionName: data.tenthInstitution,
-          boardUniversity: data.tenthBoard,
-          yearOfPassing: data.tenthYear,
-          totalMarks: data.tenthTotalMarks,
-          obtainedMarks: data.tenthObtainedMarks,
+          institutionName: data.tenthInstitution || '',
+          boardUniversity: data.tenthBoard || '',
+          yearOfPassing: data.tenthYear || '',
+          totalMarks: data.tenthTotalMarks || '',
+          obtainedMarks: data.tenthObtainedMarks || '',
           documentUrl: data.tenthDocumentUrl || '',
         } as EducationDetail,
         
         twelfthGrade: {
-          institutionName: data.twelfthInstitution,
-          boardUniversity: data.twelfthBoard,
-          yearOfPassing: data.twelfthYear,
-          totalMarks: data.twelfthTotalMarks,
-          obtainedMarks: data.twelfthObtainedMarks,
+          institutionName: data.twelfthInstitution || '',
+          boardUniversity: data.twelfthBoard || '',
+          yearOfPassing: data.twelfthYear || '',
+          totalMarks: data.twelfthTotalMarks || '',
+          obtainedMarks: data.twelfthObtainedMarks || '',
           documentUrl: data.twelfthDocumentUrl || '',
         } as EducationDetail,
         
         // Optional education fields
         degree: data.degreeInstitution ? {
-          institutionName: data.degreeInstitution,
-          boardUniversity: data.degreeUniversity,
-          yearOfPassing: data.degreeYear,
-          totalMarks: data.degreeTotalMarks,
-          obtainedMarks: data.degreeObtainedMarks,
+          institutionName: data.degreeInstitution || '',
+          boardUniversity: data.degreeUniversity || '',
+          yearOfPassing: data.degreeYear || '',
+          totalMarks: data.degreeTotalMarks || '',
+          obtainedMarks: data.degreeObtainedMarks || '',
           documentUrl: data.degreeDocumentUrl || '',
         } as EducationDetail : undefined,
         
         postGraduation: data.pgInstitution ? {
-          institutionName: data.pgInstitution,
-          boardUniversity: data.pgUniversity,
-          yearOfPassing: data.pgYear,
-          totalMarks: data.pgTotalMarks,
-          obtainedMarks: data.pgObtainedMarks,
+          institutionName: data.pgInstitution || '',
+          boardUniversity: data.pgUniversity || '',
+          yearOfPassing: data.pgYear || '',
+          totalMarks: data.pgTotalMarks || '',
+          obtainedMarks: data.pgObtainedMarks || '',
           documentUrl: data.pgDocumentUrl || '',
         } as EducationDetail : undefined,
         
         // Document Uploads
-        certificateUrl: data.certificateUrl,
-        photographUrl: data.photographUrl,
+        certificateUrl: data.certificateUrl || '',
+        photographUrl: data.photographUrl || '',
       };
       
       // Submit the enrollment form
@@ -135,6 +136,11 @@ const EnrollmentForm = ({ formType, relatedId }: EnrollmentFormProps) => {
       
       // Reset form
       form.reset();
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
       
     } catch (error) {
       console.error("Error submitting enrollment form:", error);
@@ -851,8 +857,12 @@ const EnrollmentForm = ({ formType, relatedId }: EnrollmentFormProps) => {
           </div>
           
           <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Application"}
             </Button>
           </div>
         </form>

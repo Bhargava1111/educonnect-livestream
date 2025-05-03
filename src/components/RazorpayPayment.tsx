@@ -79,7 +79,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
         order_id: orderId,
         handler: function (response: any) {
           // Update payment with success status and razorpay payment ID
-          updatePayment(payment.id, 'completed', {
+          updatePayment(payment.id, 'success', {
             paymentId: response.razorpay_payment_id
           });
           
@@ -91,9 +91,9 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
           if (onSuccess) onSuccess(response);
         },
         prefill: {
-          name: studentData.name || "",
+          name: studentData.firstName + ' ' + studentData.lastName || "",
           email: studentData.email || "",
-          contact: ""
+          contact: studentData.phone || ""
         },
         notes: {
           course_name: courseName,

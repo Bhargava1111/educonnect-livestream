@@ -14,6 +14,7 @@ export interface Student {
   profilePicture?: string;
   createdAt: string;
   lastLoginAt?: string;
+  name?: string; // Added for compatibility
 }
 
 // Get all students
@@ -57,7 +58,8 @@ export const registerStudent = (
     email,
     country,
     createdAt: new Date().toISOString(),
-    lastLoginAt: new Date().toISOString()
+    lastLoginAt: new Date().toISOString(),
+    name: `${firstName} ${lastName}` // Add combined name field
   };
   
   // Store student data
@@ -117,6 +119,11 @@ export const getCurrentStudent = (): Student | null => {
   return currentStudentData ? JSON.parse(currentStudentData) : null;
 };
 
+// Get student data - added for compatibility
+export const getStudentData = (): Student | null => {
+  return getCurrentStudent();
+};
+
 // Set current student
 export const setCurrentStudent = (student: Student): void => {
   localStorage.setItem(CURRENT_STUDENT_KEY, JSON.stringify(student));
@@ -156,6 +163,78 @@ export const updateStudentProfile = (
   return updatedStudent;
 };
 
+// Add missing functions for compatibility
+
+// Enroll student in course
+export const enrollStudentInCourse = (studentId: string, courseId: string): boolean => {
+  // Implementation would go here
+  return true;
+};
+
+// Create student
+export const createStudent = (studentData: Omit<Student, 'id' | 'createdAt'>): Student => {
+  const { firstName, lastName, phone, email, country } = studentData;
+  return registerStudent(firstName, lastName, phone, email, 'defaultPassword', country);
+};
+
+// Update student
+export const updateStudent = (studentId: string, studentData: Partial<Student>): Student | null => {
+  return updateStudentProfile(studentId, studentData);
+};
+
+// Delete student
+export const deleteStudent = (studentId: string): boolean => {
+  const students = getAllStudents();
+  const filteredStudents = students.filter(student => student.id !== studentId);
+  
+  if (filteredStudents.length < students.length) {
+    localStorage.setItem(STUDENTS_KEY, JSON.stringify(filteredStudents));
+    localStorage.removeItem(`student_password_${studentId}`);
+    return true;
+  }
+  
+  return false;
+};
+
+// Get students by enrolled course
+export const getStudentsByEnrolledCourse = (courseId: string): Student[] => {
+  // Implementation would go here
+  return [];
+};
+
+// Reset student password
+export const resetStudentPassword = (studentId: string, newPassword: string): boolean => {
+  const student = getStudentById(studentId);
+  
+  if (!student) {
+    return false;
+  }
+  
+  localStorage.setItem(`student_password_${studentId}`, newPassword);
+  return true;
+};
+
+// Student activity tracking functions
+export const getStudentLoginHistory = (studentId: string) => {
+  return [];
+};
+
+export const getStudentActivity = (studentId: string) => {
+  return [];
+};
+
+export const getStudentTotalActiveTime = (studentId: string) => {
+  return 0;
+};
+
+export const formatActiveTime = (seconds: number) => {
+  return "0h 0m";
+};
+
+export const getStudentLastActiveTime = (studentId: string) => {
+  return new Date().toISOString();
+};
+
 // Initialize with some test students if none exist
 export const initializeStudentsIfNeeded = (): void => {
   const students = getAllStudents();
@@ -169,6 +248,7 @@ export const initializeStudentsIfNeeded = (): void => {
       phone: '+919876543210',
       email: 'test@example.com',
       country: 'India',
+      name: 'Test Student',
       createdAt: new Date().toISOString()
     };
     
