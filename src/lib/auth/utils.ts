@@ -1,6 +1,10 @@
 
 import { Student } from '../types';
 
+// Constants
+export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
+export const STUDENT_LOGIN_KEY = 'student_login_history';
+
 // Generate a unique ID
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -28,6 +32,11 @@ export const setCurrentStudent = (student: Student | null): void => {
   }
 };
 
+// Clear the current student from localStorage
+export const clearCurrentStudent = (): void => {
+  localStorage.removeItem('current_student');
+};
+
 // Get all students from localStorage
 export const getAllStudents = (): Student[] => {
   const students = localStorage.getItem('career_aspire_students');
@@ -39,6 +48,18 @@ export const getAllStudents = (): Student[] => {
     console.error("Error parsing students:", error);
     return [];
   }
+};
+
+// Get a student by email
+export const getStudentByEmail = (email: string): Student | undefined => {
+  const students = getAllStudents();
+  return students.find(student => student.email === email);
+};
+
+// Get a student by phone
+export const getStudentByPhone = (phone: string): Student | undefined => {
+  const students = getAllStudents();
+  return students.find(student => student.phone === phone);
 };
 
 // Update a student in localStorage
