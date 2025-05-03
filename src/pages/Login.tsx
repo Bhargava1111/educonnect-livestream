@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -445,12 +444,12 @@ const Login = () => {
                           <div className="flex justify-center">
                             <InputOTP maxLength={6} value={otp} onChange={handleOTPChange}>
                               <InputOTPGroup>
-                                <InputOTPSlot index={0} />
-                                <InputOTPSlot index={1} />
-                                <InputOTPSlot index={2} />
-                                <InputOTPSlot index={3} />
-                                <InputOTPSlot index={4} />
-                                <InputOTPSlot index={5} />
+                                <InputOTPSlot />
+                                <InputOTPSlot />
+                                <InputOTPSlot />
+                                <InputOTPSlot />
+                                <InputOTPSlot />
+                                <InputOTPSlot />
                               </InputOTPGroup>
                             </InputOTP>
                           </div>
