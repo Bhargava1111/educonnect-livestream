@@ -1,3 +1,4 @@
+
 import { Enrollment, ENROLLMENTS_KEY } from './types';
 
 // Initialize enrollments if not present
@@ -27,6 +28,9 @@ export const getEnrollmentsByCourse = (courseId: string): Enrollment[] => {
   const enrollments = getAllEnrollments();
   return enrollments.filter(enrollment => enrollment.courseId === courseId);
 };
+
+// Add this function to maintain compatibility with courseService imports
+export const getEnrollmentsByCourseId = getEnrollmentsByCourse;
 
 export const getEnrollmentsByStudent = (studentId: string): Enrollment[] => {
   const enrollments = getAllEnrollments();

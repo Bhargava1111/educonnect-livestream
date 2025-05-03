@@ -1,10 +1,11 @@
+
 import { 
   Course, 
   RoadmapPhase, 
   COURSES_KEY,
   CourseModule
 } from './types';
-import { getEnrollmentsByCourseId } from './enrollmentService';
+import { getEnrollmentsByCourse } from './enrollmentService';
 import { getPaymentsByCourseId } from './paymentService';
 
 // Initialize with some default courses if not present
@@ -506,7 +507,7 @@ export const deleteCourse = (id: string): boolean => {
 
 // Utility function to generate course statistics
 export const getCourseStatistics = (courseId: string) => {
-  const enrollments = getEnrollmentsByCourseId(courseId);
+  const enrollments = getEnrollmentsByCourse(courseId);
   const payments = getPaymentsByCourseId(courseId);
   
   const totalRevenue = payments

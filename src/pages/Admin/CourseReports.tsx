@@ -13,7 +13,7 @@ import {
   getCourseById,
   getCourseStatistics
 } from "@/lib/courseService";
-import { getEnrollmentsByCourseId, exportEnrollmentsAsCSV } from "@/lib/enrollmentService";
+import { getEnrollmentsByCourse, exportEnrollmentsAsCSV } from "@/lib/enrollmentService";
 import { ChevronLeft, Download, Mail, FileCheck, Users, DollarSign, BarChart3 } from 'lucide-react';
 
 const CourseReports = () => {
@@ -38,7 +38,7 @@ const CourseReports = () => {
       setStats(courseStats);
       
       // Load enrollments
-      const courseEnrollments = getEnrollmentsByCourseId(courseId);
+      const courseEnrollments = getEnrollmentsByCourse(courseId);
       setEnrollments(courseEnrollments);
     } else {
       toast({
@@ -58,7 +58,7 @@ const CourseReports = () => {
     if (!courseId) return;
     
     try {
-      const csvContent = exportEnrollmentsAsCSV();
+      const csvContent = exportEnrollmentsAsCSV(courseId);
       
       // Create download link
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
