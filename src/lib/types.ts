@@ -8,6 +8,7 @@ export const PAYMENTS_KEY = 'career_aspire_payments';
 export const PLACEMENTS_KEY = 'career_aspire_placements';
 export const CONTACTS_KEY = 'career_aspire_contacts';
 export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
+export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
 
 // Student interface (updated)
 export interface Student {
@@ -108,6 +109,12 @@ export interface Job {
   category?: string;
   experience?: string;
   featured?: boolean;
+  appliedCount?: number;
+  createdAt?: string;
+  lastDate?: string; 
+  jobType?: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
+  experienceLevel?: string;
+  externalLink?: string;
 }
 
 // Assessment interfaces
@@ -190,6 +197,7 @@ export interface Placement {
   description?: string;
   imageUrl?: string;
   testimonial?: string;
+  studentName?: string; // Add for backward compatibility
 }
 
 // Contact form interface

@@ -1,8 +1,6 @@
 import { Enrollment, ENROLLMENTS_KEY } from './types';
-import { getStudentById } from './studentAuth';
-import { getCourseById } from './courseService';
 
-// Initialize enrollments
+// Initialize enrollments if not present
 const initializeEnrollmentsIfNeeded = (): Enrollment[] => {
   const existingEnrollments = localStorage.getItem(ENROLLMENTS_KEY);
   
@@ -15,40 +13,28 @@ const initializeEnrollmentsIfNeeded = (): Enrollment[] => {
   }
 };
 
-// Enrollment management
+// Enrollment CRUD operations
 export const getAllEnrollments = (): Enrollment[] => {
   return initializeEnrollmentsIfNeeded();
 };
 
-export const getEnrollmentsByStudentId = (studentId: string): Enrollment[] => {
+export const getEnrollmentById = (id: string): Enrollment | undefined => {
   const enrollments = getAllEnrollments();
-  return enrollments.filter(enrollment => enrollment.studentId === studentId);
+  return enrollments.find(enrollment => enrollment.id === id);
 };
 
-export const getEnrollmentsByCourseId = (courseId: string): Enrollment[] => {
+export const getEnrollmentsByCourse = (courseId: string): Enrollment[] => {
   const enrollments = getAllEnrollments();
   return enrollments.filter(enrollment => enrollment.courseId === courseId);
 };
 
-export const getEnrollment = (studentId: string, courseId: string): Enrollment | undefined => {
+export const getEnrollmentsByStudent = (studentId: string): Enrollment[] => {
   const enrollments = getAllEnrollments();
-  return enrollments.find(
-    enrollment => enrollment.studentId === studentId && enrollment.courseId === courseId
-  );
+  return enrollments.filter(enrollment => enrollment.studentId === studentId);
 };
 
-export const enrollmentExists = (studentId: string, courseId: string): boolean => {
-  return !!getEnrollment(studentId, courseId);
-};
-
-export const createEnrollment = (studentId: string, courseId: string): Enrollment | undefined => {
-  if (enrollmentExists(studentId, courseId)) {
-    console.error("Enrollment already exists for this student and course");
-    return undefined;
-  }
-  
+export const createEnrollment = (studentId: string, courseId: string): Enrollment => {
   const enrollments = getAllEnrollments();
-  
   const newEnrollment: Enrollment = {
     id: `enrollment_${Date.now()}`,
     studentId,
@@ -57,7 +43,8 @@ export const createEnrollment = (studentId: string, courseId: string): Enrollmen
     status: 'active',
     progress: 0,
     completed: false,
-    certificateIssued: false
+    certificateIssued: false,
+    lastAccessedDate: new Date().toISOString()
   };
   
   enrollments.push(newEnrollment);
@@ -65,15 +52,12 @@ export const createEnrollment = (studentId: string, courseId: string): Enrollmen
   return newEnrollment;
 };
 
-export const updateEnrollment = (
-  enrollmentId: string, 
-  updates: Partial<Enrollment>
-): Enrollment | undefined => {
+export const updateEnrollment = (id: string, updatedEnrollment: Partial<Enrollment>): Enrollment | undefined => {
   const enrollments = getAllEnrollments();
-  const index = enrollments.findIndex(enrollment => enrollment.id === enrollmentId);
+  const index = enrollments.findIndex(enrollment => enrollment.id === id);
   
   if (index !== -1) {
-    enrollments[index] = { ...enrollments[index], ...updates };
+    enrollments[index] = { ...enrollments[index], ...updatedEnrollment };
     localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments));
     return enrollments[index];
   }
@@ -81,29 +65,9 @@ export const updateEnrollment = (
   return undefined;
 };
 
-export const updateEnrollmentProgress = (
-  studentId: string, 
-  courseId: string, 
-  progress: number
-): Enrollment | undefined => {
-  const enrollment = getEnrollment(studentId, courseId);
-  
-  if (!enrollment) return undefined;
-  
-  // Calculate if the course should be marked as completed
-  const completed = progress >= 100;
-  
-  return updateEnrollment(enrollment.id, { 
-    progress, 
-    completed,
-    // Only update lastAccessedDate if specifically provided
-    lastAccessedDate: new Date().toISOString()
-  });
-};
-
-export const deleteEnrollment = (enrollmentId: string): boolean => {
+export const deleteEnrollment = (id: string): boolean => {
   const enrollments = getAllEnrollments();
-  const filteredEnrollments = enrollments.filter(enrollment => enrollment.id !== enrollmentId);
+  const filteredEnrollments = enrollments.filter(enrollment => enrollment.id !== id);
   
   if (filteredEnrollments.length < enrollments.length) {
     localStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(filteredEnrollments));
@@ -113,55 +77,23 @@ export const deleteEnrollment = (enrollmentId: string): boolean => {
   return false;
 };
 
-// Export enrollments as CSV data
+// Function to check if an enrollment exists
+export const enrollmentExists = (studentId: string, courseId: string): boolean => {
+  const enrollments = getAllEnrollments();
+  return enrollments.some(enrollment => enrollment.studentId === studentId && enrollment.courseId === courseId);
+};
+
+// Export enrollments as CSV
 export const exportEnrollmentsAsCSV = (courseId?: string): string => {
-  const enrollments = courseId 
-    ? getEnrollmentsByCourseId(courseId)
-    : getAllEnrollments();
+  const enrollments = courseId ? getEnrollmentsByCourse(courseId) : getAllEnrollments();
   
-  if (enrollments.length === 0) {
-    return 'No enrollments found';
-  }
+  // CSV header
+  let csv = 'ID,Student ID,Course ID,Enrollment Date,Status,Progress,Completed,Certificate Issued,Last Accessed Date\n';
   
-  // Define CSV headers
-  const headers = [
-    'Student ID',
-    'Student Name',
-    'Course ID',
-    'Course Title',
-    'Enrollment Date',
-    'Status',
-    'Progress',
-    'Completion',
-    'Last Accessed'
-  ].join(',');
+  // Add rows
+  enrollments.forEach(enrollment => {
+    csv += `${enrollment.id},${enrollment.studentId},${enrollment.courseId},${enrollment.enrollmentDate},${enrollment.status},${enrollment.progress},${enrollment.completed},${enrollment.certificateIssued},${enrollment.lastAccessedDate || 'N/A'}\n`;
+  });
   
-  // Create CSV rows
-  const rows = enrollments.map(enrollment => {
-    const student = getStudentById(enrollment.studentId);
-    const course = getCourseById(enrollment.courseId);
-    
-    const studentName = student 
-      ? `${student.firstName} ${student.lastName}`
-      : 'Unknown Student';
-    
-    const courseTitle = course ? course.title : 'Unknown Course';
-    
-    return [
-      enrollment.studentId,
-      studentName,
-      enrollment.courseId,
-      courseTitle,
-      new Date(enrollment.enrollmentDate).toLocaleDateString(),
-      enrollment.status,
-      `${enrollment.progress || 0}%`,
-      enrollment.completed ? 'Yes' : 'No',
-      enrollment.lastAccessedDate 
-        ? new Date(enrollment.lastAccessedDate).toLocaleDateString() 
-        : 'N/A'
-    ].join(',');
-  }).join('\n');
-  
-  // Combine headers and rows
-  return `${headers}\n${rows}`;
+  return csv;
 };
