@@ -1,6 +1,7 @@
 import { Student } from '../types';
 import { 
   getAllStudents, 
+  getStudentById, 
   updateStudentInStorage,
   getCurrentStudent,
   setCurrentStudent,
@@ -20,7 +21,7 @@ export const addStudent = (student: Omit<Student, 'id'>): Student => {
   return newStudent;
 };
 
-// Export getStudentById function
+// Export getStudentById function to fix the missing export error
 export const getStudentById = (id: string): Student | undefined => {
   const students = getAllStudents();
   return students.find(student => student.id === id);

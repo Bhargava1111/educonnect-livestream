@@ -8,8 +8,7 @@ export * from './types';
 // rather than using re-exports
 export * from './courseService';
 export * from './liveMeetingService';
-// Explicitly re-export JOBS_KEY to resolve ambiguity
-export { JOBS_KEY, getAllJobs, getActiveJobs, getJobById, getJobsByCategory, createJob, updateJob, deleteJob, incrementJobApplyCount, applyForJob, exportJobsAsCSV } from './jobService';
+export * from './jobService';
 export * from './placementService';
 export * from './assessmentService';
 export * from './enrollmentService';
@@ -50,11 +49,6 @@ import {
 } from './auth/passwordService';
 
 import {
-  requestEmailOTP,
-  verifyOTPAndLogin
-} from './auth/otpService';
-
-import {
   getCurrentStudent
 } from './auth/utils';
 
@@ -79,9 +73,7 @@ export {
   getStudentById,
   getAllStudents,
   registerStudent,
-  updateStudentProfile,
-  requestEmailOTP,
-  verifyOTPAndLogin
+  updateStudentProfile
 };
 
 // For backward compatibility
@@ -105,7 +97,5 @@ export const studentAuth = {
   resetPassword,
   getAllStudents,
   registerStudent,
-  updateStudentProfile,
-  requestEmailOTP,
-  verifyOTPAndLogin
+  updateStudentProfile
 };

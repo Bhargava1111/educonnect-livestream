@@ -75,7 +75,7 @@ export interface Course {
   updatedAt?: string;
   curriculum?: CourseModule[];
   roadmap?: RoadmapPhase[];
-  courseType?: string;  
+  courseType?: string; // Added for Student/Courses.tsx
 }
 
 // Course module

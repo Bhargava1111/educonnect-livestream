@@ -1,4 +1,3 @@
-
 // Implement API service methods for interacting with backend services
 import axios from 'axios';
 import { Student, Course, Job, Placement } from './types';
@@ -7,9 +6,7 @@ import {
   loginStudent,
   logoutStudent,
   getStudentEnrollments,
-  getCurrentStudent,
-  requestEmailOTP,
-  verifyOTPAndLogin
+  getCurrentStudent
 } from './courseManagement';
 
 // Mock API base URL - would be replaced with actual API URL in production
@@ -54,49 +51,6 @@ export const apiLogin = async (email: string, password: string): Promise<{ succe
     return { 
       success: false, 
       error: error.response?.data?.message || "Login failed. Please try again."
-    };
-  }
-};
-
-// OTP-based authentication methods
-export const apiRequestEmailOTP = async (email: string): Promise<{ success: boolean; message: string }> => {
-  try {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Use local function for OTP generation
-    return requestEmailOTP(email);
-    
-    /* Real implementation would be like:
-    const response = await api.post('/auth/request-otp', { email });
-    return response.data;
-    */
-  } catch (error: any) {
-    console.error("OTP request API error:", error);
-    return {
-      success: false,
-      message: "Failed to send login code. Please try again."
-    };
-  }
-};
-
-export const apiVerifyOTP = async (email: string, otp: string): Promise<{ success: boolean; data?: any; error?: string }> => {
-  try {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    // Use local function for OTP verification and login
-    return verifyOTPAndLogin(email, otp);
-    
-    /* Real implementation would be like:
-    const response = await api.post('/auth/verify-otp', { email, otp });
-    return { success: true, data: response.data };
-    */
-  } catch (error: any) {
-    console.error("OTP verification API error:", error);
-    return {
-      success: false,
-      error: "Failed to verify login code. Please try again."
     };
   }
 };

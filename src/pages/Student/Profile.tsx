@@ -1,219 +1,524 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getCurrentStudent, updateStudentProfile } from '@/lib/studentAuth';
-import { Student } from '@/lib/types';
-import { toast } from "@/components/ui/use-toast"
 
-const Profile = () => {
-  const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
-  const [formData, setFormData] = useState<any>({});
-  const navigate = useNavigate();
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from "@/components/ui/badge";
+import { EditIcon, Save, Upload } from 'lucide-react';
+import { getStudentData, updateStudentProfile } from '@/lib/studentAuth';
+import { useToast } from "@/hooks/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+
+const StudentProfile = () => {
+  const { toast } = useToast();
+  const [student, setStudent] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    profilePicture: '',
+    skills: [] as string[],
+    education: {
+      tenth: {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      },
+      twelfth: {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      },
+      degree: {
+        university: '',
+        course: '',
+        percentage: '',
+        yearOfCompletion: ''
+      }
+    },
+    aadharNumber: ''
+  });
+  const [newSkill, setNewSkill] = useState('');
 
   useEffect(() => {
-    const student = getCurrentStudent();
-    setCurrentStudent(student);
-
-    if (student) {
+    const studentData = getStudentData();
+    if (studentData) {
+      setStudent(studentData);
       setFormData({
-        firstName: student.firstName || '',
-        lastName: student.lastName || '',
-        email: student.email || '',
-        phone: student.phone || '',
-        country: student.country || '',
-        address: student.address || '',
-        skills: student.skills?.join(', ') || '',
-        aadharNumber: student.aadharNumber || '',
-        tenthSchool: student.education?.tenth?.school || '',
-        tenthPercentage: student.education?.tenth?.percentage || '',
-        tenthYear: student.education?.tenth?.yearOfCompletion || '',
-        twelfthSchool: student.education?.twelfth?.school || '',
-        twelfthPercentage: student.education?.twelfth?.percentage || '',
-        twelfthYear: student.education?.twelfth?.yearOfCompletion || '',
-        degreeUniversity: student.education?.degree?.university || '',
-        degreeCourse: student.education?.degree?.course || '',
-        degreePercentage: student.education?.degree?.percentage || '',
-        degreeYear: student.education?.degree?.yearOfCompletion || '',
-        highestQualification: student.education?.highest || ''
+        name: studentData.name || '',
+        email: studentData.email || '',
+        phone: studentData.phone || '',
+        address: studentData.address || '',
+        profilePicture: studentData.profilePicture || '',
+        skills: studentData.skills || [],
+        education: studentData.education || {
+          tenth: {
+            school: '',
+            percentage: '',
+            yearOfCompletion: ''
+          },
+          twelfth: {
+            school: '',
+            percentage: '',
+            yearOfCompletion: ''
+          },
+          degree: {
+            university: '',
+            course: '',
+            percentage: '',
+            yearOfCompletion: ''
+          }
+        },
+        aadharNumber: studentData.aadharNumber || ''
       });
     }
   }, []);
 
-  const handleChange = (e: any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: value
-    }));
-  };
-
-  const updateProfile = (formData: any) => {
-    if (!currentStudent?.id) return;
-
-    // Create a properly structured education object that matches the expected type
-    const educationData = {
-      tenth: {
-        school: formData.tenthSchool || '',
-        percentage: formData.tenthPercentage || '',
-        yearOfCompletion: formData.tenthYear || ''
-      },
-      twelfth: {
-        school: formData.twelfthSchool || '', 
-        percentage: formData.twelfthPercentage || '',
-        yearOfCompletion: formData.twelfthYear || ''
-      },
-      degree: {
-        university: formData.degreeUniversity || '',
-        course: formData.degreeCourse || '',
-        percentage: formData.degreePercentage || '',
-        yearOfCompletion: formData.degreeYear || ''
-      },
-      highest: formData.highestQualification || ''
-    };
-
-    // Call updateStudentProfile with studentId and the profile data
-    const result = updateStudentProfile(currentStudent.id, {
-      address: formData.address,
-      skills: formData.skills?.split(',').map((skill: string) => skill.trim()) || [],
-      education: educationData,
-      aadharNumber: formData.aadharNumber
-    });
-
-    if (result.success) {
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been updated successfully.",
-      })
-      navigate('/student/dashboard');
+    if (name.includes('.')) {
+      // Handle nested properties (for education fields)
+      const [category, field] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        education: {
+          ...prev.education,
+          [category]: {
+            ...prev.education[category as keyof typeof prev.education],
+            [field]: value
+          }
+        }
+      }));
     } else {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: result.error || "Failed to update profile.",
-      })
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
     }
   };
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    updateProfile(formData);
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        skills: [...prev.skills, newSkill.trim()]
+      }));
+      setNewSkill('');
+    }
   };
 
-  if (!currentStudent) {
-    return <div>Loading...</div>;
+  const handleRemoveSkill = (skillToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.filter(skill => skill !== skillToRemove)
+    }));
+  };
+
+  const handleSaveProfile = () => {
+    const success = updateStudentProfile({
+      name: formData.name,
+      phone: formData.phone,
+      address: formData.address,
+      profilePicture: formData.profilePicture,
+      skills: formData.skills,
+      education: formData.education,
+      aadharNumber: formData.aadharNumber
+    });
+
+    if (success) {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully.",
+      });
+      setIsEditing(false);
+      // Update the local state with the new data
+      setStudent({
+        ...student,
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        profilePicture: formData.profilePicture,
+        skills: formData.skills,
+        education: formData.education,
+        aadharNumber: formData.aadharNumber
+      });
+    } else {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('');
+  };
+
+  if (!student) {
+    return <div className="text-center p-8">Loading profile...</div>;
   }
 
+  // Create a date object from the registration date
+  const registrationDate = student.registrationDate 
+    ? new Date(student.registrationDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    : 'N/A';
+
   return (
-    <div className="container mx-auto py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Profile</CardTitle>
-          <CardDescription>Update your profile information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="grid gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">First Name</Label>
-                <Input type="text" id="firstName" name="firstName" value={formData.firstName || ''} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input type="text" id="lastName" name="lastName" value={formData.lastName || ''} onChange={handleChange} />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input type="email" id="email" name="email" value={formData.email || ''} onChange={handleChange} disabled />
-            </div>
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input type="tel" id="phone" name="phone" value={formData.phone || ''} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="country">Country</Label>
-              <Input type="text" id="country" name="country" value={formData.country || ''} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="address">Address</Label>
-              <Textarea id="address" name="address" value={formData.address || ''} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="skills">Skills (comma separated)</Label>
-              <Input type="text" id="skills" name="skills" value={formData.skills || ''} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="aadharNumber">Aadhar Number</Label>
-              <Input type="text" id="aadharNumber" name="aadharNumber" value={formData.aadharNumber || ''} onChange={handleChange} />
-            </div>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Student Profile</h1>
 
-            <h3 className="text-lg font-semibold">Education Details</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Profile Overview */}
+        <div className="md:col-span-1">
+          <Card>
+            <CardHeader className="pb-2 text-center">
+              <div className="mx-auto mb-4">
+                <Avatar className="w-24 h-24">
+                  {formData.profilePicture ? (
+                    <AvatarImage src={formData.profilePicture} alt={formData.name} />
+                  ) : (
+                    <AvatarFallback className="text-2xl">
+                      {formData.name ? getInitials(formData.name) : 'ST'}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </div>
+              <CardTitle>{formData.name || 'Complete Your Profile'}</CardTitle>
+              <CardDescription>Student ID: {student.id}</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="flex justify-center flex-wrap gap-2 mb-4">
+                {formData.skills && formData.skills.length > 0 ? (
+                  formData.skills.map((skill, index) => (
+                    <Badge key={index} variant="secondary" className="cursor-default">
+                      {skill}
+                      {isEditing && (
+                        <span 
+                          className="ml-1 cursor-pointer" 
+                          onClick={() => handleRemoveSkill(skill)}
+                        >
+                          ×
+                        </span>
+                      )}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">Add skills to showcase your expertise</p>
+                )}
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Enrollment Date:</span>
+                  <span>{registrationDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Courses Enrolled:</span>
+                  <span>{student.enrolledCourses?.length || 0}</span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                className="w-full" 
+                variant={isEditing ? "default" : "outline"}
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? (
+                  <>Cancel Editing</>
+                ) : (
+                  <><EditIcon className="mr-2 h-4 w-4" /> Edit Profile</>
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="tenthSchool">10th School</Label>
-                <Input type="text" id="tenthSchool" name="tenthSchool" value={formData.tenthSchool || ''} onChange={handleChange} />
+        {/* Profile Details */}
+        <div className="md:col-span-2 space-y-6">
+          {/* Personal Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Personal Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Full Name</label>
+                  <Input 
+                    className="mt-1" 
+                    name="name"
+                    value={formData.name} 
+                    onChange={handleInputChange}
+                    disabled={!isEditing} 
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Email Address</label>
+                  <Input 
+                    className="mt-1" 
+                    value={formData.email} 
+                    disabled 
+                    placeholder="Your email address"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Phone Number</label>
+                  <Input 
+                    className="mt-1" 
+                    name="phone"
+                    value={formData.phone} 
+                    onChange={handleInputChange}
+                    disabled={!isEditing} 
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Aadhar Number</label>
+                  <Input 
+                    className="mt-1" 
+                    name="aadharNumber"
+                    value={formData.aadharNumber} 
+                    onChange={handleInputChange}
+                    disabled={!isEditing} 
+                    placeholder="Enter your Aadhar number"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Profile Picture URL</label>
+                  <Input 
+                    className="mt-1" 
+                    name="profilePicture"
+                    value={formData.profilePicture} 
+                    onChange={handleInputChange}
+                    disabled={!isEditing} 
+                    placeholder="Enter image URL for your profile"
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="tenthPercentage">10th Percentage</Label>
-                <Input type="text" id="tenthPercentage" name="tenthPercentage" value={formData.tenthPercentage || ''} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="tenthYear">10th Year of Completion</Label>
-                <Input type="text" id="tenthYear" name="tenthYear" value={formData.tenthYear || ''} onChange={handleChange} />
-              </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="twelfthSchool">12th School</Label>
-                <Input type="text" id="twelfthSchool" name="twelfthSchool" value={formData.twelfthSchool || ''} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="twelfthPercentage">12th Percentage</Label>
-                <Input type="text" id="twelfthPercentage" name="twelfthPercentage" value={formData.twelfthPercentage || ''} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="twelfthYear">12th Year of Completion</Label>
-                <Input type="text" id="twelfthYear" name="twelfthYear" value={formData.twelfthYear || ''} onChange={handleChange} />
-              </div>
-            </div>
+          {/* Educational Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Educational Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* 10th Education */}
+                <div>
+                  <h3 className="font-medium mb-2">10th Standard</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">School Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="tenth.school"
+                        value={formData.education.tenth.school} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter school name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Percentage/CGPA</label>
+                      <Input 
+                        className="mt-1" 
+                        name="tenth.percentage"
+                        value={formData.education.tenth.percentage} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter percentage or CGPA"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Year of Completion</label>
+                      <Input 
+                        className="mt-1" 
+                        name="tenth.yearOfCompletion"
+                        value={formData.education.tenth.yearOfCompletion} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter year of completion"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="degreeUniversity">Degree University</Label>
-                <Input type="text" id="degreeUniversity" name="degreeUniversity" value={formData.degreeUniversity || ''} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="degreeCourse">Degree Course</Label>
-                <Input type="text" id="degreeCourse" name="degreeCourse" value={formData.degreeCourse || ''} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="degreePercentage">Degree Percentage</Label>
-                <Input type="text" id="degreePercentage" name="degreePercentage" value={formData.degreePercentage || ''} onChange={handleChange} />
-              </div>
-              <div>
-                <Label htmlFor="degreeYear">Degree Year of Completion</Label>
-                <Input type="text" id="degreeYear" name="degreeYear" value={formData.degreeYear || ''} onChange={handleChange} />
-              </div>
-            </div>
+                {/* 12th Education */}
+                <div>
+                  <h3 className="font-medium mb-2">12th Standard</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">School/College Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="twelfth.school"
+                        value={formData.education.twelfth.school} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter school/college name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Percentage/CGPA</label>
+                      <Input 
+                        className="mt-1" 
+                        name="twelfth.percentage"
+                        value={formData.education.twelfth.percentage} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter percentage or CGPA"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Year of Completion</label>
+                      <Input 
+                        className="mt-1" 
+                        name="twelfth.yearOfCompletion"
+                        value={formData.education.twelfth.yearOfCompletion} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter year of completion"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-            <div>
-              <Label htmlFor="highestQualification">Highest Qualification</Label>
-              <Input type="text" id="highestQualification" name="highestQualification" value={formData.highestQualification || ''} onChange={handleChange} />
-            </div>
+                {/* Degree Education */}
+                <div>
+                  <h3 className="font-medium mb-2">Degree/Graduation</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">University/College Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.university"
+                        value={formData.education.degree.university} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter university/college name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Course/Degree Name</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.course"
+                        value={formData.education.degree.course} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter course name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Percentage/CGPA</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.percentage"
+                        value={formData.education.degree.percentage} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter percentage or CGPA"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Year of Completion</label>
+                      <Input 
+                        className="mt-1" 
+                        name="degree.yearOfCompletion"
+                        value={formData.education.degree.yearOfCompletion} 
+                        onChange={handleInputChange}
+                        disabled={!isEditing} 
+                        placeholder="Enter year of completion"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Button type="submit">Update Profile</Button>
-          </form>
-        </CardContent>
-      </Card>
+          {/* Address Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Address Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <label className="text-sm font-medium">Address</label>
+                <Input 
+                  className="mt-1" 
+                  name="address"
+                  value={formData.address} 
+                  onChange={handleInputChange}
+                  disabled={!isEditing} 
+                  placeholder="Enter your full address"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Skills */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {isEditing && (
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Add a skill" 
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
+                    />
+                    <Button onClick={handleAddSkill}>Add</Button>
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.skills && formData.skills.map((skill, index) => (
+                    <Badge key={index} variant="secondary" className="cursor-default">
+                      {skill}
+                      {isEditing && (
+                        <span 
+                          className="ml-1 cursor-pointer" 
+                          onClick={() => handleRemoveSkill(skill)}
+                        >
+                          ×
+                        </span>
+                      )}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              {isEditing && (
+                <Button 
+                  className="ml-auto" 
+                  onClick={handleSaveProfile}
+                >
+                  <Save className="mr-2 h-4 w-4" /> Save Changes
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default Profile;
+export default StudentProfile;

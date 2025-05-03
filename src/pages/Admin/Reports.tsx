@@ -95,7 +95,7 @@ const AdminReportsPage = () => {
   const generateRevenueData = (courses: Course[], payments: Payment[]) => {
     const data = courses.map(course => {
       const revenue = payments
-        .filter(p => p.courseId === course.id && p.status === 'success')
+        .filter(p => p.courseId === course.id && p.status === 'completed')
         .reduce((sum, payment) => sum + payment.amount, 0);
       
       return {
@@ -125,7 +125,7 @@ const AdminReportsPage = () => {
     const reportData = courses.map(course => {
       const courseEnrollments = enrollments.filter(e => e.courseId === course.id);
       const courseRevenue = payments
-        .filter(p => p.courseId === course.id && p.status === 'success')
+        .filter(p => p.courseId === course.id && p.status === 'completed')
         .reduce((sum, payment) => sum + payment.amount, 0);
       
       return {

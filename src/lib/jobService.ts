@@ -1,9 +1,5 @@
 
-import { Job } from './types';
-import { STUDENT_ACTIVITY_KEY } from './auth/utils';
-
-// Constants
-export const JOBS_KEY = 'career_aspire_jobs';
+import { Job, JOBS_KEY, STUDENT_ACTIVITY_KEY } from './types';
 
 // Re-export the Job type
 export type { Job };

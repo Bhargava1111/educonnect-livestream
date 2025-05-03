@@ -71,7 +71,7 @@ const TakeAssessment = () => {
     assessmentData.questions.forEach(question => {
       if (question.type === 'multiple-choice') {
         initialAnswers[question.id] = null;
-      } else if (question.type === 'descriptive' || question.type === 'coding') {
+      } else if (question.type === 'essay' || question.type === 'coding') {
         initialAnswers[question.id] = question.codingTemplate || '';
       }
     });
@@ -227,9 +227,8 @@ const TakeAssessment = () => {
         if (answers[question.id] === question.correctAnswerIndex) {
           earnedPoints += points;
         }
-      } else if (question.type === 'descriptive' || question.type === 'coding') {
-        // For essay and coding questions, in a real app you would need manual grading
       }
+      // For essay and coding questions, in a real app you would need manual grading
     });
     
     return Math.round((earnedPoints / totalPoints) * 100);
@@ -414,7 +413,7 @@ const TakeAssessment = () => {
                   <CardDescription>
                     {currentQuestion.points || 10} points • {
                       currentQuestion.type === 'multiple-choice' ? 'Multiple Choice' :
-                      currentQuestion.type === 'descriptive' ? 'Descriptive' : 'Coding'
+                      currentQuestion.type === 'essay' ? 'Essay' : 'Coding'
                     }
                   </CardDescription>
                 </CardHeader>
@@ -440,7 +439,7 @@ const TakeAssessment = () => {
                       </RadioGroup>
                     )}
                     
-                    {currentQuestion.type === 'descriptive' && (
+                    {currentQuestion.type === 'essay' && (
                       <Textarea
                         value={answers[currentQuestion.id] || ''}
                         onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
