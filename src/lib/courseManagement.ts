@@ -26,7 +26,13 @@ import {
   getStudentTotalActiveTime,
   formatActiveTime,
   getStudentLastActiveTime,
-  getStudentEnrollments
+  getStudentEnrollments,
+  getStudentData,
+  getStudentsByEnrolledCourse,
+  enrollStudentInCourse,
+  requestPasswordResetOTP,
+  verifyPasswordResetOTP,
+  resetPassword
 } from './studentAuth';
 
 // Re-export them
@@ -39,5 +45,11 @@ export {
   getStudentTotalActiveTime,
   formatActiveTime,
   getStudentLastActiveTime,
-  getStudentEnrollments
+  getStudentEnrollments,
+  getStudentData,
+  getStudentsByEnrolledCourse,
+  enrollStudentInCourse,
+  requestPasswordResetOTP,
+  verifyPasswordResetOTP,
+  resetPassword
 };
