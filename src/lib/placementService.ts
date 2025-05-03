@@ -1,4 +1,3 @@
-
 import { Placement, PLACEMENTS_KEY } from './types';
 
 // Initialize placements if not present
@@ -81,6 +80,11 @@ export const getRecentPlacements = (count = 5): Placement[] => {
   return [...placements]
     .sort((a, b) => new Date(b.placementDate).getTime() - new Date(a.placementDate).getTime())
     .slice(0, count);
+};
+
+// Add this function to match the import in Placements.tsx
+export const addPlacement = (placementData: Omit<Placement, 'id'>): Placement => {
+  return createPlacement(placementData);
 };
 
 export const createPlacement = (placementData: Omit<Placement, 'id'>): Placement => {
