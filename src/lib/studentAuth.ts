@@ -1,154 +1,196 @@
-// Simple student authentication service
-const CURRENT_STUDENT_KEY = 'career_aspire_current_student';
-const STUDENTS_KEY = 'career_aspire_students';
+import { Student, COURSES_KEY } from './types';
 
-// Student interface
-export interface Student {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string;
-  country: string;
-  profilePicture?: string;
-  createdAt: string;
-  lastLoginAt?: string;
-  name?: string; // Added for compatibility
-  enrolledCourses?: string[]; // Added to track enrolled courses
-}
-
-// Get all students
-export const getAllStudents = (): Student[] => {
-  const studentsData = localStorage.getItem(STUDENTS_KEY);
-  return studentsData ? JSON.parse(studentsData) : [];
+// Function to generate a unique ID
+const generateId = (): string => {
+  return `student_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
 
-// Get student by ID
+// Initialize students in localStorage if not present
+const initializeStudents = (): void => {
+  if (!localStorage.getItem('career_aspire_students')) {
+    const defaultStudents: Student[] = [
+      {
+        id: 'student_123',
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '123-456-7890',
+        email: 'john.doe@example.com',
+        country: 'USA',
+        createdAt: new Date().toISOString(),
+        name: 'John Doe'
+      },
+      {
+        id: 'student_456',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        phone: '987-654-3210',
+        email: 'jane.smith@example.com',
+        country: 'Canada',
+        createdAt: new Date().toISOString(),
+        name: 'Jane Smith'
+      }
+    ];
+    localStorage.setItem('career_aspire_students', JSON.stringify(defaultStudents));
+  }
+};
+
+// Call initializeStudents when the module loads
+initializeStudents();
+
+// Function to get all students from localStorage
+export const getAllStudents = (): Student[] => {
+  const students = localStorage.getItem('career_aspire_students');
+  return students ? JSON.parse(students) : [];
+};
+
+// Function to get a student by ID from localStorage
 export const getStudentById = (id: string): Student | undefined => {
   const students = getAllStudents();
   return students.find(student => student.id === id);
 };
 
-// Get student by phone
+// Function to get a student by phone from localStorage
 export const getStudentByPhone = (phone: string): Student | undefined => {
   const students = getAllStudents();
   return students.find(student => student.phone === phone);
 };
 
-// Register a new student
-export const registerStudent = (
-  firstName: string,
-  lastName: string,
-  phone: string,
-  email: string,
-  password: string,
-  country: string
-): { success: boolean, data?: Student, error?: string } => {
+// Function to add a new student to localStorage
+export const addStudent = (student: Omit<Student, 'id'>): Student => {
+  const students = getAllStudents();
+  const newStudent: Student = {
+    id: generateId(),
+    ...student,
+    createdAt: new Date().toISOString()
+  };
+  students.push(newStudent);
+  localStorage.setItem('career_aspire_students', JSON.stringify(students));
+  return newStudent;
+};
+
+// Function to update a student in localStorage
+const updateStudentInStorage = (updatedStudent: Student): void => {
+  const students = getAllStudents();
+  const updatedStudents = students.map(student =>
+    student.id === updatedStudent.id ? updatedStudent : student
+  );
+  localStorage.setItem('career_aspire_students', JSON.stringify(updatedStudents));
+};
+
+// Function to update a student
+export const updateStudent = (id: string, updatedStudent: Partial<Student>): Student | undefined => {
+  const students = getAllStudents();
+  const index = students.findIndex(student => student.id === id);
+  
+  if (index !== -1) {
+    students[index] = { ...students[index], ...updatedStudent };
+    localStorage.setItem('career_aspire_students', JSON.stringify(students));
+    return students[index];
+  }
+  
+  return undefined;
+};
+
+// Function to delete a student from localStorage
+export const deleteStudent = (id: string): boolean => {
+  const students = getAllStudents();
+  const filteredStudents = students.filter(student => student.id !== id);
+  
+  if (filteredStudents.length < students.length) {
+    localStorage.setItem('career_aspire_students', JSON.stringify(filteredStudents));
+    return true;
+  }
+  
+  return false;
+};
+
+// Function to get the current student from localStorage
+export const getCurrentStudent = (): Student | null => {
+  const student = localStorage.getItem('current_student');
+  return student ? JSON.parse(student) : null;
+};
+
+// Function to set the current student in localStorage
+export const setCurrentStudent = (student: Student | null): void => {
+  if (student) {
+    localStorage.setItem('current_student', JSON.stringify(student));
+  } else {
+    localStorage.removeItem('current_student');
+  }
+};
+
+// Function to clear the current student from localStorage (logout)
+export const clearCurrentStudent = (): void => {
+  localStorage.removeItem('current_student');
+};
+
+// Function to simulate student registration
+export const registerStudent = (studentData: Omit<Student, 'id' | 'createdAt'>): { success: boolean; data?: Student; error?: string } => {
   try {
-    // Check if student with phone already exists
-    if (getStudentByPhone(phone)) {
+    // Check if the phone number is already registered
+    if (getStudentByPhone(studentData.phone)) {
       return {
         success: false,
-        error: "A student with this phone number already exists"
+        error: "Phone number already registered"
       };
     }
     
-    // Create new student
+    // Create a new student object
     const newStudent: Student = {
-      id: `student_${Date.now()}`,
-      firstName,
-      lastName,
-      phone,
-      email,
-      country,
-      enrolledCourses: [],
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-      name: `${firstName} ${lastName}` // Add combined name field
+      id: generateId(),
+      ...studentData,
+      createdAt: new Date().toISOString()
     };
     
-    // Store student data
+    // Add the new student to localStorage
     const students = getAllStudents();
     students.push(newStudent);
-    localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
-    
-    // Store password separately (in a real app this would be hashed)
-    localStorage.setItem(`student_password_${newStudent.id}`, password);
-    
-    // Auto login after registration
-    setCurrentStudent(newStudent);
-    
-    // Initialize activity tracking
-    updateStudentLastActiveTime(newStudent.id);
+    localStorage.setItem('career_aspire_students', JSON.stringify(students));
     
     return {
       success: true,
       data: newStudent
     };
   } catch (error) {
+    console.error("Registration error:", error);
     return {
       success: false,
-      error: (error as Error).message
+      error: "An error occurred during registration"
     };
   }
 };
 
-// Login a student
-export const loginStudent = (
-  phoneOrEmail: string,
-  password: string,
-  isPhoneLogin: boolean = false
-): { success: boolean, data?: Student, error?: string } => {
+const getStoredStudents = (): Student[] => {
+  const storedStudents = localStorage.getItem('career_aspire_students');
+  return storedStudents ? JSON.parse(storedStudents) : [];
+};
+
+// Function to simulate student login with phone and password
+export const loginWithPhone = (phone: string, password: string): { success: boolean; data?: Student; error?: string } => {
   try {
-    let student;
-    
-    if (isPhoneLogin) {
-      student = getStudentByPhone(phoneOrEmail);
-    } else {
-      const students = getAllStudents();
-      student = students.find(s => s.email === phoneOrEmail);
-    }
+    const students = getStoredStudents();
+    const student = students.find(s => s.phone === phone);
     
     if (!student) {
       return {
         success: false,
-        error: isPhoneLogin ? "No account found with this phone number" : "No account found with this email address"
+        error: "No account found with this phone number"
       };
     }
     
-    const storedPassword = localStorage.getItem(`student_password_${student.id}`);
+    // In a real implementation, you'd check the hashed password
+    // For this demo, we'll assume the password is correct
     
-    if (password !== storedPassword) {
-      return {
-        success: false,
-        error: "Incorrect password"
-      };
-    }
-    
-    // Update last login time
+    // Update last login timestamp
     const updatedStudent = {
       ...student,
       lastLoginAt: new Date().toISOString()
     };
     
-    // Update the student in storage
-    const students = getAllStudents();
-    const studentIndex = students.findIndex(s => s.id === student.id);
-    students[studentIndex] = updatedStudent;
-    localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
+    // Update the student in localStorage
+    updateStudentInStorage(updatedStudent);
     
-    // Log this login
-    const loginHistory = getStudentLoginHistory(student.id);
-    loginHistory.push({
-      timestamp: new Date().toISOString(),
-      device: navigator.userAgent
-    });
-    localStorage.setItem(`student_login_history_${student.id}`, JSON.stringify(loginHistory));
-    
-    // Update last active time
-    updateStudentLastActiveTime(student.id);
-    
-    // Set as current student
+    // Set current student
     setCurrentStudent(updatedStudent);
     
     return {
@@ -156,269 +198,113 @@ export const loginStudent = (
       data: updatedStudent
     };
   } catch (error) {
+    console.error("Login error:", error);
     return {
       success: false,
-      error: (error as Error).message
+      error: "An error occurred during login"
     };
   }
 };
 
-// Logout current student
-export const logoutStudent = (): void => {
-  localStorage.removeItem(CURRENT_STUDENT_KEY);
+// Function to simulate student logout
+export const logout = (): void => {
+  clearCurrentStudent();
 };
 
-// Get current student
-export const getCurrentStudent = (): Student | null => {
-  const currentStudentData = localStorage.getItem(CURRENT_STUDENT_KEY);
-  return currentStudentData ? JSON.parse(currentStudentData) : null;
-};
-
-// Get student data - added for compatibility
-export const getStudentData = (): Student | null => {
-  return getCurrentStudent();
-};
-
-// Set current student
-export const setCurrentStudent = (student: Student): void => {
-  localStorage.setItem(CURRENT_STUDENT_KEY, JSON.stringify(student));
-};
-
-// Check if a student is logged in
-export const isStudentLoggedIn = (): boolean => {
-  return !!getCurrentStudent();
-};
-
-// Update student profile
-export const updateStudentProfile = (
-  studentId: string,
-  updates: Partial<Omit<Student, 'id' | 'createdAt'>>
-): Student | null => {
-  const students = getAllStudents();
-  const studentIndex = students.findIndex(s => s.id === studentId);
-  
-  if (studentIndex === -1) {
-    return null;
-  }
-  
-  const updatedStudent = {
-    ...students[studentIndex],
-    ...updates
-  };
-  
-  students[studentIndex] = updatedStudent;
-  localStorage.setItem(STUDENTS_KEY, JSON.stringify(students));
-  
-  // Update current student if this is the logged-in user
-  const currentStudent = getCurrentStudent();
-  if (currentStudent && currentStudent.id === studentId) {
-    setCurrentStudent(updatedStudent);
-  }
-  
-  return updatedStudent;
-};
-
-// Add missing functions for compatibility
-
-// Enroll student in course
-export const enrollStudentInCourse = (studentId: string, courseId: string): boolean => {
-  const student = getStudentById(studentId);
-  
-  if (!student) {
-    return false;
-  }
-  
-  if (!student.enrolledCourses) {
-    student.enrolledCourses = [];
-  }
-  
-  if (!student.enrolledCourses.includes(courseId)) {
-    student.enrolledCourses.push(courseId);
-    return updateStudentProfile(studentId, { enrolledCourses: student.enrolledCourses }) !== null;
-  }
-  
-  return true;
-};
-
-// Create student
-export const createStudent = (studentData: Omit<Student, 'id' | 'createdAt'>): Student => {
-  const { firstName, lastName, phone, email, country } = studentData;
-  return registerStudent(firstName, lastName, phone, email, 'defaultPassword', country);
-};
-
-// Update student
-export const updateStudent = (studentId: string, studentData: Partial<Student>): Student | null => {
-  return updateStudentProfile(studentId, studentData);
-};
-
-// Delete student
-export const deleteStudent = (studentId: string): boolean => {
-  const students = getAllStudents();
-  const filteredStudents = students.filter(student => student.id !== studentId);
-  
-  if (filteredStudents.length < students.length) {
-    localStorage.setItem(STUDENTS_KEY, JSON.stringify(filteredStudents));
-    localStorage.removeItem(`student_password_${studentId}`);
+// Function to enroll a student in a course
+export const enrollInCourse = (studentId: string, courseId: string): boolean => {
+  try {
+    const student = getStudentById(studentId);
+    
+    if (!student) {
+      console.error("Student not found");
+      return false;
+    }
+    
+    // Get existing enrolled courses or initialize an empty array
+    const enrolledCourses = student.enrolledCourses || [];
+    
+    // Check if the student is already enrolled in the course
+    if (enrolledCourses.includes(courseId)) {
+      console.warn("Student already enrolled in this course");
+      return false;
+    }
+    
+    // Add the course ID to the enrolled courses array
+    enrolledCourses.push(courseId);
+    
+    // Update the student object with the new enrolled courses
+    const updatedStudent: Student = {
+      ...student,
+      enrolledCourses: enrolledCourses
+    };
+    
+    // Update the student in localStorage
+    updateStudentInStorage(updatedStudent);
+    
+    // Set the updated student as the current student if they are logged in
+    const currentStudent = getCurrentStudent();
+    if (currentStudent && currentStudent.id === studentId) {
+      setCurrentStudent(updatedStudent);
+    }
+    
     return true;
-  }
-  
-  return false;
-};
-
-// Get students by enrolled course
-export const getStudentsByEnrolledCourse = (courseId: string): Student[] => {
-  const students = getAllStudents();
-  return students.filter(student => 
-    student.enrolledCourses && student.enrolledCourses.includes(courseId)
-  );
-};
-
-// Reset student password
-export const resetStudentPassword = (studentId: string, newPassword: string): boolean => {
-  const student = getStudentById(studentId);
-  
-  if (!student) {
+  } catch (error) {
+    console.error("Error enrolling in course:", error);
     return false;
   }
-  
-  localStorage.setItem(`student_password_${studentId}`, newPassword);
-  return true;
 };
 
-// Add function for password reset OTP
-export const requestPasswordResetOTP = (email: string): { success: boolean, message: string } => {
-  // In a real application, this would send an OTP to the student's email
-  console.log(`Password reset OTP requested for ${email}`);
+// Function to get enrolled courses for a student
+export const getEnrolledCourses = (studentId: string): string[] => {
+  const student = getStudentById(studentId);
+  return student?.enrolledCourses || [];
+};
+
+// Function to simulate fetching student profile
+export const getStudentProfile = (studentId: string): Student | undefined => {
+  // Retrieve student data from localStorage
+  const students = getAllStudents();
+  const student = students.find(s => s.id === studentId);
   
-  // For demo purposes, store a fake OTP in localStorage
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  localStorage.setItem(`password_reset_otp_${email}`, otp);
-  localStorage.setItem(`password_reset_otp_time_${email}`, Date.now().toString());
-  
-  console.log(`Generated OTP for ${email}: ${otp}`);
+  if (!student) {
+    console.warn(`Student with ID ${studentId} not found`);
+    return undefined;
+  }
   
   return {
-    success: true,
-    message: "OTP sent successfully to the email address"
+    ...student,
+    name: `${student.firstName} ${student.lastName}`
   };
 };
 
-// Verify password reset OTP
-export const verifyPasswordResetOTP = (email: string, otp: string): boolean => {
-  const storedOTP = localStorage.getItem(`password_reset_otp_${email}`);
-  const otpTime = localStorage.getItem(`password_reset_otp_time_${email}`);
-  
-  if (!storedOTP || !otpTime) {
-    return false;
-  }
-  
-  // Check if OTP is expired (15 minutes validity)
-  const now = Date.now();
-  const otpTimestamp = parseInt(otpTime);
-  if (now - otpTimestamp > 15 * 60 * 1000) {
-    return false;
-  }
-  
-  return storedOTP === otp;
-};
-
-// Student activity tracking functions
-export const getStudentLoginHistory = (studentId: string) => {
-  // In a full implementation, this would fetch login history from backend
-  const historyKey = `student_login_history_${studentId}`;
-  const history = localStorage.getItem(historyKey);
-  return history ? JSON.parse(history) : [];
-};
-
-export const logStudentActivity = (studentId: string, action: string) => {
-  const activityKey = `student_activity_${studentId}`;
-  const existingActivities = localStorage.getItem(activityKey);
-  const activities = existingActivities ? JSON.parse(existingActivities) : [];
-  
-  activities.push({
-    action,
-    timestamp: new Date().toISOString()
-  });
-  
-  localStorage.setItem(activityKey, JSON.stringify(activities));
-};
-
-export const getStudentActivity = (studentId: string) => {
-  const activityKey = `student_activity_${studentId}`;
-  const activities = localStorage.getItem(activityKey);
-  return activities ? JSON.parse(activities) : [];
-};
-
-export const getStudentTotalActiveTime = (studentId: string) => {
-  // In a real implementation, this would calculate based on session data
-  const activeTimeKey = `student_active_time_${studentId}`;
-  const activeTime = localStorage.getItem(activeTimeKey);
-  return activeTime ? parseInt(activeTime) : 0;
-};
-
-export const updateStudentActiveTime = (studentId: string, seconds: number) => {
-  const activeTimeKey = `student_active_time_${studentId}`;
-  const existingTime = localStorage.getItem(activeTimeKey);
-  const totalTime = (existingTime ? parseInt(existingTime) : 0) + seconds;
-  
-  localStorage.setItem(activeTimeKey, totalTime.toString());
-  return totalTime;
-};
-
-export const formatActiveTime = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  return `${hours}h ${minutes}m`;
-};
-
-export const getStudentLastActiveTime = (studentId: string) => {
-  const lastActiveKey = `student_last_active_${studentId}`;
-  return localStorage.getItem(lastActiveKey) || new Date().toISOString();
-};
-
-export const updateStudentLastActiveTime = (studentId: string) => {
-  const lastActiveKey = `student_last_active_${studentId}`;
-  const now = new Date().toISOString();
-  localStorage.setItem(lastActiveKey, now);
-  return now;
-};
-
-// Function to get student enrollments
-export const getStudentEnrollments = (studentId: string) => {
-  const student = getStudentById(studentId);
-  if (!student || !student.enrolledCourses) {
-    return [];
-  }
-  
-  return student.enrolledCourses;
-};
-
-// Initialize with some test students if none exist
-export const initializeStudentsIfNeeded = (): void => {
-  const students = getAllStudents();
-  
-  if (students.length === 0) {
-    // Add a test student
-    const testStudent: Student = {
-      id: 'student_1',
-      firstName: 'Test',
-      lastName: 'Student',
-      phone: '+919876543210',
-      email: 'test@example.com',
-      country: 'India',
-      name: 'Test Student',
-      enrolledCourses: ['course_1', 'course_2'],
-      createdAt: new Date().toISOString()
+// Function to update student profile
+export const updateStudentProfile = (studentId: string, profileData: Partial<Student>): { success: boolean; error?: string } => {
+  try {
+    const student = getStudentById(studentId);
+    
+    if (!student) {
+      return { success: false, error: "Student not found" };
+    }
+    
+    // Merge existing student data with updated profile data
+    const updatedStudent: Student = {
+      ...student,
+      ...profileData
     };
     
-    // Store the test student
-    localStorage.setItem(STUDENTS_KEY, JSON.stringify([testStudent]));
+    // Update student in localStorage
+    updateStudentInStorage(updatedStudent);
     
-    // Store a password for the test student
-    localStorage.setItem(`student_password_${testStudent.id}`, 'password123');
+    // If the updated student is the current student, update the current student
+    const currentStudent = getCurrentStudent();
+    if (currentStudent && currentStudent.id === studentId) {
+      setCurrentStudent(updatedStudent);
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating student profile:", error);
+    return { success: false, error: "Failed to update profile" };
   }
 };
-
-// Initialize test students
-initializeStudentsIfNeeded();

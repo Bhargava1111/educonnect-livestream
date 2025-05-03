@@ -1,533 +1,355 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, Plus, Trash, Save, Check, X, Camera, Monitor } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import {
-  getCourseById,
-  getAssessmentById,
-  createAssessment,
-  updateAssessment,
-  createQuestion,
-  Assessment,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { 
+  Assessment, 
+  AssessmentQuestion, 
   Question,
-  Course
-} from '@/lib/courseManagement';
+  Course,
+} from '@/lib/types';
+import { 
+  createAssessment, 
+  updateAssessment, 
+  getAssessmentById, 
+  getAllAssessments 
+} from '@/lib/assessmentService';
+import { getAllCourses } from '@/lib/courseService';
+import { useParams } from 'react-router-dom';
 
-const AssessmentCreate = () => {
+const AdminAssessmentCreate = () => {
+  const { assessmentId } = useParams<{ assessmentId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { courseId, assessmentId } = useParams<{ courseId: string, assessmentId?: string }>();
   
-  const [course, setCourse] = useState<Course | null>(null);
   const [assessment, setAssessment] = useState<Assessment>({
     id: '',
-    courseId: courseId || '',
+    courseId: '',
     title: '',
     description: '',
-    questions: [],
-    timeLimit: 60,
-    passingScore: 70,
     type: 'quiz',
-    dueDate: '',
-    requiresCamera: true,
-    requiresScreenshare: true
+    questions: [],
+    duration: 60,
+    passingMarks: 70,
+    isPublished: false,
+    requiresScreenshare: false,
+    requiresCamera: false,
+    timeLimit: 60
+  });
+  
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [newQuestion, setNewQuestion] = useState<Question>({
+    id: '',
+    question: '',
+    type: 'multiple-choice',
+    options: [],
+    correctAnswer: '',
+    marks: 10
   });
   
   useEffect(() => {
-    if (!courseId) {
-      toast({
-        title: "Error",
-        description: "Course ID is required",
-        variant: "destructive"
-      });
-      navigate('/admin/courses');
-      return;
-    }
+    // Load courses
+    const loadCourses = () => {
+      const allCourses = getAllCourses();
+      setCourses(allCourses);
+    };
+    loadCourses();
     
-    // Load course information
-    const courseData = getCourseById(courseId);
-    if (courseData) {
-      setCourse(courseData);
-    } else {
-      toast({
-        title: "Course Not Found",
-        description: "The requested course could not be found",
-        variant: "destructive"
-      });
-      navigate('/admin/courses');
-      return;
-    }
-    
-    // If editing an existing assessment
+    // Load assessment if editing
     if (assessmentId) {
       const existingAssessment = getAssessmentById(assessmentId);
       if (existingAssessment) {
-        setAssessment({
-          ...existingAssessment,
-          requiresCamera: existingAssessment.requiresCamera || true,
-          requiresScreenshare: existingAssessment.requiresScreenshare || true
-        });
+        setAssessment(existingAssessment);
       } else {
         toast({
           title: "Assessment Not Found",
-          description: "The requested assessment could not be found",
+          description: "The requested assessment could not be found.",
           variant: "destructive"
         });
-        navigate(`/admin/courses/${courseId}/assessments`);
+        navigate('/admin/assessments');
       }
     }
-  }, [courseId, assessmentId, navigate, toast]);
+  }, [assessmentId, navigate, toast]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setAssessment(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    setAssessment(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSwitchChange = (name: string, checked: boolean) => {
+    setAssessment(prev => ({ ...prev, [name]: checked }));
+  };
+  
+  const handleNewQuestionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewQuestion(prev => ({ ...prev, [name]: value }));
+  };
   
   const handleAddQuestion = () => {
-    const newQuestion: Question = {
+    const newQ: AssessmentQuestion = {
       id: `question_${Date.now()}`,
-      text: '',
-      options: ['', '', '', ''],
-      correctAnswerIndex: 0,
-      points: 10,
-      type: 'multiple-choice'
+      question: newQuestion.question,
+      type: newQuestion.type as any,
+      options: newQuestion.options,
+      correctAnswer: newQuestion.correctAnswer,
+      marks: Number(newQuestion.marks)
     };
     
     setAssessment(prev => ({
       ...prev,
-      questions: [...prev.questions, newQuestion]
+      questions: [...prev.questions, newQ]
     }));
+    
+    setNewQuestion({
+      id: '',
+      question: '',
+      type: 'multiple-choice',
+      options: [],
+      correctAnswer: '',
+      marks: 10
+    });
   };
   
-  const handleRemoveQuestion = (index: number) => {
-    const newQuestions = [...assessment.questions];
-    newQuestions.splice(index, 1);
-    
+  const handleRemoveQuestion = (id: string) => {
     setAssessment(prev => ({
       ...prev,
-      questions: newQuestions
+      questions: prev.questions.filter(q => q.id !== id)
     }));
   };
   
-  const handleQuestionChange = (index: number, field: string, value: any) => {
-    const newQuestions = [...assessment.questions];
-    newQuestions[index] = {
-      ...newQuestions[index],
-      [field]: value
-    };
-    
-    setAssessment(prev => ({
-      ...prev,
-      questions: newQuestions
-    }));
-  };
-  
-  const handleOptionChange = (questionIndex: number, optionIndex: number, value: string) => {
-    const newQuestions = [...assessment.questions];
-    newQuestions[questionIndex].options[optionIndex] = value;
-    
-    setAssessment(prev => ({
-      ...prev,
-      questions: newQuestions
-    }));
-  };
-  
-  const handleAddOption = (questionIndex: number) => {
-    const newQuestions = [...assessment.questions];
-    newQuestions[questionIndex].options.push('');
-    
-    setAssessment(prev => ({
-      ...prev,
-      questions: newQuestions
-    }));
-  };
-  
-  const handleRemoveOption = (questionIndex: number, optionIndex: number) => {
-    const newQuestions = [...assessment.questions];
-    
-    // Ensure we keep at least 2 options
-    if (newQuestions[questionIndex].options.length <= 2) return;
-    
-    // If removing the correct answer, reset to first option
-    if (optionIndex === newQuestions[questionIndex].correctAnswerIndex) {
-      newQuestions[questionIndex].correctAnswerIndex = 0;
-    }
-    // If removing an option before the correct answer, adjust the index
-    else if (optionIndex < newQuestions[questionIndex].correctAnswerIndex) {
-      newQuestions[questionIndex].correctAnswerIndex--;
-    }
-    
-    newQuestions[questionIndex].options.splice(optionIndex, 1);
-    
-    setAssessment(prev => ({
-      ...prev,
-      questions: newQuestions
-    }));
-  };
-  
-  const handleSetCorrectAnswer = (questionIndex: number, optionIndex: number) => {
-    const newQuestions = [...assessment.questions];
-    newQuestions[questionIndex].correctAnswerIndex = optionIndex;
-    
-    setAssessment(prev => ({
-      ...prev,
-      questions: newQuestions
-    }));
-  };
-  
-  const handleSave = () => {
-    // Validate the assessment
-    if (!assessment.title.trim()) {
+  const handleSubmit = () => {
+    if (assessmentId) {
+      // Update existing assessment
+      updateAssessment(assessmentId, assessment);
       toast({
-        title: "Validation Error",
-        description: "Assessment title is required",
-        variant: "destructive"
+        title: "Assessment Updated",
+        description: `${assessment.title} has been updated successfully.`
       });
-      return;
-    }
-    
-    if (assessment.questions.length === 0) {
+    } else {
+      // Create new assessment
+      createAssessment(assessment);
       toast({
-        title: "Validation Error",
-        description: "At least one question is required",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Check if any questions are incomplete
-    const incompleteQuestion = assessment.questions.find(
-      q => !q.text.trim() || q.options.some(o => !o.trim())
-    );
-    
-    if (incompleteQuestion) {
-      toast({
-        title: "Validation Error",
-        description: "All questions and options must be filled in",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      if (assessmentId) {
-        // Update existing assessment
-        updateAssessment(assessmentId, assessment);
-        toast({
-          title: "Success",
-          description: "Assessment updated successfully"
-        });
-      } else {
-        // Create new assessment
-        createAssessment(assessment);
-        toast({
-          title: "Success",
-          description: "Assessment created successfully"
-        });
-      }
-      
-      // Navigate back to course assessments
-      navigate(`/admin/courses/${courseId}/assessments`);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save assessment. Please try again.",
-        variant: "destructive"
+        title: "Assessment Created",
+        description: `${assessment.title} has been created successfully.`
       });
     }
+    
+    navigate('/admin/assessments');
   };
   
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <Link 
-            to={`/admin/courses/${courseId}/assessments`}
-            className="flex items-center text-eduBlue-600 hover:text-eduBlue-700 mb-2"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Assessments
-          </Link>
-          <h1 className="text-2xl font-bold">
-            {assessmentId ? 'Edit Assessment' : 'Create New Assessment'}
-          </h1>
-          <p className="text-gray-500">
-            {course && `For course: ${course.title}`}
-          </p>
-        </div>
-        
-        <Button onClick={handleSave}>
-          <Save className="h-4 w-4 mr-2" />
-          Save Assessment
-        </Button>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">{assessmentId ? 'Edit Assessment' : 'Create New Assessment'}</h1>
+        <p className="text-gray-500">Manage assessment details and questions</p>
       </div>
       
       <Card>
         <CardHeader>
           <CardTitle>Assessment Details</CardTitle>
+          <CardDescription>
+            Enter the details for the assessment
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={assessment.title}
-              onChange={(e) => setAssessment({...assessment, title: e.target.value})}
-              placeholder="Enter assessment title"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={assessment.description}
-              onChange={(e) => setAssessment({...assessment, description: e.target.value})}
-              placeholder="Enter assessment description"
-              rows={3}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent>
+          <div className="grid gap-4">
             <div>
-              <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
-              <Input
-                id="timeLimit"
-                type="number"
-                min="1"
-                value={assessment.timeLimit}
-                onChange={(e) => setAssessment({...assessment, timeLimit: parseInt(e.target.value) || 60})}
+              <Label htmlFor="title">Title</Label>
+              <Input 
+                id="title" 
+                name="title" 
+                value={assessment.title} 
+                onChange={handleInputChange} 
               />
             </div>
             
             <div>
-              <Label htmlFor="passingScore">Passing Score (%)</Label>
-              <Input
-                id="passingScore"
-                type="number"
-                min="1"
-                max="100"
-                value={assessment.passingScore}
-                onChange={(e) => setAssessment({...assessment, passingScore: parseInt(e.target.value) || 70})}
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="type">Assessment Type</Label>
-              <select
-                id="type"
-                value={assessment.type}
-                onChange={(e) => setAssessment({...assessment, type: e.target.value as any})}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2"
+              <Label htmlFor="courseId">Course</Label>
+              <Select 
+                value={assessment.courseId} 
+                onValueChange={(value) => handleSelectChange('courseId', value)}
               >
-                <option value="quiz">Quiz</option>
-                <option value="exam">Exam</option>
-                <option value="coding-challenge">Coding Challenge</option>
-                <option value="project">Project</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map(course => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div>
-              <Label htmlFor="dueDate">Due Date (Optional)</Label>
-              <Input
-                id="dueDate"
-                type="date"
-                value={assessment.dueDate}
-                onChange={(e) => setAssessment({...assessment, dueDate: e.target.value})}
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description" 
+                name="description" 
+                value={assessment.description} 
+                onChange={handleInputChange} 
               />
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="requiresCamera"
-                checked={assessment.requiresCamera}
-                onCheckedChange={(checked) => setAssessment({...assessment, requiresCamera: checked})}
-              />
+            
+            <div>
+              <Label htmlFor="type">Type</Label>
+              <Select 
+                value={assessment.type} 
+                onValueChange={(value) => handleSelectChange('type', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assessment type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="quiz">Quiz</SelectItem>
+                  <SelectItem value="assignment">Assignment</SelectItem>
+                  <SelectItem value="project">Project</SelectItem>
+                  <SelectItem value="exam">Exam</SelectItem>
+                  <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="requiresCamera" className="flex items-center">
-                  <Camera className="h-4 w-4 mr-2" />
-                  Require Camera Recording
-                </Label>
-                <p className="text-sm text-gray-500">
-                  Students must enable their camera during the assessment
-                </p>
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input 
+                  id="duration" 
+                  name="duration" 
+                  type="number" 
+                  value={String(assessment.duration)} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="passingMarks">Passing Marks (%)</Label>
+                <Input 
+                  id="passingMarks" 
+                  name="passingMarks" 
+                  type="number" 
+                  value={String(assessment.passingMarks)} 
+                  onChange={handleInputChange} 
+                />
               </div>
             </div>
             
             <div className="flex items-center space-x-2">
-              <Switch
-                id="requiresScreenshare"
-                checked={assessment.requiresScreenshare}
-                onCheckedChange={(checked) => setAssessment({...assessment, requiresScreenshare: checked})}
+              <Switch 
+                id="isPublished" 
+                checked={assessment.isPublished} 
+                onCheckedChange={(checked) => handleSwitchChange('isPublished', checked)} 
               />
-              <div>
-                <Label htmlFor="requiresScreenshare" className="flex items-center">
-                  <Monitor className="h-4 w-4 mr-2" />
-                  Require Screen Sharing
-                </Label>
-                <p className="text-sm text-gray-500">
-                  Students must share their screen during the assessment
-                </p>
-              </div>
+              <Label htmlFor="isPublished">Published</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="requiresScreenshare" 
+                checked={assessment.requiresScreenshare} 
+                onCheckedChange={(checked) => handleSwitchChange('requiresScreenshare', checked)} 
+              />
+              <Label htmlFor="requiresScreenshare">Require Screen Share</Label>
             </div>
           </div>
         </CardContent>
       </Card>
       
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Questions</h2>
-        <Button onClick={handleAddQuestion} variant="outline">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Question
-        </Button>
-      </div>
-      
-      <div className="space-y-6">
-        {assessment.questions.map((question, questionIndex) => (
-          <Card key={questionIndex}>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between">
-                <CardTitle className="text-lg">Question {questionIndex + 1}</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleRemoveQuestion(questionIndex)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor={`question-${questionIndex}`}>Question Text</Label>
-                <Textarea
-                  id={`question-${questionIndex}`}
-                  value={question.text}
-                  onChange={(e) => handleQuestionChange(questionIndex, 'text', e.target.value)}
-                  placeholder="Enter question text"
-                />
-              </div>
-              
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <Label>Options</Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleAddOption(questionIndex)}
-                  >
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add Option
-                  </Button>
-                </div>
-                
-                <div className="space-y-2">
-                  {question.options.map((option, optionIndex) => (
-                    <div key={optionIndex} className="flex items-center gap-2">
-                      <Button
-                        variant={question.correctAnswerIndex === optionIndex ? "default" : "outline"}
-                        size="sm"
-                        className={question.correctAnswerIndex === optionIndex ? "bg-green-600 hover:bg-green-700" : ""}
-                        onClick={() => handleSetCorrectAnswer(questionIndex, optionIndex)}
-                        title="Set as correct answer"
-                      >
-                        {question.correctAnswerIndex === optionIndex ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <div className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Input
-                        value={option}
-                        onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
-                        placeholder={`Option ${optionIndex + 1}`}
-                        className="flex-1"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveOption(questionIndex, optionIndex)}
-                        disabled={question.options.length <= 2}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor={`points-${questionIndex}`}>Points</Label>
-                  <Input
-                    id={`points-${questionIndex}`}
-                    type="number"
-                    min="1"
-                    value={question.points}
-                    onChange={(e) => handleQuestionChange(questionIndex, 'points', parseInt(e.target.value) || 10)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor={`type-${questionIndex}`}>Question Type</Label>
-                  <select
-                    id={`type-${questionIndex}`}
-                    value={question.type}
-                    onChange={(e) => handleQuestionChange(questionIndex, 'type', e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2"
-                  >
-                    <option value="multiple-choice">Multiple Choice</option>
-                    <option value="essay">Essay</option>
-                    <option value="coding">Coding</option>
-                  </select>
-                </div>
-              </div>
-              
-              {question.type === 'coding' && (
-                <div>
-                  <Label htmlFor={`codingTemplate-${questionIndex}`}>Coding Template (Optional)</Label>
-                  <Textarea
-                    id={`codingTemplate-${questionIndex}`}
-                    value={question.codingTemplate || ''}
-                    onChange={(e) => handleQuestionChange(questionIndex, 'codingTemplate', e.target.value)}
-                    placeholder="Provide a code template for students to start with"
-                    className="font-mono"
-                    rows={5}
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-        
-        {assessment.questions.length === 0 && (
-          <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-gray-500">No questions added yet. Click "Add Question" to get started.</p>
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Questions</CardTitle>
+          <CardDescription>
+            Add and manage questions for the assessment
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="newQuestion">Question</Label>
+              <Textarea 
+                id="newQuestion" 
+                name="question" 
+                value={newQuestion.question} 
+                onChange={handleNewQuestionChange} 
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="newQuestionType">Type</Label>
+              <Select 
+                value={newQuestion.type} 
+                onValueChange={(value) => setNewQuestion(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select question type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                  <SelectItem value="true-false">True/False</SelectItem>
+                  <SelectItem value="fill-in-blanks">Fill in the Blanks</SelectItem>
+                  <SelectItem value="descriptive">Descriptive</SelectItem>
+                  <SelectItem value="coding">Coding</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="newQuestionMarks">Marks</Label>
+              <Input 
+                id="newQuestionMarks" 
+                name="marks" 
+                type="number" 
+                value={String(newQuestion.marks)} 
+                onChange={handleNewQuestionChange} 
+              />
+            </div>
+            
+            <Button onClick={handleAddQuestion}>Add Question</Button>
           </div>
-        )}
-      </div>
+          
+          <div className="mt-4">
+            {assessment.questions.map((question) => (
+              <Card key={question.id} className="mb-4">
+                <CardContent className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{question.question}</p>
+                    <p className="text-sm text-gray-500">Type: {question.type}</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => handleRemoveQuestion(question.id)}>
+                    Remove
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
       
-      <div className="flex justify-end gap-4">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate(`/admin/courses/${courseId}/assessments`)}
-        >
-          Cancel
-        </Button>
-        <Button onClick={handleSave}>
-          <Save className="h-4 w-4 mr-2" />
-          Save Assessment
+      <div className="mt-6 flex justify-end">
+        <Button onClick={handleSubmit}>
+          {assessmentId ? 'Update Assessment' : 'Create Assessment'}
         </Button>
       </div>
     </div>
   );
 };
 
-export default AssessmentCreate;
+export default AdminAssessmentCreate;

@@ -1,3 +1,4 @@
+
 // Define common interfaces
 export const COURSES_KEY = 'career_aspire_courses';
 export const JOBS_KEY = 'career_aspire_jobs';
@@ -9,6 +10,7 @@ export const PLACEMENTS_KEY = 'career_aspire_placements';
 export const CONTACTS_KEY = 'career_aspire_contacts';
 export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
 export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
+export const EMAIL_NOTIFICATIONS_KEY = 'career_aspire_email_notifications';
 
 // Student interface (updated)
 export interface Student {
@@ -132,11 +134,14 @@ export interface Assessment {
   isPublished?: boolean;
   createdAt?: string;
   requiresScreenshare?: boolean;
+  requiresCamera?: boolean;
+  timeLimit?: number;
 }
 
 export interface AssessmentQuestion {
   id: string;
   question: string;
+  text?: string; // Added for compatibility
   type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
   options?: string[];
   correctAnswer?: string | string[];
@@ -153,7 +158,7 @@ export interface LiveMeeting {
   scheduledDate: string; // Combined date and time
   duration: string;
   meetingLink: string; // Renamed from link
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled' | 'upcoming';
   createdAt: string;
   instructor?: string; // For backwards compatibility
   date?: string; // For backwards compatibility
@@ -198,6 +203,9 @@ export interface Placement {
   imageUrl?: string;
   testimonial?: string;
   studentName?: string; // Add for backward compatibility
+  salary?: string; // Added for compatibility
+  year?: string; // Added for compatibility
+  courseCompleted?: string; // Added for compatibility
 }
 
 // Contact form interface
@@ -230,8 +238,68 @@ export interface EnrollmentFormSubmission {
 export interface Question {
   id: string;
   question: string;
+  text?: string; // Added for compatibility
   type: string;
   options?: string[];
   correctAnswer?: string | string[];
   marks: number;
+}
+
+// Added for EnrollmentForm.tsx
+export interface EnrollmentForm {
+  id: string;
+  studentId: string;
+  formType: 'course' | 'job';
+  relatedId: string;
+  submittedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  aadharNumber: string;
+  certificateId?: string;
+  permanentAddress: Address;
+  currentAddress: Address;
+  isSameAddress: boolean;
+  fatherName?: string;
+  motherName?: string;
+  guardianPhone?: string;
+  guardianEmail?: string;
+  tenthGrade?: EducationDetail;
+  twelfthGrade?: EducationDetail;
+  degree?: EducationDetail;
+  postGraduation?: EducationDetail;
+  certificateUrl?: string;
+  photographUrl?: string;
+}
+
+export interface Address {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface EducationDetail {
+  institutionName: string;
+  boardUniversity: string;
+  yearOfPassing: string;
+  totalMarks: string;
+  obtainedMarks: string;
+  documentUrl?: string;
+}
+
+export interface EmailNotification {
+  id: string;
+  subject: string;
+  message: string;
+  recipientEmail: string;
+  status: 'sent' | 'pending' | 'failed';
+  sentAt?: string;
+  createdAt: string;
 }

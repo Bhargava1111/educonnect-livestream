@@ -30,7 +30,9 @@ const initializeJobsIfNeeded = (): Job[] => {
         lastDate: '2023-12-31',
         jobType: 'Full-time',
         experienceLevel: 'Mid',
-        status: 'Active',
+        status: 'Open',
+        postedAt: new Date().toISOString(),
+        type: 'Full-time',
         externalLink: 'https://example.com/apply',
         category: 'Information Technology'
       },
@@ -52,7 +54,9 @@ const initializeJobsIfNeeded = (): Job[] => {
         lastDate: '2023-12-15',
         jobType: 'Full-time',
         experienceLevel: 'Senior',
-        status: 'Active',
+        status: 'Open',
+        postedAt: new Date().toISOString(),
+        type: 'Full-time',
         externalLink: 'https://example.com/apply',
         category: 'Information Technology'
       }
@@ -71,7 +75,7 @@ export const getActiveJobs = (): Job[] => {
   const jobs = getAllJobs();
   return jobs.filter(job => {
     const hasExpired = job.lastDate && new Date(job.lastDate) < new Date();
-    return !hasExpired && (job.status !== 'Inactive');
+    return !hasExpired && (job.status === 'Open');
   });
 };
 
@@ -87,12 +91,14 @@ export const getJobsByCategory = (category: string): Job[] => {
 
 export const createJob = (job: Omit<Job, 'id'>): Job => {
   const jobs = getAllJobs();
-  const newJob = {
+  const newJob: Job = {
     ...job,
     id: `job_${Date.now()}`,
+    postedAt: job.postedAt || new Date().toISOString(),
     createdAt: job.createdAt || new Date().toISOString(),
     appliedCount: job.appliedCount || 0,
-    status: job.status || 'Active'
+    status: (job.status as 'Open' | 'Closed' | 'Filled') || 'Open',
+    type: job.type || 'Full-time'
   };
   
   jobs.push(newJob);
@@ -149,44 +155,47 @@ export const applyForJob = (jobId: string, studentId: string): { success: boolea
     return { success: false };
   }
   
-  // Get the job to retrieve the external link
+  // Get the job and return the external application URL if available
   const job = getJobById(jobId);
   
-  if (!job || !job.externalLink) {
-    return { success: true }; // Application counted but no redirect URL
+  // Track student activity
+  if (studentId) {
+    try {
+      const activityData = {
+        id: `activity_${Date.now()}`,
+        studentId: studentId,
+        type: 'job_application',
+        context: { jobId },
+        timestamp: new Date().toISOString()
+      };
+      
+      // Save activity to localStorage
+      const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
+      const activityArray = activities ? JSON.parse(activities) : [];
+      activityArray.push(activityData);
+      localStorage.setItem(STUDENT_ACTIVITY_KEY, JSON.stringify(activityArray));
+    } catch (error) {
+      console.error("Error tracking student activity:", error);
+    }
   }
   
-  // Log the student activity
-  const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
-  let activityLog = activities ? JSON.parse(activities) : [];
-  
-  activityLog.push({
-    id: `activity_${Date.now()}`,
-    studentId,
-    action: 'job_application',
-    jobId,
-    timestamp: new Date().toISOString(),
-    details: {
-      jobTitle: job.title,
-      company: job.company
-    }
-  });
-  
-  localStorage.setItem(STUDENT_ACTIVITY_KEY, JSON.stringify(activityLog));
-  
-  return { success: true, url: job.externalLink };
+  return { 
+    success: true,
+    url: job?.externalLink || job?.applicationLink
+  };
 };
 
-// Export job data as CSV
+// Export jobs as CSV
 export const exportJobsAsCSV = (): string => {
   const jobs = getAllJobs();
   
   // CSV header
-  let csv = 'ID,Title,Company,Location,Category,Salary,Job Type,Experience Level,Last Date,Applied Count,Status\n';
+  let csv = 'ID,Title,Company,Location,Type,Status,Requirements,Salary,Posted Date,Last Date\n';
   
   // Add rows
   jobs.forEach(job => {
-    csv += `${job.id},"${job.title}","${job.company}","${job.location}","${job.category || 'N/A'}","${job.salary || 'N/A'}","${job.jobType || 'N/A'}","${job.experienceLevel || 'N/A'}","${job.lastDate || 'N/A'}",${job.appliedCount || 0},"${job.status || 'Active'}"\n`;
+    const requirements = job.requirements.join('; ').replace(/,/g, ' ');
+    csv += `${job.id},${job.title},${job.company},${job.location},${job.type},${job.status},${requirements},${job.salary},${job.postedAt},${job.lastDate || 'N/A'}\n`;
   });
   
   return csv;

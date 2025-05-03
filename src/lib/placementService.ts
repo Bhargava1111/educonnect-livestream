@@ -1,5 +1,5 @@
 
-import { Placement, PLACEMENTS_KEY, EmailNotification, EMAIL_NOTIFICATIONS_KEY } from './types';
+import { Placement, PLACEMENTS_KEY } from './types';
 
 // Initialize placements if not present
 const initializePlacementsIfNeeded = (): Placement[] => {
@@ -11,39 +11,48 @@ const initializePlacementsIfNeeded = (): Placement[] => {
     const defaultPlacements: Placement[] = [
       {
         id: 'placement_1',
-        studentName: 'Ravi Kumar',
+        studentId: 'student_123',
+        studentName: 'Rahul Sharma',
         company: 'Infosys',
-        position: 'Test Engineer',
-        year: 2023,
-        salary: '6 LPA',
-        testimonial: 'The QA testing course at Career Aspire Technology helped me secure my dream job at Infosys.',
-        courseCompleted: 'Software Testing & QA',
-        imageUrl: '',
-        placementDate: new Date('2023-06-15').toISOString()
+        position: 'Junior Software Engineer',
+        packageAmount: '4.5 LPA',
+        placementDate: '2023-05-15',
+        description: 'Hired through campus placement.',
+        imageUrl: '/assets/images/companies/infosys.png',
+        testimonial: 'Career Aspire helped me secure this amazing opportunity.',
+        year: '2023',
+        salary: '4.5 LPA',
+        courseCompleted: 'Full Stack Development'
       },
       {
         id: 'placement_2',
-        studentName: 'Priya Sharma',
+        studentId: 'student_456',
+        studentName: 'Priya Singh',
         company: 'TCS',
-        position: 'QA Automation Specialist',
-        year: 2023,
-        salary: '7.5 LPA',
-        testimonial: 'The hands-on training and mock interviews prepared me well for the industry demands.',
-        courseCompleted: 'Software Testing & QA',
-        imageUrl: '',
-        placementDate: new Date('2023-07-22').toISOString()
+        position: 'Associate Software Engineer',
+        packageAmount: '3.8 LPA',
+        placementDate: '2023-06-22',
+        description: 'Off-campus recruitment.',
+        imageUrl: '/assets/images/companies/tcs.png',
+        testimonial: 'The technical skills I learned at Career Aspire were invaluable.',
+        year: '2023',
+        salary: '3.8 LPA',
+        courseCompleted: 'Python Data Science'
       },
       {
         id: 'placement_3',
-        studentName: 'Suresh Patel',
-        company: 'Wipro',
-        position: 'Software Test Engineer',
-        year: 2023,
-        salary: '6.8 LPA',
-        testimonial: 'The mentors at Career Aspire were excellent and helped me prepare for industry challenges.',
-        courseCompleted: 'Full Stack Development',
-        imageUrl: '',
-        placementDate: new Date('2023-08-05').toISOString()
+        studentId: 'student_789',
+        studentName: 'Karthik P',
+        company: 'Cognizant',
+        position: 'Test Engineer',
+        packageAmount: '4.2 LPA',
+        placementDate: '2023-04-10',
+        description: 'Hired through job fair.',
+        imageUrl: '/assets/images/companies/cognizant.png',
+        testimonial: 'The mock interviews prepared me well for the actual interview process.',
+        year: '2023',
+        salary: '4.2 LPA',
+        courseCompleted: 'Software Testing'
       }
     ];
     localStorage.setItem(PLACEMENTS_KEY, JSON.stringify(defaultPlacements));
@@ -51,44 +60,9 @@ const initializePlacementsIfNeeded = (): Placement[] => {
   }
 };
 
-// Notification functions
-const createNotification = (notification: Omit<EmailNotification, 'id' | 'sentDate' | 'status'>): EmailNotification => {
-  const notifications = getAllEmailNotifications();
-  
-  const newNotification: EmailNotification = {
-    ...notification,
-    id: `notification_${Date.now()}`,
-    sentDate: new Date().toISOString(),
-    status: 'sent'
-  };
-  
-  notifications.push(newNotification);
-  localStorage.setItem(EMAIL_NOTIFICATIONS_KEY, JSON.stringify(notifications));
-  
-  console.log(`Notification created: ${newNotification.subject} to ${newNotification.to}`);
-  
-  return newNotification;
-};
-
-const getAllEmailNotifications = (): EmailNotification[] => {
-  const notifications = localStorage.getItem(EMAIL_NOTIFICATIONS_KEY);
-  return notifications ? JSON.parse(notifications) : [];
-};
-
-// Placements CRUD operations
+// Placement CRUD operations
 export const getAllPlacements = (): Placement[] => {
   return initializePlacementsIfNeeded();
-};
-
-export const getRecentPlacements = (limit: number = 6): Placement[] => {
-  const placements = getAllPlacements();
-  return placements
-    .sort((a, b) => {
-      const dateA = a.placementDate ? new Date(a.placementDate).getTime() : 0;
-      const dateB = b.placementDate ? new Date(b.placementDate).getTime() : 0;
-      return dateB - dateA;  // Sort in descending order (newest first)
-    })
-    .slice(0, limit);
 };
 
 export const getPlacementById = (id: string): Placement | undefined => {
@@ -96,40 +70,40 @@ export const getPlacementById = (id: string): Placement | undefined => {
   return placements.find(placement => placement.id === id);
 };
 
-export const createPlacement = (placement: Omit<Placement, 'id'>): Placement => {
+export const getPlacementsByStudentId = (studentId: string): Placement[] => {
   const placements = getAllPlacements();
-  const newPlacement = {
-    ...placement,
+  return placements.filter(placement => placement.studentId === studentId);
+};
+
+export const getRecentPlacements = (count = 5): Placement[] => {
+  const placements = getAllPlacements();
+  // Sort by date (most recent first) and take the requested count
+  return [...placements]
+    .sort((a, b) => new Date(b.placementDate).getTime() - new Date(a.placementDate).getTime())
+    .slice(0, count);
+};
+
+export const createPlacement = (placementData: Omit<Placement, 'id'>): Placement => {
+  const placements = getAllPlacements();
+  
+  const newPlacement: Placement = {
+    ...placementData,
     id: `placement_${Date.now()}`,
-    placementDate: placement.placementDate || new Date().toISOString(),
+    placementDate: placementData.placementDate || new Date().toISOString(),
   };
   
   placements.push(newPlacement);
   localStorage.setItem(PLACEMENTS_KEY, JSON.stringify(placements));
   
-  // Create notification for admin
-  createNotification({
-    to: "admin@careeraspiretechnology.com",
-    subject: `New Placement Record Added: ${newPlacement.studentName} at ${newPlacement.company}`,
-    body: `A new placement record has been added to the system.
-    
-Student: ${newPlacement.studentName}
-Company: ${newPlacement.company}
-Position: ${newPlacement.position}
-Salary: ${newPlacement.salary}
-Course Completed: ${newPlacement.courseCompleted}`,
-    type: 'general'
-  });
-  
   return newPlacement;
 };
 
-export const updatePlacement = (id: string, updatedPlacement: Partial<Placement>): Placement | undefined => {
+export const updatePlacement = (id: string, updatedData: Partial<Placement>): Placement | undefined => {
   const placements = getAllPlacements();
   const index = placements.findIndex(placement => placement.id === id);
   
   if (index !== -1) {
-    placements[index] = { ...placements[index], ...updatedPlacement };
+    placements[index] = { ...placements[index], ...updatedData };
     localStorage.setItem(PLACEMENTS_KEY, JSON.stringify(placements));
     return placements[index];
   }
@@ -149,64 +123,84 @@ export const deletePlacement = (id: string): boolean => {
   return false;
 };
 
-// Statistics functions
+// Function to calculate placement statistics
 export const getPlacementStatistics = () => {
   const placements = getAllPlacements();
   
-  // Count total placements
+  // Total number of placements
   const totalPlacements = placements.length;
   
-  // Calculate average salary
-  const salaries = placements
-    .map(p => {
-      // Extract numeric value from salary string (e.g. "6 LPA" => 6)
-      const match = p.salary?.match(/(\d+(\.\d+)?)/);
-      return match ? parseFloat(match[0]) : 0;
-    })
-    .filter(salary => salary > 0);
-    
-  const averageSalary = salaries.length > 0 
-    ? salaries.reduce((sum, salary) => sum + salary, 0) / salaries.length
-    : 0;
-    
-  // Find highest salary
-  const highestSalary = salaries.length > 0 
-    ? Math.max(...salaries)
-    : 0;
-    
-  // Count unique companies
-  const uniqueCompanies = new Set(placements.map(p => p.company)).size;
+  // Calculate average package
+  let totalPackage = 0;
+  placements.forEach(placement => {
+    const packageAmount = parseFloat(placement.packageAmount.replace(/[^0-9.]/g, ''));
+    if (!isNaN(packageAmount)) {
+      totalPackage += packageAmount;
+    }
+  });
+  const averagePackage = totalPlacements > 0 ? totalPackage / totalPlacements : 0;
   
-  // Count placements by course
-  const placementsByCourse = placements.reduce((acc: Record<string, number>, placement) => {
-    const course = placement.courseCompleted || 'Unknown';
-    acc[course] = (acc[course] || 0) + 1;
-    return acc;
-  }, {});
+  // Count placements by company
+  const companyPlacementCounts: Record<string, number> = {};
+  placements.forEach(placement => {
+    if (companyPlacementCounts[placement.company]) {
+      companyPlacementCounts[placement.company]++;
+    } else {
+      companyPlacementCounts[placement.company] = 1;
+    }
+  });
+  
+  // Count placements by month/year
+  const placementsByMonthYear: Record<string, number> = {};
+  placements.forEach(placement => {
+    const date = new Date(placement.placementDate);
+    const monthYear = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+    
+    if (placementsByMonthYear[monthYear]) {
+      placementsByMonthYear[monthYear]++;
+    } else {
+      placementsByMonthYear[monthYear] = 1;
+    }
+  });
+  
+  // Get highest and lowest packages
+  const sortedPlacements = [...placements].sort((a, b) => {
+    const packageA = parseFloat(a.packageAmount.replace(/[^0-9.]/g, ''));
+    const packageB = parseFloat(b.packageAmount.replace(/[^0-9.]/g, ''));
+    return packageB - packageA;
+  });
+  
+  const highestPackage = sortedPlacements.length > 0 ? sortedPlacements[0].packageAmount : 'N/A';
+  const lowestPackage = sortedPlacements.length > 0 ? sortedPlacements[sortedPlacements.length - 1].packageAmount : 'N/A';
+  
+  // List of companies
+  const companies = [...new Set(placements.map(p => p.company))];
+  
+  // List of course categories completed by placed students
+  const courseCategories = [...new Set(placements.map(p => p.courseCompleted).filter(Boolean))];
   
   return {
     totalPlacements,
-    averageSalary,
-    highestSalary,
-    uniqueCompanies,
-    placementsByCourse,
+    averagePackage: averagePackage.toFixed(2) + ' LPA',
+    highestPackage,
+    lowestPackage,
+    companyPlacementCounts,
+    placementsByMonthYear,
+    companies,
+    courseCategories
   };
 };
 
-// Export placement data as CSV
+// Export placements as CSV
 export const exportPlacementsAsCSV = (): string => {
   const placements = getAllPlacements();
   
   // CSV header
-  let csv = 'ID,Student Name,Company,Position,Year,Salary,Course Completed,Placement Date\n';
+  let csv = 'ID,Student Name,Company,Position,Package,Placement Date,Year,Salary,Course Completed\n';
   
   // Add rows
   placements.forEach(placement => {
-    const placementDate = placement.placementDate 
-      ? new Date(placement.placementDate).toLocaleDateString() 
-      : 'N/A';
-      
-    csv += `${placement.id},"${placement.studentName}","${placement.company}","${placement.position}",${placement.year},"${placement.salary || 'N/A'}","${placement.courseCompleted || 'N/A'}","${placementDate}"\n`;
+    csv += `${placement.id},${placement.studentName || 'N/A'},${placement.company},${placement.position},${placement.packageAmount},${placement.placementDate},${placement.year || 'N/A'},${placement.salary || 'N/A'},${placement.courseCompleted || 'N/A'}\n`;
   });
   
   return csv;

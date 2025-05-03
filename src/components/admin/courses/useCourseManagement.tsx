@@ -13,7 +13,7 @@ export interface CourseFormData {
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   instructor: string;
   imageUrl: string;
-  status: 'Active' | 'Inactive' | 'Coming Soon';
+  status: 'Active' | 'Coming Soon' | 'Ended';
   category: string;
   courseType: 'Free' | 'Paid';
   shortDescription?: string;
@@ -72,7 +72,7 @@ export function useCourseManagement() {
     });
   };
   
-  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced' | 'Active' | 'Inactive' | 'Coming Soon' | 'Free' | 'Paid') => {
+  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced' | 'Active' | 'Coming Soon' | 'Ended' | 'Free' | 'Paid') => {
     setFormData(prev => {
       const newFormData = { ...prev, [name]: value };
       

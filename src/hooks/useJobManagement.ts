@@ -12,9 +12,9 @@ export interface JobFormData {
   salary: string;
   requirements: string[];
   lastDate: string;
-  jobType: string;
+  jobType: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
   experienceLevel: string;
-  status: string;
+  status: 'Open' | 'Closed' | 'Filled';
   externalLink?: string;
   category?: string;
 }
@@ -35,7 +35,7 @@ export const useJobManagement = () => {
     lastDate: '',
     jobType: 'Full-time',
     experienceLevel: 'Mid',
-    status: 'Active',
+    status: 'Open',
     externalLink: '',
     category: ''
   });
@@ -58,7 +58,13 @@ export const useJobManagement = () => {
 
   // Handle select input changes
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'status') {
+      setFormData(prev => ({ ...prev, [name]: value as 'Open' | 'Closed' | 'Filled' }));
+    } else if (name === 'jobType') {
+      setFormData(prev => ({ ...prev, [name]: value as 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote' }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   // Add requirement to list
@@ -90,9 +96,9 @@ export const useJobManagement = () => {
       salary: job.salary || '',
       requirements: [...job.requirements],
       lastDate: job.lastDate || '',
-      jobType: job.jobType || 'Full-time',
+      jobType: job.jobType || job.type,
       experienceLevel: job.experienceLevel || 'Mid',
-      status: job.status || 'Active',
+      status: job.status,
       externalLink: job.externalLink || '',
       category: job.category || ''
     });
@@ -113,7 +119,20 @@ export const useJobManagement = () => {
       }
 
       const newJob = createJob({
-        ...formData,
+        title: formData.title,
+        company: formData.company,
+        description: formData.description,
+        location: formData.location,
+        salary: formData.salary,
+        requirements: formData.requirements,
+        lastDate: formData.lastDate,
+        jobType: formData.jobType,
+        type: formData.jobType,
+        experienceLevel: formData.experienceLevel,
+        status: formData.status,
+        externalLink: formData.externalLink,
+        category: formData.category,
+        postedAt: new Date().toISOString(),
         createdAt: new Date().toISOString()
       });
 
@@ -149,7 +168,21 @@ export const useJobManagement = () => {
         return;
       }
 
-      const updatedJob = updateJob(jobToUpdate.id, formData);
+      const updatedJob = updateJob(jobToUpdate.id, {
+        title: formData.title,
+        company: formData.company,
+        description: formData.description,
+        location: formData.location,
+        salary: formData.salary,
+        requirements: formData.requirements,
+        lastDate: formData.lastDate,
+        jobType: formData.jobType,
+        type: formData.jobType,
+        experienceLevel: formData.experienceLevel,
+        status: formData.status,
+        externalLink: formData.externalLink,
+        category: formData.category
+      });
 
       if (updatedJob) {
         setJobs(prev => prev.map(job => job.id === jobToUpdate.id ? updatedJob : job));
@@ -206,7 +239,7 @@ export const useJobManagement = () => {
       lastDate: '',
       jobType: 'Full-time',
       experienceLevel: 'Mid',
-      status: 'Active',
+      status: 'Open',
       externalLink: '',
       category: ''
     });
