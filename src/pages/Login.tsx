@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { loginStudent, isStudentLoggedIn } from '@/lib/studentAuth';
+import { loginStudent, isStudentLoggedIn, requestEmailOTP, verifyOTPAndLogin } from '@/lib/studentAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 // Country codes for the most common countries
 const countryCodes = [
@@ -31,10 +32,16 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [phonePassword, setPhonePassword] = useState(''); // Added phone password field
+  const [phonePassword, setPhonePassword] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
   const [isLoading, setIsLoading] = useState(false);
   const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false);
+  
+  // OTP related states
+  const [otpEmail, setOtpEmail] = useState('');
+  const [isRequestingOTP, setIsRequestingOTP] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [otp, setOtp] = useState('');
   
   // Redirect if already logged in
   useEffect(() => {
@@ -149,6 +156,115 @@ const Login = () => {
     }
   };
 
+  const handleRequestOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!otpEmail) {
+      toast({
+        title: "Input Error",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsRequestingOTP(true);
+    
+    try {
+      // Call the OTP request function
+      const result = requestEmailOTP(otpEmail);
+      
+      if (result.success) {
+        toast({
+          title: "OTP Sent",
+          description: result.message,
+        });
+        
+        setOtpRequested(true);
+      } else {
+        toast({
+          title: "Request Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("OTP request error:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred while requesting the OTP. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRequestingOTP(false);
+    }
+  };
+
+  const handleOTPLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!otpEmail || !otp) {
+      toast({
+        title: "Input Error",
+        description: "Please enter both email and OTP.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (otp.length !== 6) {
+      toast({
+        title: "Input Error",
+        description: "Please enter a valid 6-digit OTP.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Call the OTP verification function
+      const result = verifyOTPAndLogin(otpEmail, otp);
+      
+      if (result.success) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome back! You have been logged in successfully.",
+        });
+        
+        // Small delay to allow toast to be seen before redirect
+        setTimeout(() => {
+          navigate('/');
+        }, 500);
+      } else {
+        toast({
+          title: "Login Failed",
+          description: result.error || "Invalid or expired OTP. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("OTP login error:", error);
+      toast({
+        title: "Login Error",
+        description: "An error occurred while logging in. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOTPChange = (value: string) => {
+    setOtp(value);
+  };
+
+  const resetOTPForm = () => {
+    setOtpRequested(false);
+    setOtp('');
+  };
+
   return (
     <>
       <Dialog open={isCountryDialogOpen} onOpenChange={setIsCountryDialogOpen}>
@@ -189,9 +305,10 @@ const Login = () => {
             </CardHeader>
             <CardContent className="pt-6">
               <Tabs defaultValue="email" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsList className="grid w-full grid-cols-3 mb-6">
                   <TabsTrigger value="email">Email</TabsTrigger>
                   <TabsTrigger value="phone">Phone</TabsTrigger>
+                  <TabsTrigger value="otp">OTP</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="email">
@@ -289,6 +406,73 @@ const Login = () => {
                       </Button>
                     </div>
                   </form>
+                </TabsContent>
+
+                <TabsContent value="otp">
+                  {!otpRequested ? (
+                    <form onSubmit={handleRequestOTP}>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="otpEmail">Email Address</Label>
+                          <Input 
+                            id="otpEmail"
+                            type="email"
+                            placeholder="Enter your registered email"
+                            value={otpEmail}
+                            onChange={(e) => setOtpEmail(e.target.value)}
+                            required
+                            className="border-purple-100 focus-visible:ring-eduBlue-500"
+                          />
+                        </div>
+                        <Button 
+                          className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
+                          type="submit"
+                          disabled={isRequestingOTP}
+                        >
+                          {isRequestingOTP ? "Sending Code..." : "Send Login Code"}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleOTPLogin}>
+                      <div className="space-y-4">
+                        <div className="text-center mb-4">
+                          <p className="font-medium text-eduBlue-600">Login Code Sent!</p>
+                          <p className="text-sm text-gray-600">We've sent a 6-digit code to {otpEmail}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="otp" className="block text-center mb-4">Enter Login Code</Label>
+                          <div className="flex justify-center">
+                            <InputOTP maxLength={6} value={otp} onChange={handleOTPChange}>
+                              <InputOTPGroup>
+                                <InputOTPSlot index={0} />
+                                <InputOTPSlot index={1} />
+                                <InputOTPSlot index={2} />
+                                <InputOTPSlot index={3} />
+                                <InputOTPSlot index={4} />
+                                <InputOTPSlot index={5} />
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
+                        </div>
+                        <Button 
+                          className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
+                          type="submit"
+                          disabled={isLoading || otp.length !== 6}
+                        >
+                          {isLoading ? "Verifying..." : "Login"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="w-full text-sm"
+                          onClick={resetOTPForm}
+                        >
+                          Change Email
+                        </Button>
+                      </div>
+                    </form>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

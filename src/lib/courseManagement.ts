@@ -50,6 +50,11 @@ import {
 } from './auth/passwordService';
 
 import {
+  requestEmailOTP,
+  verifyOTPAndLogin
+} from './auth/otpService';
+
+import {
   getCurrentStudent
 } from './auth/utils';
 
@@ -74,7 +79,9 @@ export {
   getStudentById,
   getAllStudents,
   registerStudent,
-  updateStudentProfile
+  updateStudentProfile,
+  requestEmailOTP,
+  verifyOTPAndLogin
 };
 
 // For backward compatibility
@@ -98,5 +105,7 @@ export const studentAuth = {
   resetPassword,
   getAllStudents,
   registerStudent,
-  updateStudentProfile
+  updateStudentProfile,
+  requestEmailOTP,
+  verifyOTPAndLogin
 };

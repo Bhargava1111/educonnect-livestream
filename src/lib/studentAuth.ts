@@ -20,5 +20,7 @@ export {
   getStudentById,
   getAllStudents,
   registerStudent,
-  updateStudentProfile
+  updateStudentProfile,
+  requestEmailOTP,
+  verifyOTPAndLogin
 } from './courseManagement';
