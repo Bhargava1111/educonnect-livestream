@@ -60,7 +60,7 @@ const AdminPlacementsPage = () => {
     setStudentNames(names);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -275,11 +275,21 @@ const AdminPlacementsPage = () => {
                     <Calendar
                       mode="single"
                       selected={formData.placementDate ? new Date(formData.placementDate) : undefined}
-                      onSelect={(date) => date ? handleChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any : null}
+                      onSelect={(date) => {
+                        if (date) {
+                          handleChange({ 
+                            target: { 
+                              name: 'placementDate', 
+                              value: date.toISOString().split('T')[0] 
+                            } 
+                          } as any);
+                        }
+                      }}
                       disabled={(date) =>
                         date > new Date()
                       }
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -415,11 +425,21 @@ const AdminPlacementsPage = () => {
                     <Calendar
                       mode="single"
                       selected={editFormData.placementDate ? new Date(editFormData.placementDate) : undefined}
-                      onSelect={(date) => date ? handleEditChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any : null}
+                      onSelect={(date) => {
+                        if (date) {
+                          handleEditChange({ 
+                            target: { 
+                              name: 'placementDate', 
+                              value: date.toISOString().split('T')[0] 
+                            } 
+                          } as any);
+                        }
+                      }}
                       disabled={(date) =>
                         date > new Date()
                       }
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>

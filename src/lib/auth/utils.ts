@@ -41,12 +41,6 @@ export const getAllStudents = (): Student[] => {
   }
 };
 
-// Get a student by ID
-export const getStudentById = (id: string): Student | undefined => {
-  const students = getAllStudents();
-  return students.find(student => student.id === id);
-};
-
 // Update a student in localStorage
 export const updateStudentInStorage = (updatedStudent: Student): void => {
   const students = getAllStudents();
