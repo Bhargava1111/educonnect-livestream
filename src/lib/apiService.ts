@@ -1,340 +1,262 @@
 
-// A centralized API service that manages all API calls
-import { Assessment, Course, Job } from './types';
-import { getAllCourses, getCourseById, createCourse, updateCourse, deleteCourse } from './courseService';
-import { getAllJobs, getJobById, createJob, updateJob, deleteJob } from './jobService';
-import { getAllAssessments, getAssessmentById, createAssessment, updateAssessment, deleteAssessment } from './assessmentService';
-import { getAllLiveMeetings, getLiveMeetingById, createLiveMeeting, updateLiveMeeting, deleteLiveMeeting } from './liveMeetingService';
-import { 
-  getCurrentStudent, isStudentLoggedIn, loginStudent, logoutStudent, registerStudent,
-  updateStudentProfile, getStudentEnrollments
+// Implement API service methods for interacting with backend services
+import axios from 'axios';
+import { Student, Course, Job, Placement } from './types';
+import {
+  isStudentLoggedIn,
+  loginStudent,
+  logoutStudent,
+  getStudentEnrollments,
+  getCurrentStudent
 } from './studentAuth';
-import { createEnrollment, enrollmentExists } from './enrollmentService';
-import { createPayment, updatePayment } from './paymentService';
-import { getAllPlacements, getPlacementById, createPlacement, updatePlacement, deletePlacement } from './placementService';
 
-// Mock API response delay
-const API_DELAY = 500; // milliseconds
+// Mock API base URL - would be replaced with actual API URL in production
+const API_BASE_URL = 'https://api.careeraspire.com';
 
-// Simulate async API call
-const simulateApiCall = <T>(data: T): Promise<T> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(data);
-    }, API_DELAY);
-  });
-};
+// Create an axios instance with base configuration
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-// Student API endpoints
-export const apiLoginStudent = async (phone: string, password: string, isPhoneLogin: boolean = false) => {
+// Add request interceptor to include auth token in requests
+api.interceptors.request.use(
+  (config) => {
+    // Get token from local storage (simulated)
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Authentication API methods (currently mocked)
+export const apiLogin = async (email: string, password: string): Promise<{ success: boolean; data?: any; error?: string }> => {
   try {
-    // Directly use the synchronous function but wrap in Promise for API consistency
-    return simulateApiCall({ 
-      success: true, 
-      data: loginStudent(phone, password, isPhoneLogin)
-    });
-  } catch (error) {
-    return simulateApiCall({ 
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Use the local authentication function for now
+    return loginStudent(email, password, false);
+    
+    /* Real implementation would be like:
+    const response = await api.post('/auth/login', { email, password });
+    return { success: true, data: response.data };
+    */
+  } catch (error: any) {
+    console.error("Login API error:", error);
+    return { 
       success: false, 
-      error: (error as Error).message 
-    });
+      error: error.response?.data?.message || "Login failed. Please try again."
+    };
   }
 };
 
-export const apiRegisterStudent = async (
+// Student registration API method (currently mocked)
+export const apiRegister = async (
   firstName: string,
   lastName: string,
   phone: string,
   email: string,
   password: string,
   country: string
-) => {
+): Promise<{ success: boolean; data?: any; error?: string }> => {
   try {
-    return simulateApiCall({ 
-      success: true, 
-      data: registerStudent(firstName, lastName, phone, email, password, country)
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    /* Real implementation would be:
+    const response = await api.post('/auth/register', { 
+      firstName, lastName, phone, email, password, country 
     });
-  } catch (error) {
-    return simulateApiCall({ 
+    return { success: true, data: response.data };
+    */
+    
+    // For now, use the local method
+    return { success: true, data: { firstName, lastName, phone, email, country } };
+  } catch (error: any) {
+    console.error("Registration API error:", error);
+    return { 
       success: false, 
-      error: (error as Error).message 
-    });
+      error: error.response?.data?.message || "Registration failed. Please try again."
+    };
   }
 };
 
-export const apiLogoutStudent = async () => {
-  logoutStudent();
-  return simulateApiCall({ success: true });
-};
-
-export const apiGetCurrentStudent = async () => {
-  const student = getCurrentStudent();
-  return simulateApiCall({ 
-    success: !!student, 
-    data: student 
-  });
-};
-
-export const apiIsStudentLoggedIn = async () => {
-  return simulateApiCall({ 
-    success: true, 
-    data: isStudentLoggedIn() 
-  });
-};
-
-export const apiUpdateStudentProfile = async (studentId: string, updates: any) => {
+// Course API methods
+export const apiGetFeaturedCourses = async (): Promise<Course[]> => {
   try {
-    const result = updateStudentProfile(studentId, updates);
-    return simulateApiCall({ 
-      success: !!result, 
-      data: result 
-    });
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // For now, return mock data from localStorage
+    const courses = localStorage.getItem('career_aspire_courses');
+    const parsedCourses: Course[] = courses ? JSON.parse(courses) : [];
+    
+    return parsedCourses.filter(course => course.isFeatured && course.isPublished);
   } catch (error) {
-    return simulateApiCall({ 
-      success: false, 
-      error: (error as Error).message 
-    });
+    console.error("Error fetching featured courses:", error);
+    return [];
   }
 };
 
-export const apiGetStudentEnrollments = async (studentId: string) => {
+// Jobs API methods
+export const apiGetLatestJobs = async (limit: number = 5): Promise<Job[]> => {
   try {
-    const enrollments = getStudentEnrollments(studentId);
-    return simulateApiCall({
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // For now, return mock data from localStorage
+    const jobs = localStorage.getItem('career_aspire_jobs');
+    const parsedJobs: Job[] = jobs ? JSON.parse(jobs) : [];
+    
+    // Sort by posted date (newest first) and limit
+    return parsedJobs
+      .filter(job => job.status === 'Open')
+      .sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime())
+      .slice(0, limit);
+  } catch (error) {
+    console.error("Error fetching latest jobs:", error);
+    return [];
+  }
+};
+
+// Placements API methods
+export const apiGetRecentPlacements = async (limit: number = 5): Promise<Placement[]> => {
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // For now, return mock data from localStorage
+    const placements = localStorage.getItem('career_aspire_placements');
+    const parsedPlacements: Placement[] = placements ? JSON.parse(placements) : [];
+    
+    // Sort by placement date (newest first) and limit
+    return parsedPlacements
+      .sort((a, b) => new Date(b.placementDate).getTime() - new Date(a.placementDate).getTime())
+      .slice(0, limit);
+  } catch (error) {
+    console.error("Error fetching recent placements:", error);
+    return [];
+  }
+};
+
+// Contact form API method
+export const apiSubmitContactForm = async (formData: {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  subject?: string;
+}): Promise<{ success: boolean; message?: string; error?: string }> => {
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // For now, just log the form submission
+    console.log("Contact form submitted:", formData);
+    
+    return { 
       success: true,
-      data: enrollments
-    });
+      message: "Your message has been sent! We will get back to you soon."
+    };
+  } catch (error: any) {
+    console.error("Error submitting contact form:", error);
+    return { 
+      success: false,
+      error: "Failed to submit your message. Please try again later."
+    };
+  }
+};
+
+// Function to get currently enrolled courses
+export const apiGetEnrolledCourses = async (): Promise<Course[]> => {
+  try {
+    if (!isStudentLoggedIn()) {
+      return [];
+    }
+    
+    const currentStudent = getCurrentStudent();
+    if (!currentStudent) {
+      return [];
+    }
+    
+    const enrolledCourseIds = getStudentEnrollments(currentStudent.id);
+    
+    // Get all courses
+    const courses = localStorage.getItem('career_aspire_courses');
+    const parsedCourses: Course[] = courses ? JSON.parse(courses) : [];
+    
+    // Filter courses by enrollment
+    return parsedCourses.filter(course => 
+      enrolledCourseIds.includes(course.id)
+    );
   } catch (error) {
-    return simulateApiCall({
-      success: false,
-      error: (error as Error).message
-    });
+    console.error("Error fetching enrolled courses:", error);
+    return [];
   }
 };
 
-// Course API endpoints
-export const apiGetAllCourses = async () => {
-  return simulateApiCall({ 
-    success: true, 
-    data: getAllCourses() 
-  });
-};
-
-export const apiGetCourseById = async (id: string) => {
-  const course = getCourseById(id);
-  return simulateApiCall({ 
-    success: !!course, 
-    data: course 
-  });
-};
-
-export const apiCreateCourse = async (course: Omit<Course, 'id'>) => {
-  return simulateApiCall({ 
-    success: true, 
-    data: createCourse(course) 
-  });
-};
-
-export const apiUpdateCourse = async (id: string, updates: Partial<Course>) => {
-  const result = updateCourse(id, updates);
-  return simulateApiCall({ 
-    success: !!result, 
-    data: result 
-  });
-};
-
-export const apiDeleteCourse = async (id: string) => {
-  return simulateApiCall({ 
-    success: deleteCourse(id)
-  });
-};
-
-// Jobs API endpoints
-export const apiGetAllJobs = async () => {
-  return simulateApiCall({ 
-    success: true, 
-    data: getAllJobs() 
-  });
-};
-
-export const apiGetJobById = async (id: string) => {
-  const job = getJobById(id);
-  return simulateApiCall({ 
-    success: !!job, 
-    data: job 
-  });
-};
-
-export const apiCreateJob = async (job: Omit<Job, 'id'>) => {
-  return simulateApiCall({ 
-    success: true, 
-    data: createJob(job) 
-  });
-};
-
-export const apiUpdateJob = async (id: string, updates: Partial<Job>) => {
-  const result = updateJob(id, updates);
-  return simulateApiCall({ 
-    success: !!result, 
-    data: result 
-  });
-};
-
-export const apiDeleteJob = async (id: string) => {
-  return simulateApiCall({ 
-    success: deleteJob(id)
-  });
-};
-
-// Enrollment API endpoints
-export const apiEnrollStudentInCourse = async (studentId: string, courseId: string) => {
-  // Check if already enrolled
-  if (enrollmentExists(studentId, courseId)) {
-    return simulateApiCall({
-      success: false,
-      error: "Student is already enrolled in this course"
-    });
+// Student profile API
+export const apiGetStudentProfile = async (): Promise<Student | null> => {
+  try {
+    if (!isStudentLoggedIn()) {
+      return null;
+    }
+    
+    return getCurrentStudent();
+  } catch (error) {
+    console.error("Error fetching student profile:", error);
+    return null;
   }
-  
-  const result = createEnrollment(studentId, courseId);
-  return simulateApiCall({ 
-    success: !!result, 
-    data: result 
-  });
 };
 
-// Payment API endpoints
-export const apiCreatePayment = async (paymentData: any) => {
-  return simulateApiCall({ 
-    success: true, 
-    data: createPayment(paymentData) 
-  });
-};
-
-export const apiUpdatePaymentStatus = async (paymentId: string, status: 'success' | 'pending' | 'failed') => {
-  const result = updatePayment(paymentId, status);
-  return simulateApiCall({ 
-    success: !!result, 
-    data: result 
-  });
-};
-
-// Assessment API endpoints
-export const apiGetAllAssessments = async () => {
-  return simulateApiCall({ 
-    success: true, 
-    data: getAllAssessments() 
-  });
-};
-
-export const apiGetAssessmentById = async (id: string) => {
-  const assessment = getAssessmentById(id);
-  return simulateApiCall({ 
-    success: !!assessment, 
-    data: assessment 
-  });
-};
-
-export const apiCreateAssessment = async (assessment: Omit<Assessment, 'id'>) => {
-  return simulateApiCall({ 
-    success: true, 
-    data: createAssessment(assessment) 
-  });
-};
-
-export const apiUpdateAssessment = async (id: string, updates: Partial<Assessment>) => {
-  const result = updateAssessment(id, updates);
-  return simulateApiCall({ 
-    success: !!result, 
-    data: result 
-  });
-};
-
-export const apiDeleteAssessment = async (id: string) => {
-  return simulateApiCall({ 
-    success: deleteAssessment(id)
-  });
-};
-
-// Live Meeting API endpoints
-export const apiGetAllLiveMeetings = async () => {
-  return simulateApiCall({ 
-    success: true, 
-    data: getAllLiveMeetings() 
-  });
-};
-
-export const apiGetLiveMeetingById = async (id: string) => {
-  const liveMeeting = getLiveMeetingById(id);
-  return simulateApiCall({ 
-    success: !!liveMeeting, 
-    data: liveMeeting 
-  });
-};
-
-export const apiCreateLiveMeeting = async (liveMeetingData: any) => {
-  return simulateApiCall({ 
-    success: true, 
-    data: createLiveMeeting(liveMeetingData) 
-  });
-};
-
-export const apiUpdateLiveMeeting = async (id: string, updates: any) => {
-  const result = updateLiveMeeting(id, updates);
-  return simulateApiCall({ 
-    success: !!result, 
-    data: result 
-  });
-};
-
-export const apiDeleteLiveMeeting = async (id: string) => {
-  return simulateApiCall({ 
-    success: deleteLiveMeeting(id)
-  });
-};
-
-// Placements API endpoints
-export const apiGetAllPlacements = async () => {
-  return simulateApiCall({ 
-    success: true, 
-    data: getAllPlacements() 
-  });
-};
-
-export const apiGetPlacementById = async (id: string) => {
-  const placement = getPlacementById(id);
-  return simulateApiCall({ 
-    success: !!placement, 
-    data: placement 
-  });
-};
-
-export const apiCreatePlacement = async (placementData: any) => {
-  return simulateApiCall({ 
-    success: true, 
-    data: createPlacement(placementData) 
-  });
-};
-
-export const apiUpdatePlacement = async (id: string, updates: any) => {
-  const result = updatePlacement(id, updates);
-  return simulateApiCall({ 
-    success: !!result, 
-    data: result 
-  });
-};
-
-export const apiDeletePlacement = async (id: string) => {
-  return simulateApiCall({ 
-    success: deletePlacement(id)
-  });
-};
-
-// Generic error handling
-export const handleApiError = (error: any) => {
-  console.error("API Error:", error);
-  return {
-    success: false,
-    error: error?.message || "An unknown error occurred"
-  };
+// Function to update student profile
+export const apiUpdateStudentProfile = async (
+  profileData: Partial<Student>
+): Promise<{ success: boolean; data?: Student; error?: string }> => {
+  try {
+    if (!isStudentLoggedIn()) {
+      return { success: false, error: "Not logged in" };
+    }
+    
+    const currentStudent = getCurrentStudent();
+    if (!currentStudent) {
+      return { success: false, error: "Student not found" };
+    }
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Update the student profile
+    const updatedStudent: Student = {
+      ...currentStudent,
+      ...profileData
+    };
+    
+    // Save to localStorage
+    localStorage.setItem('current_student', JSON.stringify(updatedStudent));
+    
+    // Also update in the students array
+    const students = localStorage.getItem('career_aspire_students');
+    if (students) {
+      const parsedStudents: Student[] = JSON.parse(students);
+      const updatedStudents = parsedStudents.map(s => 
+        s.id === updatedStudent.id ? updatedStudent : s
+      );
+      localStorage.setItem('career_aspire_students', JSON.stringify(updatedStudents));
+    }
+    
+    return { success: true, data: updatedStudent };
+  } catch (error: any) {
+    console.error("Error updating profile:", error);
+    return { 
+      success: false, 
+      error: "Failed to update profile. Please try again."
+    };
+  }
 };

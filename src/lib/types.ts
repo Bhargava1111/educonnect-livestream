@@ -117,6 +117,8 @@ export interface Job {
   jobType?: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
   experienceLevel?: string;
   externalLink?: string;
+  // Make status compatible with 'Active' | 'Inactive' for backward compatibility
+  year?: string; // For backward compatibility
 }
 
 // Assessment interfaces
@@ -136,6 +138,7 @@ export interface Assessment {
   requiresScreenshare?: boolean;
   requiresCamera?: boolean;
   timeLimit?: number;
+  passingScore?: number; // Add the passingScore field
 }
 
 export interface AssessmentQuestion {
@@ -145,7 +148,9 @@ export interface AssessmentQuestion {
   type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
   options?: string[];
   correctAnswer?: string | string[];
+  correctAnswerIndex?: number; // Added for compatibility
   marks: number;
+  points?: number; // Added for compatibility
 }
 
 // Live meeting interface
@@ -242,7 +247,9 @@ export interface Question {
   type: string;
   options?: string[];
   correctAnswer?: string | string[];
+  correctAnswerIndex?: number; // Added for compatibility
   marks: number;
+  points?: number; // Added for compatibility
 }
 
 // Added for EnrollmentForm.tsx

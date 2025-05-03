@@ -16,21 +16,28 @@ export * from './paymentService';
 export * from './contactService';
 export * from './enrollmentFormService';
 
-// Get these functions from studentAuth instead of defining them here
-// to avoid circular imports
+// Import and re-export student auth functions
 import {
+  isStudentLoggedIn,
+  loginStudent,
+  logoutStudent,
   getStudentLoginHistory,
   getStudentActivity,
   getStudentTotalActiveTime,
   formatActiveTime,
-  getStudentLastActiveTime
+  getStudentLastActiveTime,
+  getStudentEnrollments
 } from './studentAuth';
 
 // Re-export them
 export {
+  isStudentLoggedIn,
+  loginStudent,
+  logoutStudent,
   getStudentLoginHistory,
   getStudentActivity,
   getStudentTotalActiveTime,
   formatActiveTime,
-  getStudentLastActiveTime
+  getStudentLastActiveTime,
+  getStudentEnrollments
 };

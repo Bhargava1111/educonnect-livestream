@@ -1,3 +1,4 @@
+
 import { Assessment, ASSESSMENTS_KEY, Question, AssessmentQuestion } from './types';
 
 // Assessment CRUD operations
@@ -65,8 +66,8 @@ export const createQuestion = (
     id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
     question: text,
     options,
-    correctAnswerIndex,
-    points,
+    correctAnswer: options[correctAnswerIndex],
+    marks: points,
     type: type as 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding'
   };
 };

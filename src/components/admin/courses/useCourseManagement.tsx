@@ -104,7 +104,9 @@ export function useCourseManagement() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         curriculum: [],
-        roadmap: []
+        roadmap: [],
+        students: 0,
+        ratings: 0
       });
       
       console.log("New course created:", newCourse);

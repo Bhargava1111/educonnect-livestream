@@ -1,4 +1,5 @@
-import { Student, COURSES_KEY } from './types';
+
+import { Student, COURSES_KEY, STUDENT_ACTIVITY_KEY } from './types';
 
 // Function to generate a unique ID
 const generateId = (): string => {
@@ -125,10 +126,17 @@ export const clearCurrentStudent = (): void => {
 };
 
 // Function to simulate student registration
-export const registerStudent = (studentData: Omit<Student, 'id' | 'createdAt'>): { success: boolean; data?: Student; error?: string } => {
+export const registerStudent = (
+  firstName: string,
+  lastName: string,
+  phone: string,
+  email: string,
+  password: string,
+  country: string
+): { success: boolean; data?: Student; error?: string } => {
   try {
     // Check if the phone number is already registered
-    if (getStudentByPhone(studentData.phone)) {
+    if (getStudentByPhone(phone)) {
       return {
         success: false,
         error: "Phone number already registered"
@@ -138,7 +146,11 @@ export const registerStudent = (studentData: Omit<Student, 'id' | 'createdAt'>):
     // Create a new student object
     const newStudent: Student = {
       id: generateId(),
-      ...studentData,
+      firstName,
+      lastName,
+      phone,
+      email,
+      country,
       createdAt: new Date().toISOString()
     };
     
@@ -146,6 +158,9 @@ export const registerStudent = (studentData: Omit<Student, 'id' | 'createdAt'>):
     const students = getAllStudents();
     students.push(newStudent);
     localStorage.setItem('career_aspire_students', JSON.stringify(students));
+    
+    // Set as current student
+    setCurrentStudent(newStudent);
     
     return {
       success: true,
@@ -160,21 +175,34 @@ export const registerStudent = (studentData: Omit<Student, 'id' | 'createdAt'>):
   }
 };
 
-const getStoredStudents = (): Student[] => {
-  const storedStudents = localStorage.getItem('career_aspire_students');
-  return storedStudents ? JSON.parse(storedStudents) : [];
+// Function to check if a student is logged in
+export const isStudentLoggedIn = (): boolean => {
+  return !!getCurrentStudent();
 };
 
-// Function to simulate student login with phone and password
-export const loginWithPhone = (phone: string, password: string): { success: boolean; data?: Student; error?: string } => {
+// Function to simulate student login
+export const loginStudent = (
+  identifier: string, 
+  password: string, 
+  isPhoneLogin: boolean = false
+): { success: boolean; data?: Student; error?: string } => {
   try {
-    const students = getStoredStudents();
-    const student = students.find(s => s.phone === phone);
+    const students = getAllStudents();
+    
+    let student: Student | undefined;
+    
+    if (isPhoneLogin) {
+      // Login with phone
+      student = students.find(s => s.phone === identifier);
+    } else {
+      // Login with email
+      student = students.find(s => s.email === identifier);
+    }
     
     if (!student) {
       return {
         success: false,
-        error: "No account found with this phone number"
+        error: isPhoneLogin ? "No account found with this phone number" : "No account found with this email"
       };
     }
     
@@ -207,7 +235,7 @@ export const loginWithPhone = (phone: string, password: string): { success: bool
 };
 
 // Function to simulate student logout
-export const logout = (): void => {
+export const logoutStudent = (): void => {
   clearCurrentStudent();
 };
 
@@ -261,6 +289,11 @@ export const getEnrolledCourses = (studentId: string): string[] => {
   return student?.enrolledCourses || [];
 };
 
+// Function to get student enrollments
+export const getStudentEnrollments = (studentId: string): string[] => {
+  return getEnrolledCourses(studentId);
+};
+
 // Function to simulate fetching student profile
 export const getStudentProfile = (studentId: string): Student | undefined => {
   // Retrieve student data from localStorage
@@ -308,3 +341,154 @@ export const updateStudentProfile = (studentId: string, profileData: Partial<Stu
     return { success: false, error: "Failed to update profile" };
   }
 };
+
+// Student activity tracking
+interface StudentActivity {
+  id: string;
+  studentId: string;
+  action: string;
+  timestamp: string;
+  details?: Record<string, any>;
+}
+
+interface StudentLoginRecord {
+  timestamp: string;
+  device: string;
+}
+
+// Function to track student activity
+export const trackStudentActivity = (
+  studentId: string,
+  action: string,
+  details?: Record<string, any>
+): void => {
+  try {
+    const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
+    const activityArray: StudentActivity[] = activities ? JSON.parse(activities) : [];
+    
+    const newActivity: StudentActivity = {
+      id: `activity_${Date.now()}`,
+      studentId,
+      action,
+      timestamp: new Date().toISOString(),
+      details
+    };
+    
+    activityArray.push(newActivity);
+    localStorage.setItem(STUDENT_ACTIVITY_KEY, JSON.stringify(activityArray));
+  } catch (error) {
+    console.error("Error tracking student activity:", error);
+  }
+};
+
+// Function to get student activities
+export const getStudentActivity = (studentId: string): StudentActivity[] => {
+  try {
+    const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
+    const activityArray: StudentActivity[] = activities ? JSON.parse(activities) : [];
+    
+    return activityArray.filter(activity => activity.studentId === studentId)
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  } catch (error) {
+    console.error("Error getting student activities:", error);
+    return [];
+  }
+};
+
+// Function to track student login
+export const trackStudentLogin = (studentId: string, device: string = "Unknown device"): void => {
+  try {
+    const key = `student_login_history_${studentId}`;
+    const loginHistory = localStorage.getItem(key);
+    const historyArray: StudentLoginRecord[] = loginHistory ? JSON.parse(loginHistory) : [];
+    
+    const newLogin: StudentLoginRecord = {
+      timestamp: new Date().toISOString(),
+      device
+    };
+    
+    historyArray.push(newLogin);
+    localStorage.setItem(key, JSON.stringify(historyArray));
+    
+    // Also track as an activity
+    trackStudentActivity(studentId, "Logged in", { device });
+  } catch (error) {
+    console.error("Error tracking student login:", error);
+  }
+};
+
+// Function to get student login history
+export const getStudentLoginHistory = (studentId: string): StudentLoginRecord[] => {
+  try {
+    const key = `student_login_history_${studentId}`;
+    const loginHistory = localStorage.getItem(key);
+    const historyArray: StudentLoginRecord[] = loginHistory ? JSON.parse(loginHistory) : [];
+    
+    return historyArray.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  } catch (error) {
+    console.error("Error getting student login history:", error);
+    return [];
+  }
+};
+
+// Function to get student total active time
+export const getStudentTotalActiveTime = (studentId: string): number => {
+  try {
+    const key = `student_active_time_${studentId}`;
+    const activeTime = localStorage.getItem(key);
+    return activeTime ? parseInt(activeTime, 10) : 0;
+  } catch (error) {
+    console.error("Error getting student active time:", error);
+    return 0;
+  }
+};
+
+// Function to increment student active time
+export const incrementStudentActiveTime = (studentId: string, seconds: number = 60): void => {
+  try {
+    const key = `student_active_time_${studentId}`;
+    const currentActiveTime = getStudentTotalActiveTime(studentId);
+    const newActiveTime = currentActiveTime + seconds;
+    localStorage.setItem(key, newActiveTime.toString());
+    
+    // Update last active timestamp
+    localStorage.setItem(`student_last_active_${studentId}`, new Date().toISOString());
+  } catch (error) {
+    console.error("Error incrementing student active time:", error);
+  }
+};
+
+// Function to get student last active time
+export const getStudentLastActiveTime = (studentId: string): string | null => {
+  try {
+    const key = `student_last_active_${studentId}`;
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.error("Error getting student last active time:", error);
+    return null;
+  }
+};
+
+// Function to format active time in hours and minutes
+export const formatActiveTime = (totalSeconds: number): string => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  
+  if (hours === 0) {
+    return `${minutes}m`;
+  }
+  
+  return `${hours}h ${minutes}m`;
+};
+
+// Export the logout function for backward compatibility
+export const logout = logoutStudent;
+
+// Initialize student activity tracking
+const initializeStudentActivity = () => {
+  if (!localStorage.getItem(STUDENT_ACTIVITY_KEY)) {
+    localStorage.setItem(STUDENT_ACTIVITY_KEY, JSON.stringify([]));
+  }
+};
+
+initializeStudentActivity();
