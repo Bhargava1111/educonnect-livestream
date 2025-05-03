@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -99,10 +100,12 @@ const StudentProfile = () => {
         ...prev,
         education: {
           ...prev.education,
-          [category]: {
-            ...prev.education[category as keyof typeof prev.education],
-            [field]: value
-          }
+          [category]: category === 'highest' 
+            ? value 
+            : {
+                ...(prev.education[category as keyof typeof prev.education] as object || {}),
+                [field]: value
+              }
         }
       }));
     } else {
