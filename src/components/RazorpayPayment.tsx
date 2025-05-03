@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { createPayment, updatePayment } from '@/lib/paymentService';
-import { getStudentData } from '@/lib/studentAuth';
+import { getCurrentStudent } from '@/lib/studentAuth';
 
 // Define the props interface for the component
 interface RazorpayPaymentProps {
@@ -51,7 +51,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       await loadRazorpay();
       
       // Get student data
-      const studentData = getStudentData();
+      const studentData = getCurrentStudent();
       if (!studentData) {
         throw new Error("User not logged in");
       }

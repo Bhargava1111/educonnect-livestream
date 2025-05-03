@@ -1,3 +1,4 @@
+
 // This file now serves as a central export point for all services
 
 // Export all types
@@ -15,23 +16,21 @@ export * from './paymentService';
 export * from './contactService';
 export * from './enrollmentFormService';
 
-// Export student activity tracking functions
-export const getStudentLoginHistory = (studentId: string) => {
-  return [];
-};
+// Get these functions from studentAuth instead of defining them here
+// to avoid circular imports
+import {
+  getStudentLoginHistory,
+  getStudentActivity,
+  getStudentTotalActiveTime,
+  formatActiveTime,
+  getStudentLastActiveTime
+} from './studentAuth';
 
-export const getStudentActivity = (studentId: string) => {
-  return [];
-};
-
-export const getStudentTotalActiveTime = (studentId: string) => {
-  return 0;
-};
-
-export const formatActiveTime = (seconds: number) => {
-  return "0h 0m";
-};
-
-export const getStudentLastActiveTime = (studentId: string) => {
-  return new Date().toISOString();
+// Re-export them
+export {
+  getStudentLoginHistory,
+  getStudentActivity,
+  getStudentTotalActiveTime,
+  formatActiveTime,
+  getStudentLastActiveTime
 };

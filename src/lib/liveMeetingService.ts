@@ -20,7 +20,12 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
         meetingLink: 'https://meet.google.com/sample-meeting-1',
         hostName: 'Dr. Smith',
         status: 'scheduled',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        // Adding fields to support the UI
+        instructor: 'Dr. Smith',
+        date: new Date().toLocaleDateString(),
+        time: '10:00',
+        link: 'https://meet.google.com/sample-meeting-1'
       },
       {
         id: 'meeting_2',
@@ -32,7 +37,12 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
         meetingLink: 'https://meet.google.com/sample-meeting-2',
         hostName: 'Jane Cooper',
         status: 'scheduled',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        // Adding fields to support the UI
+        instructor: 'Jane Cooper',
+        date: new Date(Date.now() + 86400000).toLocaleDateString(),
+        time: '14:00',
+        link: 'https://meet.google.com/sample-meeting-2'
       },
       {
         id: 'meeting_3',
@@ -44,7 +54,12 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
         meetingLink: 'https://meet.google.com/sample-meeting-3',
         hostName: 'Robert Wilson',
         status: 'scheduled',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        // Adding fields to support the UI
+        instructor: 'Robert Wilson',
+        date: new Date(Date.now() + 172800000).toLocaleDateString(),
+        time: '11:00',
+        link: 'https://meet.google.com/sample-meeting-3'
       },
       {
         id: 'meeting_4',
@@ -56,7 +71,12 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
         meetingLink: 'https://meet.google.com/sample-meeting-4',
         hostName: 'Dr. Smith',
         status: 'completed',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        // Adding fields to support the UI
+        instructor: 'Dr. Smith',
+        date: new Date(Date.now() - 172800000).toLocaleDateString(),
+        time: '15:00',
+        link: 'https://meet.google.com/sample-meeting-4'
       },
       {
         id: 'meeting_5',
@@ -68,7 +88,12 @@ const initializeLiveMeetingsIfNeeded = (): LiveMeeting[] => {
         meetingLink: 'https://meet.google.com/sample-meeting-5',
         hostName: 'Jane Cooper',
         status: 'completed',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        // Adding fields to support the UI
+        instructor: 'Jane Cooper',
+        date: new Date(Date.now() - 86400000).toLocaleDateString(),
+        time: '13:00',
+        link: 'https://meet.google.com/sample-meeting-5'
       }
     ];
     

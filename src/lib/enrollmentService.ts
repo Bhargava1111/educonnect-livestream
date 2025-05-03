@@ -1,5 +1,6 @@
-
 import { Enrollment, ENROLLMENTS_KEY } from './types';
+import { getStudentById } from './studentAuth';
+import { getCourseById } from './courseService';
 
 // Initialize enrollments
 const initializeEnrollmentsIfNeeded = (): Enrollment[] => {
@@ -110,4 +111,57 @@ export const deleteEnrollment = (enrollmentId: string): boolean => {
   }
   
   return false;
+};
+
+// Export enrollments as CSV data
+export const exportEnrollmentsAsCSV = (courseId?: string): string => {
+  const enrollments = courseId 
+    ? getEnrollmentsByCourseId(courseId)
+    : getAllEnrollments();
+  
+  if (enrollments.length === 0) {
+    return 'No enrollments found';
+  }
+  
+  // Define CSV headers
+  const headers = [
+    'Student ID',
+    'Student Name',
+    'Course ID',
+    'Course Title',
+    'Enrollment Date',
+    'Status',
+    'Progress',
+    'Completion',
+    'Last Accessed'
+  ].join(',');
+  
+  // Create CSV rows
+  const rows = enrollments.map(enrollment => {
+    const student = getStudentById(enrollment.studentId);
+    const course = getCourseById(enrollment.courseId);
+    
+    const studentName = student 
+      ? `${student.firstName} ${student.lastName}`
+      : 'Unknown Student';
+    
+    const courseTitle = course ? course.title : 'Unknown Course';
+    
+    return [
+      enrollment.studentId,
+      studentName,
+      enrollment.courseId,
+      courseTitle,
+      new Date(enrollment.enrollmentDate).toLocaleDateString(),
+      enrollment.status,
+      `${enrollment.progress || 0}%`,
+      enrollment.completed ? 'Yes' : 'No',
+      enrollment.lastAccessedDate 
+        ? new Date(enrollment.lastAccessedDate).toLocaleDateString() 
+        : 'N/A'
+    ].join(',');
+  }).join('\n');
+  
+  // Combine headers and rows
+  return `${headers}\n${rows}`;
 };

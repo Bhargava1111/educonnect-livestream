@@ -15,6 +15,7 @@ export interface Student {
   createdAt: string;
   lastLoginAt?: string;
   name?: string; // Added for compatibility
+  enrolledCourses?: string[]; // Added to track enrolled courses
 }
 
 // Get all students
@@ -57,6 +58,7 @@ export const registerStudent = (
     phone,
     email,
     country,
+    enrolledCourses: [],
     createdAt: new Date().toISOString(),
     lastLoginAt: new Date().toISOString(),
     name: `${firstName} ${lastName}` // Add combined name field
@@ -167,7 +169,21 @@ export const updateStudentProfile = (
 
 // Enroll student in course
 export const enrollStudentInCourse = (studentId: string, courseId: string): boolean => {
-  // Implementation would go here
+  const student = getStudentById(studentId);
+  
+  if (!student) {
+    return false;
+  }
+  
+  if (!student.enrolledCourses) {
+    student.enrolledCourses = [];
+  }
+  
+  if (!student.enrolledCourses.includes(courseId)) {
+    student.enrolledCourses.push(courseId);
+    return updateStudentProfile(studentId, { enrolledCourses: student.enrolledCourses }) !== null;
+  }
+  
   return true;
 };
 
@@ -198,8 +214,10 @@ export const deleteStudent = (studentId: string): boolean => {
 
 // Get students by enrolled course
 export const getStudentsByEnrolledCourse = (courseId: string): Student[] => {
-  // Implementation would go here
-  return [];
+  const students = getAllStudents();
+  return students.filter(student => 
+    student.enrolledCourses && student.enrolledCourses.includes(courseId)
+  );
 };
 
 // Reset student password
@@ -212,6 +230,38 @@ export const resetStudentPassword = (studentId: string, newPassword: string): bo
   
   localStorage.setItem(`student_password_${studentId}`, newPassword);
   return true;
+};
+
+// Add function for password reset OTP
+export const requestPasswordResetOTP = (email: string): void => {
+  // In a real application, this would send an OTP to the student's email
+  console.log(`Password reset OTP requested for ${email}`);
+  
+  // For demo purposes, store a fake OTP in localStorage
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  localStorage.setItem(`password_reset_otp_${email}`, otp);
+  localStorage.setItem(`password_reset_otp_time_${email}`, Date.now().toString());
+  
+  console.log(`Generated OTP for ${email}: ${otp}`);
+};
+
+// Verify password reset OTP
+export const verifyPasswordResetOTP = (email: string, otp: string): boolean => {
+  const storedOTP = localStorage.getItem(`password_reset_otp_${email}`);
+  const otpTime = localStorage.getItem(`password_reset_otp_time_${email}`);
+  
+  if (!storedOTP || !otpTime) {
+    return false;
+  }
+  
+  // Check if OTP is expired (15 minutes validity)
+  const now = Date.now();
+  const otpTimestamp = parseInt(otpTime);
+  if (now - otpTimestamp > 15 * 60 * 1000) {
+    return false;
+  }
+  
+  return storedOTP === otp;
 };
 
 // Student activity tracking functions
@@ -249,6 +299,7 @@ export const initializeStudentsIfNeeded = (): void => {
       email: 'test@example.com',
       country: 'India',
       name: 'Test Student',
+      enrolledCourses: ['course_1', 'course_2'],
       createdAt: new Date().toISOString()
     };
     
