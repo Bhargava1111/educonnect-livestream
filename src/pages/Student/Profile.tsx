@@ -15,7 +15,7 @@ const StudentProfile = () => {
   const [student, setStudent] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Fix: Make education properties optional to match the type in Student
+  // Fix: Make the education properties in formData structure match the Student interface
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,7 +39,8 @@ const StudentProfile = () => {
         course: '',
         percentage: '',
         yearOfCompletion: ''
-      }
+      },
+      highest: ''
     },
     aadharNumber: ''
   });
@@ -57,23 +58,24 @@ const StudentProfile = () => {
         address: studentData.address || '',
         profilePicture: studentData.profilePicture || '',
         skills: studentData.skills || [],
-        education: studentData.education || {
-          tenth: {
+        education: {
+          tenth: studentData.education?.tenth || {
             school: '',
             percentage: '',
             yearOfCompletion: ''
           },
-          twelfth: {
+          twelfth: studentData.education?.twelfth || {
             school: '',
             percentage: '',
             yearOfCompletion: ''
           },
-          degree: {
+          degree: studentData.education?.degree || {
             university: '',
             course: '',
             percentage: '',
             yearOfCompletion: ''
-          }
+          },
+          highest: studentData.education?.highest || ''
         },
         aadharNumber: studentData.aadharNumber || ''
       });
