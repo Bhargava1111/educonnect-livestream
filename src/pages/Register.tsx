@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -89,15 +88,15 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Directly register the user
-      const result = registerStudent({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        password: values.password,
-        phone: values.phone,
-        countryCode: values.countryCode,
-      });
+      // Register the user with all required fields
+      const result = registerStudent(
+        values.firstName,
+        values.lastName,
+        `${values.countryCode} ${values.phone}`,
+        values.email,
+        values.password,
+        values.countryCode.substring(1) // Country without + prefix
+      );
       
       if (result.success) {
         toast({

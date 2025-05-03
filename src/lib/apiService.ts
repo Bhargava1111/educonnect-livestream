@@ -6,9 +6,10 @@ import { getAllJobs, getJobById, createJob, updateJob, deleteJob } from './jobSe
 import { getAllAssessments, getAssessmentById, createAssessment, updateAssessment, deleteAssessment } from './assessmentService';
 import { getAllLiveMeetings, getLiveMeetingById, createLiveMeeting, updateLiveMeeting, deleteLiveMeeting } from './liveMeetingService';
 import { 
-  getCurrentStudent, isStudentLoggedIn, loginStudent, logoutStudent, registerStudent, updateStudentProfile 
+  getCurrentStudent, isStudentLoggedIn, loginStudent, logoutStudent, registerStudent,
+  updateStudentProfile, getStudentEnrollments
 } from './studentAuth';
-import { createEnrollment } from './enrollmentService';
+import { createEnrollment, enrollmentExists } from './enrollmentService';
 import { createPayment, updatePayment } from './paymentService';
 import { getAllPlacements, getPlacementById, createPlacement, updatePlacement, deletePlacement } from './placementService';
 
@@ -25,12 +26,12 @@ const simulateApiCall = <T>(data: T): Promise<T> => {
 };
 
 // Student API endpoints
-export const apiLoginStudent = async (phone: string, password: string) => {
+export const apiLoginStudent = async (phone: string, password: string, isPhoneLogin: boolean = false) => {
   try {
     // Directly use the synchronous function but wrap in Promise for API consistency
     return simulateApiCall({ 
       success: true, 
-      data: loginStudent(phone, password)
+      data: loginStudent(phone, password, isPhoneLogin)
     });
   } catch (error) {
     return simulateApiCall({ 
@@ -92,6 +93,21 @@ export const apiUpdateStudentProfile = async (studentId: string, updates: any) =
     return simulateApiCall({ 
       success: false, 
       error: (error as Error).message 
+    });
+  }
+};
+
+export const apiGetStudentEnrollments = async (studentId: string) => {
+  try {
+    const enrollments = getStudentEnrollments(studentId);
+    return simulateApiCall({
+      success: true,
+      data: enrollments
+    });
+  } catch (error) {
+    return simulateApiCall({
+      success: false,
+      error: (error as Error).message
     });
   }
 };
@@ -172,6 +188,14 @@ export const apiDeleteJob = async (id: string) => {
 
 // Enrollment API endpoints
 export const apiEnrollStudentInCourse = async (studentId: string, courseId: string) => {
+  // Check if already enrolled
+  if (enrollmentExists(studentId, courseId)) {
+    return simulateApiCall({
+      success: false,
+      error: "Student is already enrolled in this course"
+    });
+  }
+  
   const result = createEnrollment(studentId, courseId);
   return simulateApiCall({ 
     success: !!result, 

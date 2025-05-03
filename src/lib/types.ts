@@ -1,185 +1,116 @@
-// Storage keys
-export const JOBS_KEY = "career_aspire_jobs";
-export const PLACEMENTS_KEY = "career_aspire_placements";
-export const COURSES_KEY = "career_aspire_courses";
-export const LIVE_MEETINGS_KEY = "career_aspire_live_meetings";
-export const ENROLLMENTS_KEY = "career_aspire_enrollments";
-export const PAYMENTS_KEY = "career_aspire_payments";
-export const CONTACTS_KEY = "career_aspire_contacts";
-export const ASSESSMENTS_KEY = "career_aspire_assessments";
-export const EMAIL_NOTIFICATIONS_KEY = "career_aspire_email_notifications";
-export const STUDENT_ACTIVITY_KEY = "career_aspire_student_activity";
-export const ENROLLMENT_FORMS_KEY = "career_aspire_enrollment_forms";
+// Define common interfaces
+export const COURSES_KEY = 'career_aspire_courses';
+export const JOBS_KEY = 'career_aspire_jobs';
+export const ASSESSMENTS_KEY = 'career_aspire_assessments';
+export const LIVE_MEETINGS_KEY = 'career_aspire_live_meetings';
+export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
+export const PAYMENTS_KEY = 'career_aspire_payments';
+export const PLACEMENTS_KEY = 'career_aspire_placements';
+export const CONTACTS_KEY = 'career_aspire_contacts';
+export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
 
-// Job type definition
-export interface Job {
+// Student interface (updated)
+export interface Student {
   id: string;
-  title: string;
-  company: string;
-  location: string;
-  description: string;
-  requirements: string[];
-  salary?: string;
-  appliedCount?: number;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  country: string;
+  profilePicture?: string;
   createdAt: string;
-  lastDate?: string;
-  jobType?: string; // Full-time, Part-time, Contract, etc.
-  experienceLevel?: string; // Entry, Mid, Senior
-  status?: string; // Active, Inactive, Draft
-  externalLink?: string;
-  category?: string; // Industry or category
+  lastLoginAt?: string;
+  name?: string;
+  enrolledCourses?: string[]; // Track enrolled courses
 }
 
-// Placement type definition
-export interface Placement {
-  id: string;
-  studentName: string;
-  company: string;
-  position: string;
-  year: number;
-  salary: string;
-  testimonial?: string;
-  courseCompleted?: string;
-  imageUrl?: string;
-  placementDate?: string;
-}
-
-// Course type definition
+// Course interface
 export interface Course {
   id: string;
   title: string;
   shortDescription: string;
   description: string;
-  price: number;
-  discountedPrice?: number;
   duration: string;
-  level: "Beginner" | "Intermediate" | "Advanced";
+  price: number;
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  students: number;
+  ratings: number;
+  instructor: string;
+  status: 'Active' | 'Coming Soon' | 'Ended';
   category: string;
-  topics: CourseTopic[];
   imageUrl?: string;
-  features?: string[];
-  prerequisites?: string[];
-  isFeatured: boolean;
-  isPublished: boolean;
-  ratings?: number;
-  reviewCount?: number;
+  isFeatured?: boolean;
+  isPublished?: boolean;
+  topics?: string[];
+  popular?: boolean;
   createdAt: string;
-  updatedAt: string;
-  students?: number; // Added for student count
-  status?: "Active" | "Inactive" | "Coming Soon"; // Added for course status
-  instructor?: string; // Added for instructor name
-  curriculum?: CourseModule[]; // Changed type from string[] to CourseModule[]
-  roadmap?: RoadmapPhase[]; // Added for course roadmap
+  updatedAt?: string;
+  curriculum?: CourseModule[];
+  roadmap?: RoadmapPhase[];
 }
 
-// Course module definition
+// Course module
 export interface CourseModule {
   id: string;
   title: string;
-  topics: { id: string; title: string }[];
+  topics: CourseTopic[];
 }
 
-// Course topic definition
 export interface CourseTopic {
   id: string;
   title: string;
-  description?: string;
-  duration?: string;
-  materials?: CourseMaterial[];
 }
 
-// Course material definition
-export interface CourseMaterial {
-  id: string;
-  title: string;
-  type: 'pdf' | 'ppt' | 'doc' | 'video' | 'link';
-  url: string;
-  size?: string;
-  uploadedAt: string;
-}
-
-// Roadmap Phase for course roadmap
+// Roadmap phase with videos and materials
 export interface RoadmapPhase {
-  id?: string;
-  order?: number;
   phase: number;
   title: string;
-  description?: string;
   duration: string;
   topics: string[];
   projects: string[];
-  materials?: string[];
-  videos?: string[];
-  milestones?: string[];
+  videos?: RoadmapVideo[]; // New field: videos for the phase
+  materials?: RoadmapMaterial[]; // New field: materials for the phase
 }
 
-// Live meeting definition
-export interface LiveMeeting {
+// Video for roadmap phase
+export interface RoadmapVideo {
   id: string;
   title: string;
-  description?: string;
-  courseId?: string;
-  scheduledDate: string;
-  duration: string;
-  meetingLink: string;
-  hostName: string;
-  capacity?: number;
-  registeredStudents?: string[]; // Array of student IDs
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
-  recordingUrl?: string;
-  createdAt: string;
-  
-  // These fields are used in the UI but not in the data model
-  // Adding them here to avoid type errors
-  instructor?: string;
-  date?: string;
-  time?: string;
-  link?: string;
+  url: string;
+  description: string;
+  topicIndex: number;
 }
 
-// Enrollment definition
-export interface Enrollment {
+// Material for roadmap phase
+export interface RoadmapMaterial {
   id: string;
-  studentId: string;
-  courseId: string;
-  enrollmentDate: string;
-  status: 'active' | 'completed' | 'dropped' | 'on-hold';
-  completionPercentage?: number;
-  certificateIssued?: boolean;
-  certificateUrl?: string;
-  lastAccessedDate?: string;
-  progress?: number; // Added for tracking progress
-  completed?: boolean; // Added to track completion
+  title: string;
+  type: 'document' | 'link';
+  url: string;
+  description: string;
 }
 
-// Payment definition
-export interface Payment {
+// Job interface
+export interface Job {
   id: string;
-  studentId: string;
-  courseId: string;
-  amount: number;
-  paymentDate: string;
-  paymentMethod: string;
-  status: 'success' | 'pending' | 'failed' | 'completed'; // Added 'completed' for compatibility
-  transactionId?: string;
-  invoiceUrl?: string;
-  paymentId?: string; // Added for payment gateway reference
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  description: string;
+  requirements: string[];
+  type: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
+  status: 'Open' | 'Closed' | 'Filled';
+  postedAt: string;
+  deadlineDate?: string;
+  contactEmail?: string;
+  applicationLink?: string;
+  category?: string;
+  experience?: string;
+  featured?: boolean;
 }
 
-// Contact form submission
-export interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  message: string;
-  submittedAt: string;
-  status: 'new' | 'in-progress' | 'resolved';
-  assignedTo?: string;
-  notes?: string[];
-}
-
-// Assessment definition
+// Assessment interfaces
 export interface Assessment {
   id: string;
   title: string;
@@ -188,204 +119,111 @@ export interface Assessment {
   type: 'quiz' | 'assignment' | 'project' | 'exam' | 'coding-challenge';
   totalMarks?: number;
   passingMarks?: number;
-  passingScore?: number; // Added for compatibility
+  duration?: number; // in minutes
   dueDate?: string;
-  questions?: AssessmentQuestion[];
+  questions: AssessmentQuestion[];
+  isPublished?: boolean;
   createdAt?: string;
-  timeLimit?: number; // Added for compatibility
-  requiresCamera?: boolean; // Added for compatibility
-  requiresScreenshare?: boolean; // Added for compatibility
+  requiresScreenshare?: boolean;
 }
 
-// Assessment question
 export interface AssessmentQuestion {
   id: string;
-  text: string;
+  question: string;
   type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
   options?: string[];
   correctAnswer?: string | string[];
-  correctAnswerIndex?: number; // Added for compatibility
-  marks?: number;
-  points?: number; // Added for compatibility
-  codingTemplate?: string; // Added for coding questions
+  marks: number;
 }
 
-// Question type (for assessment service)
-export interface Question {
+// Live meeting interface
+export interface LiveMeeting {
   id: string;
-  text: string;
-  type: string | 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
-  options?: string[];
-  correctAnswerIndex?: number;
-  correctAnswer?: string | string[];
-  marks?: number;
-  points?: number; // Added for compatibility
-  codingTemplate?: string; // Added for coding questions
+  courseId: string;
+  title: string;
+  description: string;
+  hostName: string; // Renamed from instructor
+  scheduledDate: string; // Combined date and time
+  duration: string;
+  meetingLink: string; // Renamed from link
+  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  createdAt: string;
+  instructor?: string; // For backwards compatibility
+  date?: string; // For backwards compatibility
+  time?: string; // For backwards compatibility
+  link?: string; // For backwards compatibility
 }
 
-// Student submission for assessment
-export interface AssessmentSubmission {
-  id: string;
-  assessmentId: string;
-  studentId: string;
-  answers: { questionId: string; answer: string | string[] }[];
-  submittedAt: string;
-  isGraded: boolean;
-  marksObtained?: number;
-  feedback?: string;
-  gradedAt?: string;
-  gradedBy?: string;
-}
-
-// Email notification
-export interface EmailNotification {
-  id: string;
-  to: string;
-  subject: string;
-  body: string;
-  sentDate: string;
-  status: 'sent' | 'failed' | 'pending';
-  type: 'welcome' | 'reset-password' | 'enrollment-confirmation' | 'assignment' | 'general' | 'enrollment';
-  relatedId?: string;
-}
-
-// Student activity tracking
-export interface StudentActivity {
+// Enrollment interface
+export interface Enrollment {
   id: string;
   studentId: string;
-  loginTime: string;
-  logoutTime?: string;
-  activeDuration?: number; // in seconds
-  pages: {
-    path: string;
-    timeSpent: number; // in seconds
-    enteredAt: string;
-    leftAt?: string;
-  }[];
-  device?: {
-    browser: string;
-    os: string;
-    device: string;
-  };
-  ipAddress?: string;
+  courseId: string;
+  enrollmentDate: string;
+  status: 'active' | 'completed' | 'cancelled' | 'on-hold';
+  progress: number;
+  completed: boolean;
+  certificateIssued: boolean;
+  lastAccessedDate?: string;
 }
 
-// Login history for tracking
-export interface LoginHistory {
-  id: string;
-  userId: string;
-  timestamp: string;
-  success: boolean;
-  ipAddress?: string;
-  userAgent?: string;
-  failureReason?: string;
-}
-
-// Enrollment form data
-export interface EnrollmentForm {
+// Payment interfaces
+export interface Payment {
   id: string;
   studentId: string;
-  formType: 'course' | 'job';
-  relatedId: string; // courseId or jobId
-  submittedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
-  
-  // Basic Information
-  firstName: string;
-  lastName: string;
+  courseId: string;
+  amount: number;
+  paymentDate: string;
+  paymentId: string;
+  status: 'success' | 'pending' | 'failed';
+  paymentMethod: string;
+}
+
+// Placement interface
+export interface Placement {
+  id: string;
+  studentId: string;
+  company: string;
+  position: string;
+  packageAmount: string;
+  placementDate: string;
+  description?: string;
+  imageUrl?: string;
+  testimonial?: string;
+}
+
+// Contact form interface
+export interface Contact {
+  id: string;
+  name: string;
   email: string;
   phone: string;
-  dateOfBirth: string;
-  gender: 'male' | 'female' | 'other';
-  
-  // Identification Details
-  aadharNumber: string;
-  certificateId?: string;
-  
-  // Address Information
-  permanentAddress: Address;
-  currentAddress: Address;
-  isSameAddress: boolean;
-  
-  // Parent/Guardian Details
-  fatherName: string;
-  motherName: string;
-  guardianPhone: string;
-  guardianEmail: string;
-  
-  // Educational Details
-  tenthGrade: EducationDetail;
-  twelfthGrade: EducationDetail;
-  degree?: EducationDetail;
-  postGraduation?: EducationDetail;
-  
-  // Document Uploads
-  certificateUrl?: string;
-  photographUrl?: string;
+  message: string;
+  subject?: string;
+  createdAt: string;
+  status: 'new' | 'contacted' | 'resolved';
 }
 
-// Address interface
-export interface Address {
-  line1: string;
-  line2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-}
-
-// Education detail interface
-export interface EducationDetail {
-  institutionName: string;
-  boardUniversity: string;
-  yearOfPassing: string;
-  totalMarks: string;
-  obtainedMarks: string;
-  documentUrl?: string;
-}
-
-// Update AssessmentQuestion to include correctAnswerIndex for compatibility
-export interface AssessmentQuestion {
+// Enrollment form interface
+export interface EnrollmentFormSubmission {
   id: string;
-  text: string;
-  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
-  options?: string[];
-  correctAnswer?: string | string[];
-  correctAnswerIndex?: number; // Added for compatibility
-  marks?: number;
-  points?: number; // Added for compatibility
-  codingTemplate?: string; // Added for coding questions
+  name: string;
+  email: string;
+  phone: string;
+  courseId?: string;
+  jobId?: string;
+  education?: string;
+  experience?: string;
+  message?: string;
+  createdAt: string;
+  status: 'new' | 'contacted' | 'enrolled' | 'rejected';
 }
 
-// Question type (for assessment service)
 export interface Question {
   id: string;
-  text: string;
+  question: string;
   type: string;
   options?: string[];
-  correctAnswerIndex?: number;
   correctAnswer?: string | string[];
-  marks?: number;
-  points?: number; // Added for compatibility
-  codingTemplate?: string; // Added for coding questions
-}
-
-// Update RoadmapPhase to include phase for compatibility
-export interface RoadmapPhase {
-  id?: string; 
-  order?: number;
-  phase: number; // Made required for compatibility
-  title: string;
-  description?: string;
-  duration: string;
-  topics: string[];
-  projects: string[];
-  milestones?: string[];
-}
-
-// Update CourseModule interface
-export interface CourseModule {
-  id: string;
-  title: string;
-  topics: { id: string; title: string; }[];
+  marks: number;
 }

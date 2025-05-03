@@ -31,6 +31,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [phonePassword, setPhonePassword] = useState(''); // Added phone password field
   const [countryCode, setCountryCode] = useState('+91');
   const [isLoading, setIsLoading] = useState(false);
   const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false);
@@ -57,8 +58,8 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Call the login function and get the result
-      const result = loginStudent(email, password);
+      // Call the login function with email and password
+      const result = loginStudent(email, password, false);
       
       if (result.success) {
         toast({
@@ -100,6 +101,15 @@ const Login = () => {
       });
       return;
     }
+
+    if (!phonePassword) {
+      toast({
+        title: "Input Error",
+        description: "Please enter your password.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     
@@ -107,8 +117,8 @@ const Login = () => {
       // Format phone number with country code
       const formattedPhone = `${countryCode} ${phoneNumber}`;
       
-      // Direct login with phone number
-      const result = loginStudent(formattedPhone, "", true);
+      // Login with phone number and password
+      const result = loginStudent(formattedPhone, phonePassword, true);
       
       if (result.success) {
         toast({
@@ -123,7 +133,7 @@ const Login = () => {
       } else {
         toast({
           title: "Login Failed",
-          description: result.error || "Phone number not registered. Please register first.",
+          description: result.error || "Phone number not registered or incorrect password. Please try again.",
           variant: "destructive",
         });
       }
@@ -251,6 +261,24 @@ const Login = () => {
                           />
                         </div>
                         <p className="text-sm text-gray-500">Enter your 10-digit phone number without country code</p>
+                      </div>
+
+                      {/* Added password field for phone login */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="phonePassword">Password</Label>
+                          <Link to="/forgot-password" className="text-sm text-eduBlue-600 hover:text-eduBlue-700">
+                            Forgot your password?
+                          </Link>
+                        </div>
+                        <Input 
+                          id="phonePassword" 
+                          type="password" 
+                          value={phonePassword}
+                          onChange={(e) => setPhonePassword(e.target.value)}
+                          required 
+                          className="border-purple-100 focus-visible:ring-eduBlue-500"
+                        />
                       </div>
                       <Button 
                         className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all" 
