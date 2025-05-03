@@ -51,6 +51,27 @@ const StudentProfile = () => {
     const studentData = getStudentData();
     if (studentData) {
       setStudent(studentData);
+      
+      // Ensure we have valid default objects for each education level
+      const tenthData = studentData.education?.tenth || {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      };
+      
+      const twelfthData = studentData.education?.twelfth || {
+        school: '',
+        percentage: '',
+        yearOfCompletion: ''
+      };
+      
+      const degreeData = studentData.education?.degree || {
+        university: '',
+        course: '',
+        percentage: '',
+        yearOfCompletion: ''
+      };
+      
       setFormData({
         name: studentData.name || '',
         email: studentData.email || '',
@@ -59,22 +80,9 @@ const StudentProfile = () => {
         profilePicture: studentData.profilePicture || '',
         skills: studentData.skills || [],
         education: {
-          tenth: studentData.education?.tenth || {
-            school: '',
-            percentage: '',
-            yearOfCompletion: ''
-          },
-          twelfth: studentData.education?.twelfth || {
-            school: '',
-            percentage: '',
-            yearOfCompletion: ''
-          },
-          degree: studentData.education?.degree || {
-            university: '',
-            course: '',
-            percentage: '',
-            yearOfCompletion: ''
-          },
+          tenth: tenthData,
+          twelfth: twelfthData,
+          degree: degreeData,
           highest: studentData.education?.highest || ''
         },
         aadharNumber: studentData.aadharNumber || ''
