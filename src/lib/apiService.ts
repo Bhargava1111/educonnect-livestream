@@ -1,4 +1,3 @@
-
 // Implement API service methods for interacting with backend services
 import axios from 'axios';
 import { Student, Course, Job, Placement } from './types';
@@ -8,7 +7,7 @@ import {
   logoutStudent,
   getStudentEnrollments,
   getCurrentStudent
-} from './studentAuth';
+} from './courseManagement';
 
 // Mock API base URL - would be replaced with actual API URL in production
 const API_BASE_URL = 'https://api.careeraspire.com';

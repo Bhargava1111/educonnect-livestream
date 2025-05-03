@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,9 +54,13 @@ const AdminPlacements = () => {
   
   const handleAddPlacement = () => {
     try {
+      const packageAmount = formData.salary; // Assuming packageAmount is stored in salary
+      const packageAmountStr = String(packageAmount);
+      
       const newPlacement = createPlacement({
         ...formData,
-        year: Number(formData.year)
+        year: Number(formData.year),
+        packageAmount: packageAmountStr
       });
       
       toast({
@@ -77,13 +80,17 @@ const AdminPlacements = () => {
     }
   };
   
-  const handleEditPlacement = () => {
+  const handleEditPlacement = (id: string) => {
     if (!selectedPlacement) return;
     
     try {
+      const packageAmount = selectedPlacement.packageAmount; // Assuming packageAmount is stored in packageAmount
+      const packageAmountStr = String(packageAmount);
+      
       updatePlacement(selectedPlacement.id, {
         ...formData,
-        year: Number(formData.year)
+        year: Number(formData.year),
+        packageAmount: packageAmountStr
       });
       
       toast({

@@ -35,7 +35,8 @@ import {
   getStudentEnrollments,
   getStudentData,
   getStudentsByEnrolledCourse,
-  enrollStudentInCourse
+  enrollStudentInCourse,
+  getStudentById 
 } from './auth/studentService';
 
 import {
@@ -43,6 +44,10 @@ import {
   verifyPasswordResetOTP,
   resetPassword
 } from './auth/passwordService';
+
+import {
+  getCurrentStudent
+} from './auth/utils';
 
 // Re-export them
 export {
@@ -58,6 +63,29 @@ export {
   getStudentData,
   getStudentsByEnrolledCourse,
   enrollStudentInCourse,
+  requestPasswordResetOTP,
+  verifyPasswordResetOTP,
+  resetPassword,
+  getCurrentStudent,
+  getStudentById
+};
+
+// For backward compatibility
+export const studentAuth = {
+  isStudentLoggedIn,
+  loginStudent,
+  logoutStudent,
+  getStudentLoginHistory,
+  getStudentActivity,
+  getStudentTotalActiveTime,
+  formatActiveTime,
+  getStudentLastActiveTime,
+  getStudentEnrollments,
+  getStudentData,
+  getStudentsByEnrolledCourse,
+  enrollStudentInCourse,
+  getCurrentStudent,
+  getStudentById,
   requestPasswordResetOTP,
   verifyPasswordResetOTP,
   resetPassword

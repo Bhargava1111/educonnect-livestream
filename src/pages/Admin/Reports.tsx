@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -321,6 +320,27 @@ const AdminReports = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      <div className="mt-6">
+        <h3 className="text-lg font-medium mb-2">Payment Success Rate</h3>
+        <div className="flex items-center">
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div
+              className="bg-green-500 h-2.5 rounded-full"
+              style={{
+                width: `${payments.length > 0
+                  ? (payments.filter(payment => payment.status === 'success').length / payments.length) * 100
+                  : 0}%`
+              }}
+            ></div>
+          </div>
+          <span className="text-sm font-medium text-gray-700 ml-2">
+            {payments.length > 0
+              ? Math.round((payments.filter(payment => payment.status === 'success').length / payments.length) * 100)
+              : 0}%
+          </span>
+        </div>
+      </div>
     </div>
   );
 };
