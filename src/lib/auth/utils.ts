@@ -1,5 +1,9 @@
 
 import { Student } from '../types';
+import { STUDENT_ACTIVITY_KEY as ACTIVITY_KEY } from '../types'; // Import from types.ts
+
+// Re-export STUDENT_ACTIVITY_KEY for backward compatibility
+export const STUDENT_ACTIVITY_KEY = ACTIVITY_KEY;
 
 // Generate a unique ID
 export const generateId = (): string => {
@@ -28,6 +32,11 @@ export const setCurrentStudent = (student: Student | null): void => {
   }
 };
 
+// Clear the current student from localStorage
+export const clearCurrentStudent = (): void => {
+  localStorage.removeItem('current_student');
+};
+
 // Get all students from localStorage
 export const getAllStudents = (): Student[] => {
   const students = localStorage.getItem('career_aspire_students');
@@ -45,6 +54,18 @@ export const getAllStudents = (): Student[] => {
 export const getStudentById = (id: string): Student | undefined => {
   const students = getAllStudents();
   return students.find(student => student.id === id);
+};
+
+// Get a student by email
+export const getStudentByEmail = (email: string): Student | undefined => {
+  const students = getAllStudents();
+  return students.find(student => student.email === email);
+};
+
+// Get a student by phone
+export const getStudentByPhone = (phone: string): Student | undefined => {
+  const students = getAllStudents();
+  return students.find(student => student.phone === phone);
 };
 
 // Update a student in localStorage

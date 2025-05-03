@@ -1,4 +1,3 @@
-
 import { Student } from '../types';
 import { 
   getAllStudents, 
