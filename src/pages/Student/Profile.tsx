@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,8 @@ const StudentProfile = () => {
   const { toast } = useToast();
   const [student, setStudent] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Fix: Make education properties optional to match the type in Student
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -42,6 +43,7 @@ const StudentProfile = () => {
     },
     aadharNumber: ''
   });
+  
   const [newSkill, setNewSkill] = useState('');
 
   useEffect(() => {
@@ -119,7 +121,10 @@ const StudentProfile = () => {
   };
 
   const handleSaveProfile = () => {
-    const success = updateStudentProfile({
+    // Fix: Pass the student ID as the first argument to updateStudentProfile
+    if (!student) return;
+    
+    const success = updateStudentProfile(student.id, {
       name: formData.name,
       phone: formData.phone,
       address: formData.address,

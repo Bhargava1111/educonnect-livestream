@@ -11,7 +11,7 @@ export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
 export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
 export const EMAIL_NOTIFICATIONS_KEY = 'career_aspire_email_notifications';
 
-// Student interface (updated with additional properties)
+// Student interface (update education fields to match usage)
 export interface Student {
   id: string;
   firstName: string;

@@ -77,7 +77,6 @@ const AdminReportsPage = () => {
     generateEnrollmentData(loadedCourses, loadedEnrollments);
     generateRevenueData(loadedCourses, loadedPayments);
     generateCourseDistribution(loadedCourses, loadedEnrollments);
-    
   }, []);
   
   const generateEnrollmentData = (courses: Course[], enrollments: Enrollment[]) => {
@@ -94,8 +93,9 @@ const AdminReportsPage = () => {
   
   const generateRevenueData = (courses: Course[], payments: Payment[]) => {
     const data = courses.map(course => {
+      // Fix: Change "completed" to "success" in the comparison
       const revenue = payments
-        .filter(p => p.courseId === course.id && p.status === 'completed')
+        .filter(p => p.courseId === course.id && p.status === 'success')
         .reduce((sum, payment) => sum + payment.amount, 0);
       
       return {
@@ -124,8 +124,9 @@ const AdminReportsPage = () => {
     // Combine course and enrollment data
     const reportData = courses.map(course => {
       const courseEnrollments = enrollments.filter(e => e.courseId === course.id);
+      // Fix: Change "completed" to "success" in the comparison
       const courseRevenue = payments
-        .filter(p => p.courseId === course.id && p.status === 'completed')
+        .filter(p => p.courseId === course.id && p.status === 'success')
         .reduce((sum, payment) => sum + payment.amount, 0);
       
       return {

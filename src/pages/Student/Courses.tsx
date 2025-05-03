@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -128,8 +127,8 @@ const StudentCourses = () => {
       return;
     }
 
-    // Update student profile with the form data first
-    updateStudentProfile({
+    // Fix: Pass the student ID as the first argument to updateStudentProfile
+    updateStudentProfile(student.id, {
       aadharNumber: data.aadharNumber,
       education: {
         ...student.education,

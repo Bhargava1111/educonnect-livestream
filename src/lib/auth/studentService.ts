@@ -212,7 +212,7 @@ export const getStudentProfile = (studentId: string): Student | undefined => {
   };
 };
 
-// Function to update student profile
+// Function to update student profile - Update to match how it's called in Profile.tsx and Courses.tsx
 export const updateStudentProfile = (studentId: string, profileData: Partial<Student>): { success: boolean; error?: string } => {
   try {
     const student = getStudentById(studentId);
