@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Edit, Trash2, Plus } from 'lucide-react';
 
-const AdminPlacementsPage = () => {
+const AdminPlacementsPage: React.FC = () => {
   const { toast } = useToast();
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [isAddingPlacement, setIsAddingPlacement] = useState(false);
@@ -60,7 +61,7 @@ const AdminPlacementsPage = () => {
     setStudentNames(names);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -262,7 +263,7 @@ const AdminPlacementsPage = () => {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
-                      variant={"outline"}
+                      variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
                         !formData.placementDate && "text-muted-foreground"
@@ -275,7 +276,7 @@ const AdminPlacementsPage = () => {
                     <Calendar
                       mode="single"
                       selected={formData.placementDate ? new Date(formData.placementDate) : undefined}
-                      onSelect={(date) => date ? handleChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any : null}
+                      onSelect={(date) => date ? handleChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any) : null}
                       disabled={(date) =>
                         date > new Date()
                       }
@@ -287,7 +288,7 @@ const AdminPlacementsPage = () => {
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Input
-                  type="textarea"
+                  type="text"
                   id="description"
                   name="description"
                   value={formData.description}
@@ -297,7 +298,7 @@ const AdminPlacementsPage = () => {
               <div>
                 <Label htmlFor="testimonial">Testimonial</Label>
                 <Input
-                  type="textarea"
+                  type="text"
                   id="testimonial"
                   name="testimonial"
                   value={formData.testimonial}
@@ -402,7 +403,7 @@ const AdminPlacementsPage = () => {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
-                      variant={"outline"}
+                      variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
                         !editFormData.placementDate && "text-muted-foreground"
@@ -415,7 +416,7 @@ const AdminPlacementsPage = () => {
                     <Calendar
                       mode="single"
                       selected={editFormData.placementDate ? new Date(editFormData.placementDate) : undefined}
-                      onSelect={(date) => date ? handleEditChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any : null}
+                      onSelect={(date) => date ? handleEditChange({ target: { name: 'placementDate', value: date.toISOString().split('T')[0] } } as any) : null}
                       disabled={(date) =>
                         date > new Date()
                       }
@@ -427,7 +428,7 @@ const AdminPlacementsPage = () => {
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Input
-                  type="textarea"
+                  type="text"
                   id="description"
                   name="description"
                   value={editFormData.description}
@@ -437,7 +438,7 @@ const AdminPlacementsPage = () => {
               <div>
                 <Label htmlFor="testimonial">Testimonial</Label>
                 <Input
-                  type="textarea"
+                  type="text"
                   id="testimonial"
                   name="testimonial"
                   value={editFormData.testimonial}
