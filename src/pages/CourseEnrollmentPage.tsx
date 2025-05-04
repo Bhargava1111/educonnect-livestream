@@ -5,7 +5,7 @@ import { getCourseById } from '@/lib/courseManagement';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import EnrollmentForm from '@/components/enrollment/EnrollmentForm';
+import CompleteEnrollmentForm from '@/components/enrollment/CompleteEnrollmentForm';
 import { useToast } from '@/hooks/use-toast';
 import { isStudentLoggedIn } from '@/lib/studentAuth';
 
@@ -80,10 +80,15 @@ const CourseEnrollmentPage = () => {
         </div>
       </div>
       
-      <EnrollmentForm 
-        formType="course" 
-        relatedId={courseId || ''} 
-      />
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Course Enrollment Form</h2>
+          <CompleteEnrollmentForm 
+            formType="course" 
+            relatedId={courseId || ''} 
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };

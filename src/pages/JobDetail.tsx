@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getJobById } from '@/lib/jobService';
 import { Button } from '@/components/ui/button';
@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, Briefcase, MapPin, Calendar, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
-import EnrollmentFormWrapper from '@/components/enrollment/EnrollmentFormWrapper';
+import EnrollmentFormDialog from '@/components/enrollment/EnrollmentFormDialog';
 
 const JobDetail = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Fetch job data
   const job = jobId ? getJobById(jobId) : null;
@@ -51,6 +52,14 @@ const JobDetail = () => {
       </div>
     );
   }
+  
+  const handleApply = () => {
+    if (job.externalLink) {
+      window.open(job.externalLink, '_blank');
+    } else {
+      setIsDialogOpen(true);
+    }
+  };
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -127,24 +136,9 @@ const JobDetail = () => {
           {/* Apply Now Button */}
           <div className="flex flex-wrap gap-3 pt-4">
             {isJobActive && (
-              job.externalLink ? (
-                <EnrollmentFormWrapper
-                  formType="job"
-                  relatedId={job.id}
-                  title={`Application for ${job.title}`}
-                  description="Fill in the application form to apply for this position."
-                  buttonText="Apply Now"
-                  redirectPath={job.externalLink}
-                />
-              ) : (
-                <EnrollmentFormWrapper
-                  formType="job"
-                  relatedId={job.id}
-                  title={`Application for ${job.title}`}
-                  description="Fill in the application form to apply for this position."
-                  buttonText="Apply Now"
-                />
-              )
+              <Button onClick={handleApply}>
+                Apply Now
+              </Button>
             )}
             
             {job.externalLink && (
@@ -155,6 +149,15 @@ const JobDetail = () => {
           </div>
         </CardContent>
       </Card>
+      
+      <EnrollmentFormDialog
+        formType="job"
+        relatedId={job.id}
+        title={`Application for ${job.title}`}
+        description="Complete the application form below to apply for this position."
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   );
 };

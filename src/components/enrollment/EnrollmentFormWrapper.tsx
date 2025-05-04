@@ -1,18 +1,11 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
-import { isStudentLoggedIn } from '@/lib/studentAuth';
-import EnrollmentForm from './EnrollmentForm';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { isStudentLoggedIn } from '@/lib/studentAuth';
+import EnrollmentFormDialog from './EnrollmentFormDialog';
 
 interface EnrollmentFormWrapperProps {
   formType: 'course' | 'job';
@@ -21,7 +14,7 @@ interface EnrollmentFormWrapperProps {
   description?: string;
   buttonText?: string;
   buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  redirectPath?: string; // Used for job applications with external links
+  redirectPath?: string;
   fullWidth?: boolean;
 }
 
@@ -89,19 +82,14 @@ const EnrollmentFormWrapper: React.FC<EnrollmentFormWrapperProps> = ({
       )}
       
       {/* Enrollment Form Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-            {description && <DialogDescription>{description}</DialogDescription>}
-          </DialogHeader>
-          <EnrollmentForm
-            formType={formType}
-            relatedId={relatedId}
-            onSuccess={() => setIsDialogOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      <EnrollmentFormDialog
+        formType={formType}
+        relatedId={relatedId}
+        title={title}
+        description={description}
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </>
   );
 };

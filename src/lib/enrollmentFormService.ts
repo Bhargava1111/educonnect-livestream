@@ -48,6 +48,26 @@ export const submitEnrollmentForm = async (form: Omit<EnrollmentForm, 'id'>): Pr
       forms.push(newForm);
       localStorage.setItem(ENROLLMENT_FORMS_KEY, JSON.stringify(forms));
       
+      // Track this as activity
+      try {
+        const activityData = {
+          id: `activity_${Date.now()}`,
+          studentId: form.studentId,
+          type: form.formType === 'course' ? 'course_enrollment' : 'job_application',
+          context: { relatedId: form.relatedId },
+          timestamp: new Date().toISOString()
+        };
+        
+        // Save activity to localStorage if we have a STUDENT_ACTIVITY_KEY constant
+        const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
+        const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
+        const activityArray = activities ? JSON.parse(activities) : [];
+        activityArray.push(activityData);
+        localStorage.setItem(STUDENT_ACTIVITY_KEY, JSON.stringify(activityArray));
+      } catch (error) {
+        console.error("Error tracking student activity:", error);
+      }
+      
       resolve(newForm);
     }, 500); // Simulate network delay
   });
