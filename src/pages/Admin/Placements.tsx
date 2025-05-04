@@ -7,13 +7,13 @@ import { Plus, Download, Search } from 'lucide-react';
 import { PlacementTable } from '@/components/admin/placements/PlacementTable';
 import { PlacementForm } from '@/components/admin/placements/PlacementForm';
 import { 
-  Placement, 
   getAllPlacements,
   addPlacement,
   updatePlacement,
   deletePlacement,
   exportPlacementsAsCSV
 } from '@/lib/placementService';
+import { Placement } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
