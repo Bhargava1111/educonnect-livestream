@@ -386,6 +386,7 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
           
+          {/* Students Tab Content */}
           <TabsContent value="students">
             <Card>
               <CardHeader className="flex justify-between items-center">
@@ -484,6 +485,7 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
           
+          {/* Courses Tab Content */}
           <TabsContent value="courses">
             <Card>
               <CardHeader className="flex justify-between items-center">
@@ -555,6 +557,7 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
           
+          {/* Sessions Tab Content */}
           <TabsContent value="sessions">
             <Card>
               <CardHeader className="flex justify-between items-center">

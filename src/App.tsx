@@ -25,8 +25,6 @@ import AdminCourseRoadmap from "./pages/Admin/CourseRoadmap";
 import CourseAssessments from "./pages/Admin/CourseAssessments";
 import CourseReports from "./pages/Admin/CourseReports";
 import AdminLiveMeetings from "./pages/Admin/LiveMeetings";
-import AdminJobs from "./pages/Admin/Jobs";
-import AdminPlacements from "./pages/Admin/Placements";
 import AdminContact from "./pages/Admin/Contact";
 import AdminAssessments from "./pages/Admin/Assessments";
 import AdminSchedule from "./pages/Admin/Schedule";
@@ -43,7 +41,6 @@ import CourseEnrollmentPage from "./pages/CourseEnrollmentPage";
 import JobDetail from "./pages/JobDetail";
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
-import StudentActivity from "./pages/Admin/StudentActivity";
 
 const queryClient = new QueryClient();
 
@@ -71,15 +68,12 @@ const App = () => (
             <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/students" element={<AdminStudents />} />
-            <Route path="/admin/students/:id" element={<StudentActivity />} />
             <Route path="/admin/courses" element={<AdminCourses />} />
             <Route path="/admin/courses/:courseId" element={<CourseDetails />} />
             <Route path="/admin/courses/:courseId/roadmap" element={<AdminCourseRoadmap />} />
             <Route path="/admin/courses/:courseId/assessments" element={<CourseAssessments />} />
             <Route path="/admin/courses/:courseId/reports" element={<CourseReports />} />
             <Route path="/admin/live-meetings" element={<AdminLiveMeetings />} />
-            <Route path="/admin/jobs" element={<AdminJobs />} />
-            <Route path="/admin/placements" element={<AdminPlacements />} />
             <Route path="/admin/contact" element={<AdminContact />} />
             <Route path="/admin/assessments" element={<AdminAssessments />} />
             <Route path="/admin/schedule" element={<AdminSchedule />} />
