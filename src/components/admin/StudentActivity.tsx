@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CalendarDays } from 'lucide-react';
+import { Clock, User } from 'lucide-react';
 import { getStudentActivity, getStudentLoginHistory, getStudentTotalActiveTime, formatActiveTime, getStudentLastActiveTime } from '@/lib/auth/activityService';
 
 interface StudentActivityProps {
@@ -194,7 +194,7 @@ const StudentActivityComponent: React.FC<StudentActivityProps> = ({ studentId })
                         <TableRow key={index}>
                           <TableCell className="font-medium">
                             <div className="flex items-center">
-                              <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <User className="mr-2 h-4 w-4 text-muted-foreground" />
                               {login.device}
                             </div>
                           </TableCell>

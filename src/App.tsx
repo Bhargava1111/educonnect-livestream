@@ -44,6 +44,7 @@ import CourseEnrollmentPage from "./pages/CourseEnrollmentPage";
 import JobDetail from "./pages/JobDetail";
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import StudentActivityPage from "./pages/Admin/StudentActivity";
 
 // This is a test comment to verify that code changes are being applied
 
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/admin/schedule" element={<AdminSchedule />} />
             <Route path="/admin/reports" element={<AdminReports />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/students/:id/activity" element={<StudentActivityPage />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/student/courses" element={<StudentCourses />} />

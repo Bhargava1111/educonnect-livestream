@@ -17,14 +17,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Download } from 'lucide-react';
+import { Search, Download, Activity } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { getAllStudents, getStudentsByEnrolledCourse } from '@/lib/studentAuth';
 import { getAllCourses } from '@/lib/courseManagement';
+import { useNavigate } from 'react-router-dom';
 
 const AdminStudents = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
+  const navigate = useNavigate();
   
   const allStudents = getAllStudents();
   const allCourses = getAllCourses();
@@ -68,6 +70,10 @@ const AdminStudents = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const viewStudentActivity = (studentId: string) => {
+    navigate(`/admin/students/${studentId}/activity`);
   };
 
   return (
@@ -146,9 +152,19 @@ const AdminStudents = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
-                          View Details
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button variant="ghost" size="sm">
+                            View Details
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => viewStudentActivity(student.id)}
+                          >
+                            <Activity className="mr-1 h-4 w-4" />
+                            Activity
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
