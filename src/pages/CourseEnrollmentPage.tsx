@@ -25,9 +25,9 @@ const CourseEnrollmentPage = () => {
         description: "Please login to access the enrollment form.",
         variant: "destructive",
       });
-      navigate('/login');
+      navigate('/login', { state: { redirectAfterLogin: `/course-enrollment/${courseId}` } });
     }
-  }, [navigate, toast]);
+  }, [navigate, toast, courseId]);
   
   // Handle back navigation
   const handleBack = () => {
@@ -61,6 +61,23 @@ const CourseEnrollmentPage = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{course.title}</h1>
         <p className="text-gray-600">{course.shortDescription}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+            Duration: {course.duration}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+            Level: {course.level}
+          </span>
+          {course.price > 0 ? (
+            <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+              Price: ₹{course.price.toLocaleString()}
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+              Free
+            </span>
+          )}
+        </div>
       </div>
       
       <EnrollmentForm 

@@ -1,26 +1,28 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { JobFormData } from '@/hooks/useJobManagement';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Job } from '@/lib/jobService';
 
 interface JobFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: () => void;
+  onSubmit: (e: React.FormEvent) => void;
   title: string;
   submitLabel: string;
-  formData: JobFormData;
+  formData: Partial<Job>;
   requirementInput: string;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onSelectChange: (name: string, value: string) => void;
+  onSelectChange: (field: string, value: string) => void;
   onRequirementInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddRequirement: () => void;
-  onRemoveRequirement: (index: number) => void;
+  onRemoveRequirement: (requirement: string) => void;
 }
 
 export const JobForm: React.FC<JobFormProps> = ({
@@ -39,68 +41,89 @@ export const JobForm: React.FC<JobFormProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            Fill out the form below to {submitLabel === "Add Job" ? "create a new job listing" : "update the job listing"}.
-          </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+        
+        <form className="space-y-6" onSubmit={onSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Job Title*</Label>
+              <Label htmlFor="title">Job Title</Label>
               <Input
                 id="title"
                 name="title"
-                value={formData.title}
+                value={formData.title || ''}
                 onChange={onInputChange}
+                placeholder="Enter job title"
                 required
               />
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="company">Company*</Label>
+              <Label htmlFor="company">Company</Label>
               <Input
                 id="company"
                 name="company"
-                value={formData.company}
+                value={formData.company || ''}
                 onChange={onInputChange}
+                placeholder="Enter company name"
                 required
               />
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+            
             <div className="space-y-2">
-              <Label htmlFor="location">Location*</Label>
+              <Label htmlFor="location">Location</Label>
               <Input
                 id="location"
                 name="location"
-                value={formData.location}
+                value={formData.location || ''}
                 onChange={onInputChange}
+                placeholder="Enter job location"
                 required
               />
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="salary">Salary</Label>
               <Input
                 id="salary"
                 name="salary"
-                placeholder="e.g. 6-10 LPA"
-                value={formData.salary}
+                value={formData.salary || ''}
+                onChange={onInputChange}
+                placeholder="e.g. 6-9 LPA"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Input
+                id="category"
+                name="category"
+                value={formData.category || ''}
+                onChange={onInputChange}
+                placeholder="Enter job category"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="lastDate">Last Date to Apply</Label>
+              <Input
+                id="lastDate"
+                name="lastDate"
+                type="date"
+                value={formData.lastDate || ''}
                 onChange={onInputChange}
               />
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+            
             <div className="space-y-2">
-              <Label htmlFor="jobType">Job Type*</Label>
+              <Label htmlFor="jobType">Job Type</Label>
               <Select 
-                value={formData.jobType} 
+                value={formData.jobType || 'Full-time'} 
                 onValueChange={(value) => onSelectChange('jobType', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger id="jobType">
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -108,17 +131,17 @@ export const JobForm: React.FC<JobFormProps> = ({
                   <SelectItem value="Part-time">Part-time</SelectItem>
                   <SelectItem value="Contract">Contract</SelectItem>
                   <SelectItem value="Internship">Internship</SelectItem>
-                  <SelectItem value="Remote">Remote</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="experienceLevel">Experience Level*</Label>
+              <Label htmlFor="experienceLevel">Experience Level</Label>
               <Select 
-                value={formData.experienceLevel} 
+                value={formData.experienceLevel || 'Entry'} 
                 onValueChange={(value) => onSelectChange('experienceLevel', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger id="experienceLevel">
                   <SelectValue placeholder="Select experience level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -128,124 +151,90 @@ export const JobForm: React.FC<JobFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="lastDate">Last Date to Apply*</Label>
-              <Input
-                id="lastDate"
-                name="lastDate"
-                type="date"
-                value={formData.lastDate}
-                onChange={onInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="category">Category/Industry</Label>
-              <Select 
-                value={formData.category || ''} 
-                onValueChange={(value) => onSelectChange('category', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Information Technology">Information Technology</SelectItem>
-                  <SelectItem value="Finance">Finance</SelectItem>
-                  <SelectItem value="Healthcare">Healthcare</SelectItem>
-                  <SelectItem value="Education">Education</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Sales">Sales</SelectItem>
-                  <SelectItem value="Engineering">Engineering</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="externalLink">External Application Link</Label>
-              <Input
-                id="externalLink"
-                name="externalLink"
-                type="url"
-                placeholder="https://example.com/apply"
-                value={formData.externalLink || ''}
-                onChange={onInputChange}
-              />
-            </div>
+            
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select 
-                value={formData.status || 'Active'} 
+                value={formData.status || 'Open'} 
                 onValueChange={(value) => onSelectChange('status', value)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select job status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
-                  <SelectItem value="Draft">Draft</SelectItem>
+                  <SelectItem value="Open">Open</SelectItem>
+                  <SelectItem value="Closed">Closed</SelectItem>
+                  <SelectItem value="Filled">Filled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="externalLink">External Application Link (Optional)</Label>
+              <Input
+                id="externalLink"
+                name="externalLink"
+                value={formData.externalLink || ''}
+                onChange={onInputChange}
+                placeholder="https://example.com/apply"
+              />
+            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Job Description*</Label>
+            <Label htmlFor="description">Job Description</Label>
             <Textarea
               id="description"
               name="description"
-              rows={4}
-              value={formData.description}
+              value={formData.description || ''}
               onChange={onInputChange}
+              placeholder="Enter job description"
+              className="h-24"
               required
-              className="min-h-[100px]"
             />
           </div>
           
-          <div className="space-y-2">
-            <Label>Requirements</Label>
-            <div className="flex gap-2">
-              <Input
-                value={requirementInput}
-                onChange={onRequirementInputChange}
-                placeholder="Add a requirement"
-                onKeyDown={(e) => e.key === 'Enter' && onAddRequirement()}
-              />
-              <Button type="button" onClick={onAddRequirement} variant="outline">
-                Add
-              </Button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Requirements</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={requirementInput}
+                  onChange={onRequirementInputChange}
+                  placeholder="Add a requirement"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), onAddRequirement())}
+                />
+                <Button type="button" onClick={onAddRequirement}>
+                  Add
+                </Button>
+              </div>
             </div>
-            <ul className="mt-2 space-y-1">
-              {formData.requirements.map((req, index) => (
-                <li key={index} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                  <span>{req}</span>
-                  <Button
+            
+            <div className="flex flex-wrap gap-2 mt-2">
+              {formData.requirements?.map((req, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  {req}
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onRemoveRequirement(index)}
+                    onClick={() => onRemoveRequirement(req)}
+                    className="ml-1 hover:text-red-500"
                   >
-                    ✕
-                  </Button>
-                </li>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
               ))}
-            </ul>
+            </div>
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={onSubmit}>
-            {submitLabel}
-          </Button>
-        </DialogFooter>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              {submitLabel}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

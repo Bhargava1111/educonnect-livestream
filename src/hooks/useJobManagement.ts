@@ -1,249 +1,167 @@
 
-import React, { useState, useEffect } from 'react';
-import { getAllJobs, createJob, updateJob, deleteJob, Job } from '@/lib/jobService';
-import { useToast } from './use-toast';
-
-// Type for job form data
-export interface JobFormData {
-  title: string;
-  company: string;
-  description: string;
-  location: string;
-  salary: string;
-  requirements: string[];
-  lastDate: string;
-  jobType: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
-  experienceLevel: string;
-  status: 'Open' | 'Closed' | 'Filled';
-  externalLink?: string;
-  category?: string;
-}
+import { useState } from 'react';
+import { Job, createJob, getAllJobs, updateJob, deleteJob } from '@/lib/jobService';
+import { useToast } from '@/hooks/use-toast';
 
 export const useJobManagement = () => {
   const { toast } = useToast();
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<Job[]>(() => getAllJobs());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [requirementInput, setRequirementInput] = useState('');
-  const [formData, setFormData] = useState<JobFormData>({
+  const [formData, setFormData] = useState<Partial<Job>>({
     title: '',
     company: '',
-    description: '',
     location: '',
-    salary: '',
+    description: '',
     requirements: [],
-    lastDate: '',
+    salary: '',
     jobType: 'Full-time',
-    experienceLevel: 'Mid',
+    experienceLevel: 'Entry',
     status: 'Open',
-    externalLink: '',
-    category: ''
+    category: 'Information Technology',
+    lastDate: '',
+    externalLink: ''
   });
 
-  // Fetch jobs on component mount
-  useEffect(() => {
-    const fetchJobs = () => {
-      const jobsList = getAllJobs();
-      setJobs(jobsList);
-    };
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      company: '',
+      location: '',
+      description: '',
+      requirements: [],
+      salary: '',
+      jobType: 'Full-time',
+      experienceLevel: 'Entry',
+      status: 'Open',
+      category: 'Information Technology',
+      lastDate: '',
+      externalLink: ''
+    });
+    setRequirementInput('');
+  };
 
-    fetchJobs();
-  }, []);
-
-  // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle select input changes
-  const handleSelectChange = (name: string, value: string) => {
-    if (name === 'status') {
-      setFormData(prev => ({ ...prev, [name]: value as 'Open' | 'Closed' | 'Filled' }));
-    } else if (name === 'jobType') {
-      setFormData(prev => ({ ...prev, [name]: value as 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote' }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+  const handleSelectChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Add requirement to list
   const addRequirement = () => {
     if (requirementInput.trim()) {
       setFormData(prev => ({
         ...prev,
-        requirements: [...prev.requirements, requirementInput.trim()]
+        requirements: [...(prev.requirements || []), requirementInput.trim()]
       }));
       setRequirementInput('');
     }
   };
 
-  // Remove requirement from list
-  const removeRequirement = (index: number) => {
+  const removeRequirement = (requirement: string) => {
     setFormData(prev => ({
       ...prev,
-      requirements: prev.requirements.filter((_, i) => i !== index)
+      requirements: prev.requirements?.filter(r => r !== requirement) || []
     }));
   };
 
-  // Open edit modal with job data
+  const handleAddJob = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Force type assertion since we know we're providing all required fields
+      const newJob = createJob(formData as Omit<Job, 'id'>);
+      
+      setJobs([newJob, ...jobs]);
+      
+      toast({
+        title: "Job Created",
+        description: `${newJob.title} job listing has been created.`
+      });
+      
+      setIsAddModalOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error("Error adding job:", error);
+      
+      toast({
+        title: "Error",
+        description: "Failed to create job listing.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const openEditModal = (job: Job) => {
-    setFormData({
-      title: job.title,
-      company: job.company,
-      description: job.description,
-      location: job.location,
-      salary: job.salary || '',
-      requirements: [...job.requirements],
-      lastDate: job.lastDate || '',
-      jobType: job.jobType || job.type,
-      experienceLevel: job.experienceLevel || 'Mid',
-      status: job.status,
-      externalLink: job.externalLink || '',
-      category: job.category || ''
-    });
+    setFormData(job);
     setIsEditModalOpen(true);
   };
 
-  // Handle add job submission
-  const handleAddJob = () => {
-    try {
-      // Validate required fields
-      if (!formData.title || !formData.company || !formData.description || !formData.location) {
-        toast({
-          title: "Validation Error",
-          description: "Please fill in all required fields.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const newJob = createJob({
-        title: formData.title,
-        company: formData.company,
-        description: formData.description,
-        location: formData.location,
-        salary: formData.salary,
-        requirements: formData.requirements,
-        lastDate: formData.lastDate,
-        jobType: formData.jobType,
-        type: formData.jobType,
-        experienceLevel: formData.experienceLevel,
-        status: formData.status,
-        externalLink: formData.externalLink,
-        category: formData.category,
-        postedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString()
-      });
-
-      setJobs(prev => [...prev, newJob]);
-      setIsAddModalOpen(false);
-      resetForm();
-
-      toast({
-        title: "Job Created",
-        description: "The job posting has been successfully created."
-      });
-    } catch (error) {
-      console.error("Error adding job:", error);
+  const handleEditJob = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.id) {
       toast({
         title: "Error",
-        description: "Failed to create job. Please try again.",
-        variant: "destructive",
+        description: "Invalid job ID.",
+        variant: "destructive"
       });
+      return;
     }
-  };
-
-  // Handle edit job submission
-  const handleEditJob = () => {
+    
     try {
-      const jobToUpdate = jobs.find(job => job.title === formData.title && job.company === formData.company);
+      const updatedJob = updateJob(formData.id, formData);
       
-      if (!jobToUpdate) {
-        toast({
-          title: "Error",
-          description: "Job not found.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const updatedJob = updateJob(jobToUpdate.id, {
-        title: formData.title,
-        company: formData.company,
-        description: formData.description,
-        location: formData.location,
-        salary: formData.salary,
-        requirements: formData.requirements,
-        lastDate: formData.lastDate,
-        jobType: formData.jobType,
-        type: formData.jobType,
-        experienceLevel: formData.experienceLevel,
-        status: formData.status,
-        externalLink: formData.externalLink,
-        category: formData.category
-      });
-
       if (updatedJob) {
-        setJobs(prev => prev.map(job => job.id === jobToUpdate.id ? updatedJob : job));
-        setIsEditModalOpen(false);
-        resetForm();
-
+        setJobs(jobs.map(job => job.id === updatedJob.id ? updatedJob : job));
+        
         toast({
           title: "Job Updated",
-          description: "The job posting has been successfully updated."
+          description: `${updatedJob.title} has been updated.`
         });
+        
+        setIsEditModalOpen(false);
+        resetForm();
+      } else {
+        throw new Error("Failed to update job");
       }
     } catch (error) {
       console.error("Error updating job:", error);
+      
       toast({
         title: "Error",
-        description: "Failed to update job. Please try again.",
-        variant: "destructive",
+        description: "Failed to update job listing.",
+        variant: "destructive"
       });
     }
   };
 
-  // Handle delete job
-  const handleDeleteJob = (jobId: string) => {
+  const handleDeleteJob = (id: string) => {
     try {
-      const success = deleteJob(jobId);
-
+      const success = deleteJob(id);
+      
       if (success) {
-        setJobs(prev => prev.filter(job => job.id !== jobId));
-
+        setJobs(jobs.filter(job => job.id !== id));
+        
         toast({
           title: "Job Deleted",
-          description: "The job posting has been successfully deleted."
+          description: "Job listing has been removed."
         });
+      } else {
+        throw new Error("Failed to delete job");
       }
     } catch (error) {
       console.error("Error deleting job:", error);
+      
       toast({
         title: "Error",
-        description: "Failed to delete job. Please try again.",
-        variant: "destructive",
+        description: "Failed to delete job listing.",
+        variant: "destructive"
       });
     }
-  };
-
-  // Reset form to default values
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      company: '',
-      description: '',
-      location: '',
-      salary: '',
-      requirements: [],
-      lastDate: '',
-      jobType: 'Full-time',
-      experienceLevel: 'Mid',
-      status: 'Open',
-      externalLink: '',
-      category: ''
-    });
-    setRequirementInput('');
   };
 
   return {
@@ -266,5 +184,3 @@ export const useJobManagement = () => {
     resetForm
   };
 };
-
-export default useJobManagement;

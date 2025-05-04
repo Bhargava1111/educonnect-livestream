@@ -41,6 +41,9 @@ import LiveMeetings from "./pages/LiveMeetings";
 import NotFound from "./pages/NotFound";
 import CourseEnrollmentPage from "./pages/CourseEnrollmentPage";
 import JobDetail from "./pages/JobDetail";
+import PaymentPage from "./pages/PaymentPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import StudentActivity from "./pages/Admin/StudentActivity";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +71,7 @@ const App = () => (
             <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/students" element={<AdminStudents />} />
+            <Route path="/admin/students/:id" element={<StudentActivity />} />
             <Route path="/admin/courses" element={<AdminCourses />} />
             <Route path="/admin/courses/:courseId" element={<CourseDetails />} />
             <Route path="/admin/courses/:courseId/roadmap" element={<AdminCourseRoadmap />} />
@@ -86,8 +90,10 @@ const App = () => (
             <Route path="/student/courses" element={<StudentCourses />} />
             <Route path="/student/profile" element={<StudentProfile />} />
             <Route path="/student/*" element={<StudentDashboard />} />
-            <Route path="/course-enrollment/:courseId" element={<CourseEnrollmentPage />} />
-            <Route path="/job/:jobId" element={<JobDetail />} />
+            <Route path="/course-enrollment/:courseId" element={<Layout><CourseEnrollmentPage /></Layout>} />
+            <Route path="/payment/:courseId" element={<Layout><PaymentPage /></Layout>} />
+            <Route path="/payment-success" element={<Layout><PaymentSuccessPage /></Layout>} />
+            <Route path="/job/:jobId" element={<Layout><JobDetail /></Layout>} />
             <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
         </TooltipProvider>

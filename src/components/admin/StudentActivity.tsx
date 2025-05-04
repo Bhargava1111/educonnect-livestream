@@ -1,189 +1,224 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  getStudentById, 
-  getStudentLoginHistory, 
-  getStudentActivity, 
-  getStudentTotalActiveTime, 
-  formatActiveTime 
-} from '@/lib/studentAuth';
-import { Clock, CalendarClock, ListChecks } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Clock, CalendarDays } from 'lucide-react';
+import { getStudentActivity, getStudentLoginHistory, getStudentTotalActiveTime, formatActiveTime, getStudentLastActiveTime } from '@/lib/auth/activityService';
 
 interface StudentActivityProps {
   studentId: string;
 }
 
-const StudentActivity: React.FC<StudentActivityProps> = ({ studentId }) => {
-  const [student, setStudent] = useState<any>(null);
-  const [activeTime, setActiveTime] = useState<string>("0h 0m");
-  const [loginHistory, setLoginHistory] = useState<any[]>([]);
+const StudentActivityComponent: React.FC<StudentActivityProps> = ({ studentId }) => {
   const [activities, setActivities] = useState<any[]>([]);
-
+  const [loginHistory, setLoginHistory] = useState<any[]>([]);
+  const [activeTime, setActiveTime] = useState<string>("0m");
+  const [lastActive, setLastActive] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("all");
+  
   useEffect(() => {
-    // Load student data
-    const studentData = getStudentById(studentId);
-    setStudent(studentData);
+    // Load student activity data
+    const activityData = getStudentActivity(studentId);
+    setActivities(activityData);
     
-    // Get login history
-    const history = getStudentLoginHistory(studentId);
-    setLoginHistory(history);
+    // Load login history
+    const loginData = getStudentLoginHistory(studentId);
+    setLoginHistory(loginData);
     
-    // Get student activities
-    const studentActivities = getStudentActivity(studentId);
-    setActivities(studentActivities);
+    // Get active time
+    const totalActiveSeconds = getStudentTotalActiveTime(studentId);
+    setActiveTime(formatActiveTime(totalActiveSeconds));
     
-    // Get formatted active time
-    const totalSeconds = getStudentTotalActiveTime(studentId);
-    setActiveTime(formatActiveTime(totalSeconds));
-    
+    // Get last active time
+    const lastActiveTime = getStudentLastActiveTime(studentId);
+    setLastActive(lastActiveTime);
   }, [studentId]);
-
-  if (!student) {
-    return <div>Loading student data...</div>;
-  }
-
+  
+  // Filter activities
+  const filteredActivities = filter === "all" 
+    ? activities 
+    : activities.filter(activity => activity.action === filter);
+  
+  // Get unique activity types
+  const activityTypes = Array.from(new Set(activities.map(a => a.action)));
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          Student Activity
-        </CardTitle>
-        <CardDescription>
-          Track student engagement and activity
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Active Time</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+              <span className="text-2xl font-bold">{activeTime}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Total time spent on the platform
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Last Active</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold">
+              {lastActive ? (
+                new Date(lastActive).toLocaleDateString('en-US', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })
+              ) : (
+                "Never"
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {lastActive ? (
+                `At ${new Date(lastActive).toLocaleTimeString()}`
+              ) : (
+                "No activity recorded"
+              )}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Logins</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loginHistory.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Number of times logged in
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Tabs defaultValue="activity">
+        <TabsList className="mb-4">
+          <TabsTrigger value="activity">Activity Log</TabsTrigger>
+          <TabsTrigger value="login">Login History</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="activity">
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Time</p>
-                  <h2 className="text-2xl font-bold">{activeTime}</h2>
-                </div>
-                <Clock className="h-8 w-8 text-primary opacity-80" />
+                <CardTitle>Activity History</CardTitle>
+                <Select value={filter} onValueChange={setFilter}>
+                  <SelectTrigger className="w-44">
+                    <SelectValue placeholder="Filter by action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Activities</SelectItem>
+                    {activityTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Login Sessions</p>
-                  <h2 className="text-2xl font-bold">{loginHistory.length}</h2>
-                </div>
-                <CalendarClock className="h-8 w-8 text-primary opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Activities</p>
-                  <h2 className="text-2xl font-bold">{activities.length}</h2>
-                </div>
-                <ListChecks className="h-8 w-8 text-primary opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="logins">
-          <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="logins">Login History</TabsTrigger>
-            <TabsTrigger value="activity">Activity Log</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="logins">
-            <Card>
-              <CardHeader>
-                <CardTitle>Login Sessions</CardTitle>
-                <CardDescription>
-                  Recent login history for {student.firstName} {student.lastName}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-72 rounded-md">
-                  {loginHistory.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date & Time</TableHead>
-                          <TableHead>Device</TableHead>
+              <CardDescription>Recent student activities</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Details</TableHead>
+                      <TableHead className="text-right">Timestamp</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredActivities.length > 0 ? (
+                      filteredActivities.map((activity) => (
+                        <TableRow key={activity.id}>
+                          <TableCell className="font-medium capitalize">
+                            {activity.action}
+                          </TableCell>
+                          <TableCell>
+                            {activity.details ? (
+                              <pre className="text-xs overflow-auto max-w-xs">
+                                {JSON.stringify(activity.details, null, 2)}
+                              </pre>
+                            ) : (
+                              <span className="text-gray-400">No details</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {new Date(activity.timestamp).toLocaleString()}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {loginHistory.map((login, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell>
-                              {new Date(login.timestamp).toLocaleString()}
-                            </TableCell>
-                            <TableCell className="max-w-sm truncate">
-                              {login.device || 'Unknown device'}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No login history available
-                    </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="activity">
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity Log</CardTitle>
-                <CardDescription>
-                  Student activity tracking
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-72 rounded-md">
-                  {activities.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date & Time</TableHead>
-                          <TableHead>Activity</TableHead>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} className="h-24 text-center">
+                          No activity records found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="login">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Login History</CardTitle>
+              <CardDescription>Record of login sessions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Device</TableHead>
+                      <TableHead className="text-right">Date & Time</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loginHistory.length > 0 ? (
+                      loginHistory.map((login, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center">
+                              <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                              {login.device}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {new Date(login.timestamp).toLocaleString()}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {activities.map((activity, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell>
-                              {new Date(activity.timestamp).toLocaleString()}
-                            </TableCell>
-                            <TableCell>{activity.action}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No activity data available
-                    </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} className="h-24 text-center">
+                          No login records found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
-export default StudentActivity;
+export default StudentActivityComponent;
