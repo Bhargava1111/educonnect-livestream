@@ -20,6 +20,9 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/Admin/Dashboard";
 import AdminStudents from "./pages/Admin/Students";
 import AdminCourses from "./pages/Admin/Courses";
+import AdminJobs from "./pages/Admin/Jobs";
+import AdminPlacements from "./pages/Admin/Placements";
+import AdminCareers from "./pages/Admin/Careers";
 import CourseDetails from "./pages/Admin/CourseDetails";
 import AdminCourseRoadmap from "./pages/Admin/CourseRoadmap";
 import CourseAssessments from "./pages/Admin/CourseAssessments";
@@ -71,6 +74,9 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/students" element={<AdminStudents />} />
             <Route path="/admin/courses" element={<AdminCourses />} />
+            <Route path="/admin/jobs" element={<AdminJobs />} />
+            <Route path="/admin/placements" element={<AdminPlacements />} />
+            <Route path="/admin/careers" element={<AdminCareers />} />
             <Route path="/admin/courses/:courseId" element={<CourseDetails />} />
             <Route path="/admin/courses/:courseId/roadmap" element={<AdminCourseRoadmap />} />
             <Route path="/admin/courses/:courseId/assessments" element={<CourseAssessments />} />

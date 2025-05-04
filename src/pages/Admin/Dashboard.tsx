@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from "@/components/ui/badge";
 import { 
   BarChart, 
+  Briefcase,
   Calendar, 
   ChevronDown, 
   ChevronUp, 
@@ -103,6 +105,30 @@ const AdminDashboard = () => {
             >
               <GraduationCap className="mr-2 h-4 w-4" />
               Courses
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/jobs')}
+            >
+              <Briefcase className="mr-2 h-4 w-4" />
+              Jobs
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/placements')}
+            >
+              <User className="mr-2 h-4 w-4" />
+              Placements
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => navigateTo('/admin/careers')}
+            >
+              <Briefcase className="mr-2 h-4 w-4" />
+              Careers
             </Button>
             <Button 
               variant="ghost" 

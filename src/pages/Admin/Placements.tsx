@@ -6,85 +6,60 @@ import { Input } from "@/components/ui/input";
 import { Plus, Download, Search } from 'lucide-react';
 import { PlacementTable } from '@/components/admin/placements/PlacementTable';
 import { PlacementForm } from '@/components/admin/placements/PlacementForm';
+import { Placement } from '@/lib/types';
 import { 
-  getAllPlacements,
-  addPlacement,
-  updatePlacement,
+  getAllPlacements, 
+  addPlacement, 
+  updatePlacement, 
   deletePlacement,
   exportPlacementsAsCSV
 } from '@/lib/placementService';
-import { Placement } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const AdminPlacements = () => {
   const { toast } = useToast();
-  const [placements, setPlacements] = useState<Placement[]>(() => getAllPlacements());
+  const [placements, setPlacements] = useState<Placement[]>(getAllPlacements());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [formData, setFormData] = useState<Partial<Placement>>({
-    studentName: '',
-    studentId: '',
-    company: '',
-    position: '',
-    packageAmount: '',
-    placementDate: new Date().toISOString().split('T')[0],
-    description: '',
-    year: new Date().getFullYear().toString(),
-    testimonial: '',
-    imageUrl: '',
-    courseCompleted: '',
-    salary: ''
-  });
-  
+  const [editPlacement, setEditPlacement] = useState<Placement | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterYear, setFilterYear] = useState('all');
 
-  // Reset form data
-  const resetForm = () => {
-    setFormData({
-      studentName: '',
-      studentId: '',
-      company: '',
-      position: '',
-      packageAmount: '',
-      placementDate: new Date().toISOString().split('T')[0],
-      description: '',
-      year: new Date().getFullYear().toString(),
-      testimonial: '',
-      imageUrl: '',
-      courseCompleted: '',
-      salary: ''
-    });
+  // Get unique years for filtering
+  const years = Array.from(new Set(placements.map(placement => placement.year).filter(Boolean)));
+
+  // Filter placements based on search term and year
+  const filteredPlacements = placements.filter(placement => 
+    (placement.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     placement.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     placement.position.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterYear === 'all' || placement.year === filterYear)
+  );
+
+  // Handle CSV export
+  const handleExportCSV = () => {
+    const csvData = exportPlacementsAsCSV();
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'placements_export.csv');
+    a.click();
+    URL.revokeObjectURL(url);
   };
-  
-  // Handle input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  // Open edit modal
-  const handleEdit = (placement: Placement) => {
-    setFormData(placement);
-    setIsEditModalOpen(true);
-  };
-  
-  // Add new placement
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+
+  const handleAddPlacement = (placementData: Omit<Placement, 'id'>) => {
     try {
-      const newPlacement = addPlacement(formData as Omit<Placement, 'id'>);
+      const newPlacement = addPlacement(placementData);
       setPlacements([newPlacement, ...placements]);
       
       toast({
         title: "Placement Added",
-        description: `${newPlacement.studentName}'s placement record has been added.`
+        description: `${newPlacement.studentName}'s placement has been added.`
       });
       
       setIsAddModalOpen(false);
-      resetForm();
     } catch (error) {
       console.error("Error adding placement:", error);
       
@@ -95,35 +70,28 @@ const AdminPlacements = () => {
       });
     }
   };
-  
-  // Update existing placement
-  const handleUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.id) {
-      toast({
-        title: "Error",
-        description: "Invalid placement ID.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
+
+  const openEditModal = (placement: Placement) => {
+    setEditPlacement(placement);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditPlacement = (updatedData: Partial<Placement>) => {
+    if (!editPlacement) return;
+
     try {
-      const updated = updatePlacement(formData.id, formData);
+      const updated = updatePlacement(editPlacement.id, updatedData);
       
       if (updated) {
         setPlacements(placements.map(p => p.id === updated.id ? updated : p));
         
         toast({
           title: "Placement Updated",
-          description: `${updated.studentName}'s placement record has been updated.`
+          description: `${updated.studentName}'s placement has been updated.`
         });
         
         setIsEditModalOpen(false);
-        resetForm();
-      } else {
-        throw new Error("Failed to update placement record");
+        setEditPlacement(null);
       }
     } catch (error) {
       console.error("Error updating placement:", error);
@@ -135,9 +103,8 @@ const AdminPlacements = () => {
       });
     }
   };
-  
-  // Delete placement
-  const handleDelete = (id: string) => {
+
+  const handleDeletePlacement = (id: string) => {
     try {
       const success = deletePlacement(id);
       
@@ -148,8 +115,6 @@ const AdminPlacements = () => {
           title: "Placement Deleted",
           description: "Placement record has been removed."
         });
-      } else {
-        throw new Error("Failed to delete placement record");
       }
     } catch (error) {
       console.error("Error deleting placement:", error);
@@ -161,29 +126,6 @@ const AdminPlacements = () => {
       });
     }
   };
-  
-  // Export CSV
-  const handleExportCSV = () => {
-    const csvData = exportPlacementsAsCSV();
-    const blob = new Blob([csvData], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', 'placements_export.csv');
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-  
-  // Get unique years for filter
-  const years = Array.from(new Set(placements.map(p => p.year).filter(Boolean)));
-  
-  // Filter placements based on search term and year
-  const filteredPlacements = placements.filter(placement => 
-    (placement.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     placement.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     placement.position?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (filterYear === 'all' || placement.year === filterYear)
-  );
 
   return (
     <div className="p-6">
@@ -232,35 +174,33 @@ const AdminPlacements = () => {
         <CardContent className="p-0">
           <PlacementTable 
             placements={filteredPlacements}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            onEdit={openEditModal}
+            onDelete={handleDeletePlacement}
           />
         </CardContent>
       </Card>
       
-      {/* Add Placement Modal */}
       {isAddModalOpen && (
         <PlacementForm
           open={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onSubmit={handleAdd}
+          onSubmit={handleAddPlacement}
           title="Add New Placement"
           submitLabel="Add Placement"
-          formData={formData}
-          onInputChange={handleInputChange}
         />
       )}
       
-      {/* Edit Placement Modal */}
-      {isEditModalOpen && (
+      {isEditModalOpen && editPlacement && (
         <PlacementForm
           open={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSubmit={handleUpdate}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditPlacement(null);
+          }}
+          onSubmit={handleEditPlacement}
           title="Edit Placement"
           submitLabel="Update Placement"
-          formData={formData}
-          onInputChange={handleInputChange}
+          defaultValues={editPlacement}
         />
       )}
     </div>
