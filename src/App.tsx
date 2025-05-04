@@ -42,6 +42,8 @@ import JobDetail from "./pages/JobDetail";
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
+// This is a test comment to verify that code changes are being applied
+
 const queryClient = new QueryClient();
 
 const App = () => (
