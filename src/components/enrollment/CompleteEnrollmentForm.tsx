@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -138,7 +137,7 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Initialize the form
+  // Initialize the form with proper default values
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -148,10 +147,52 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
       phone: student?.phone || '',
       isSameAddress: false,
       permanentAddress: {
-        country: 'India',
+        line1: '', // Required field
+        line2: '',
+        city: '', // Required field
+        state: '', // Required field
+        postalCode: '', // Required field
+        country: 'India', // Required field with default value
       },
       currentAddress: {
-        country: 'India',
+        line1: '', // Required field
+        line2: '',
+        city: '', // Required field
+        state: '', // Required field
+        postalCode: '', // Required field
+        country: 'India', // Required field with default value
+      },
+      tenthGrade: {
+        institutionName: '', // Required field
+        boardUniversity: '', // Required field
+        yearOfPassing: '', // Required field
+        totalMarks: '', // Required field
+        obtainedMarks: '', // Required field
+        documentUrl: '',
+      },
+      twelfthGrade: {
+        institutionName: '',
+        boardUniversity: '',
+        yearOfPassing: '',
+        totalMarks: '',
+        obtainedMarks: '',
+        documentUrl: '',
+      },
+      degree: {
+        institutionName: '',
+        boardUniversity: '',
+        yearOfPassing: '',
+        totalMarks: '',
+        obtainedMarks: '',
+        documentUrl: '',
+      },
+      postGraduation: {
+        institutionName: '',
+        boardUniversity: '',
+        yearOfPassing: '',
+        totalMarks: '',
+        obtainedMarks: '',
+        documentUrl: '',
       },
     },
   });
@@ -217,9 +258,31 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
         guardianPhone: data.guardianPhone,
         guardianEmail: data.guardianEmail,
         tenthGrade: data.tenthGrade,
-        twelfthGrade: data.twelfthGrade,
-        degree: data.degree,
-        postGraduation: data.postGraduation,
+        // For optional education details, ensure we create complete objects if they're provided
+        twelfthGrade: data.twelfthGrade ? {
+          institutionName: data.twelfthGrade.institutionName || '',
+          boardUniversity: data.twelfthGrade.boardUniversity || '',
+          yearOfPassing: data.twelfthGrade.yearOfPassing || '',
+          totalMarks: data.twelfthGrade.totalMarks || '',
+          obtainedMarks: data.twelfthGrade.obtainedMarks || '',
+          documentUrl: data.twelfthGrade.documentUrl,
+        } : undefined,
+        degree: data.degree ? {
+          institutionName: data.degree.institutionName || '',
+          boardUniversity: data.degree.boardUniversity || '',
+          yearOfPassing: data.degree.yearOfPassing || '',
+          totalMarks: data.degree.totalMarks || '',
+          obtainedMarks: data.degree.obtainedMarks || '',
+          documentUrl: data.degree.documentUrl,
+        } : undefined,
+        postGraduation: data.postGraduation ? {
+          institutionName: data.postGraduation.institutionName || '',
+          boardUniversity: data.postGraduation.boardUniversity || '',
+          yearOfPassing: data.postGraduation.yearOfPassing || '',
+          totalMarks: data.postGraduation.totalMarks || '',
+          obtainedMarks: data.postGraduation.obtainedMarks || '',
+          documentUrl: data.postGraduation.documentUrl,
+        } : undefined,
         certificateUrl: data.certificateUrl,
         photographUrl: data.photographUrl,
       };
@@ -423,6 +486,7 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
                               date > new Date() || date < new Date("1900-01-01")
                             }
                             initialFocus
+                            className={cn("p-3 pointer-events-auto")}
                           />
                         </PopoverContent>
                       </Popover>
@@ -949,236 +1013,4 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
                         <Input placeholder="E.g. 85% or 425" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="twelfthGrade.documentUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Upload Marksheet</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="file"
-                            onChange={handleFileUpload('twelfthGrade.documentUrl')}
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            className="flex-1"
-                          />
-                          <div className="shrink-0">
-                            <Button type="button" size="sm" variant="outline">
-                              <Upload className="h-4 w-4 mr-1" />
-                              Upload
-                            </Button>
-                          </div>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Upload 12th marksheet (PDF, JPG, JPEG, PNG)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <h3 className="text-lg font-medium">Degree Details (if applicable)</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="degree.institutionName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Institution Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter college/university name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="degree.boardUniversity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>University</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter university name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="degree.yearOfPassing"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Year of Passing</FormLabel>
-                      <FormControl>
-                        <Input placeholder="YYYY" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="degree.totalMarks"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total CGPA/Percentage</FormLabel>
-                      <FormControl>
-                        <Input placeholder="E.g. 10.0 or 100%" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="degree.obtainedMarks"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Obtained CGPA/Percentage</FormLabel>
-                      <FormControl>
-                        <Input placeholder="E.g. 8.5 or 85%" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="degree.documentUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Upload Degree Certificate</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="file"
-                            onChange={handleFileUpload('degree.documentUrl')}
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            className="flex-1"
-                          />
-                          <div className="shrink-0">
-                            <Button type="button" size="sm" variant="outline">
-                              <Upload className="h-4 w-4 mr-1" />
-                              Upload
-                            </Button>
-                          </div>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Upload degree certificate (PDF, JPG, JPEG, PNG)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <h3 className="text-lg font-medium">Additional Document Uploads</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="certificateUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Upload Certificate (if any)</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="file"
-                            onChange={handleFileUpload('certificateUrl')}
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            className="flex-1"
-                          />
-                          <div className="shrink-0">
-                            <Button type="button" size="sm" variant="outline">
-                              <Upload className="h-4 w-4 mr-1" />
-                              Upload
-                            </Button>
-                          </div>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Upload any additional certificates (PDF, JPG, JPEG, PNG)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="photographUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Upload Passport Size Photograph</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="file"
-                            onChange={handleFileUpload('photographUrl')}
-                            accept=".jpg,.jpeg,.png"
-                            className="flex-1"
-                          />
-                          <div className="shrink-0">
-                            <Button type="button" size="sm" variant="outline">
-                              <Upload className="h-4 w-4 mr-1" />
-                              Upload
-                            </Button>
-                          </div>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Upload a recent passport size photograph (JPG, JPEG, PNG)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          )}
-          
-          {/* Form Navigation */}
-          <div className="flex justify-between pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={prevStep}
-              disabled={step === 1}
-            >
-              Previous
-            </Button>
-            
-            {step < totalSteps ? (
-              <Button type="button" onClick={nextStep}>
-                Next
-              </Button>
-            ) : (
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </Button>
-            )}
-          </div>
-        </form>
-      </Form>
-    </div>
-  );
-};
-
-export default CompleteEnrollmentForm;
+                    </FormItem
