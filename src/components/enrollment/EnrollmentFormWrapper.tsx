@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { isStudentLoggedIn } from '@/lib/studentAuth';
-import EnrollmentFormDialog from './EnrollmentFormDialog';
 
 interface EnrollmentFormWrapperProps {
   formType: 'course' | 'job';
@@ -29,7 +28,6 @@ const EnrollmentFormWrapper: React.FC<EnrollmentFormWrapperProps> = ({
   fullWidth = false,
 }) => {
   const navigate = useNavigate();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   
   const handleClick = () => {
@@ -46,11 +44,11 @@ const EnrollmentFormWrapper: React.FC<EnrollmentFormWrapperProps> = ({
     }
     
     if (formType === 'course') {
-      // For courses, open the enrollment form dialog
-      setIsDialogOpen(true);
+      // Redirect directly to payment page for courses
+      navigate(`/payment/${relatedId}`);
     } else {
-      // For jobs, open the job application form dialog
-      setIsDialogOpen(true);
+      // For jobs, redirect to application page
+      navigate(`/job-application/${relatedId}`);
     }
   };
   
@@ -85,16 +83,6 @@ const EnrollmentFormWrapper: React.FC<EnrollmentFormWrapperProps> = ({
           </AlertDescription>
         </Alert>
       )}
-      
-      {/* Enrollment Form Dialog */}
-      <EnrollmentFormDialog
-        formType={formType}
-        relatedId={relatedId}
-        title={title}
-        description={description}
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      />
     </>
   );
 };

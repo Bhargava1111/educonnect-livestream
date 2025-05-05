@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -99,10 +98,12 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
     }
 
     if (price === 0) {
+      // For free courses, proceed directly with enrollment
       handlePaymentSuccess(null);
       return;
     }
 
+    // For paid courses, show payment options
     setIsEnrolling(true);
   };
 
@@ -126,7 +127,19 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
       return;
     }
 
-    window.open(customPaymentLink, '_blank');
+    // If there's a custom payment link, redirect to it
+    if (customPaymentLink) {
+      window.open(customPaymentLink, '_blank');
+    } else {
+      // Otherwise redirect to our payment page
+      navigate(`/payment/${courseId}`, { 
+        state: { 
+          courseId: String(courseId),
+          courseName: title,
+          price: price
+        } 
+      });
+    }
   };
 
   if (!courseExists) {

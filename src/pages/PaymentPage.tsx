@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, CreditCard, CreditCardIcon, FileCheck, Landmark, Wallet } from 'lucide-react';
@@ -14,12 +14,16 @@ import { getPaymentLink } from '@/lib/paymentService';
 const PaymentPage = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'bank' | 'cash'>('online');
   
   // Get course data and payment link
-  const course = courseId ? getCourseById(courseId) : null;
-  const paymentLink = courseId ? getPaymentLink(courseId) : '';
+  // First try from location state, then from URL param
+  const stateData = location.state || {};
+  const courseIdToUse = courseId || stateData.courseId;
+  const course = courseIdToUse ? getCourseById(courseIdToUse) : null;
+  const paymentLink = courseIdToUse ? getPaymentLink(courseIdToUse) : '';
   
   // Get student data
   const student = getStudentData();
@@ -69,7 +73,7 @@ const PaymentPage = () => {
     // After initiating payment process, redirect to success page
     navigate('/payment-success', { 
       state: { 
-        courseId,
+        courseId: courseIdToUse,
         courseName: course?.title,
         paymentMethod 
       } 
