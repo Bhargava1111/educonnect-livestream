@@ -45,8 +45,13 @@ const EnrollmentFormWrapper: React.FC<EnrollmentFormWrapperProps> = ({
       return;
     }
     
-    // Open enrollment form dialog
-    setIsDialogOpen(true);
+    if (formType === 'course') {
+      // For courses, open the enrollment form dialog
+      setIsDialogOpen(true);
+    } else {
+      // For jobs, open the job application form dialog
+      setIsDialogOpen(true);
+    }
   };
   
   const handleLoginRedirect = () => {

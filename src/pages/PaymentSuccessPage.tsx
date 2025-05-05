@@ -4,18 +4,43 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, FileText } from 'lucide-react';
+import { createEnrollment } from '@/lib/enrollmentService';
+import { getStudentData } from '@/lib/studentAuth';
+import { useToast } from '@/hooks/use-toast';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const { courseId, courseName, paymentMethod } = location.state || {};
   
   useEffect(() => {
     // If no course data in state, redirect to courses
     if (!courseId) {
       navigate('/courses');
+      return;
     }
-  }, [courseId, navigate]);
+    
+    // Get student data and create enrollment
+    const student = getStudentData();
+    if (student && courseId) {
+      try {
+        // Create enrollment for the student
+        createEnrollment(student.id, courseId);
+        toast({
+          title: "Enrollment Successful",
+          description: `You have been enrolled in ${courseName}`,
+        });
+      } catch (error) {
+        console.error("Error creating enrollment:", error);
+        toast({
+          title: "Error",
+          description: "There was an issue enrolling you in the course",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [courseId, courseName, navigate, toast]);
   
   const handleViewCourse = () => {
     navigate(`/courses/${courseId}`);
