@@ -22,6 +22,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { getAllCourses, Course } from "@/lib/courseManagement";
+import EnrollmentFormWrapper from "@/components/enrollment/EnrollmentFormWrapper";
 
 const Courses = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,9 +137,14 @@ const Courses = () => {
                         <Link to={`/courses/${course.id}/roadmap`}>
                           <Button variant="outline">View Roadmap</Button>
                         </Link>
-                        <Link to={`/courses/${course.id}`}>
-                          <Button className="bg-eduBlue-600 hover:bg-eduBlue-700">Enroll Now</Button>
-                        </Link>
+                        <EnrollmentFormWrapper
+                          formType="course"
+                          relatedId={course.id}
+                          title={`Enroll in ${course.title}`}
+                          description={`Complete this form to enroll in ${course.title}`}
+                          buttonText="Enroll Now"
+                          buttonVariant="default"
+                        />
                       </CardFooter>
                     </Card>
                   ))

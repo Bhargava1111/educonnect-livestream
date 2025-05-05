@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +8,7 @@ import { createEnrollment } from '@/lib/enrollmentService';
 import { getCourseById } from '@/lib/courseManagement';
 import CourseNotFound from './course/CourseNotFound';
 import CourseEnrollmentCard from './course/CourseEnrollmentCard';
+import EnrollmentFormDialog from './enrollment/EnrollmentFormDialog';
 
 interface CourseEnrollmentProps {
   courseId: string | number;
@@ -29,6 +31,7 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [customPaymentLink, setCustomPaymentLink] = useState('');
   const [courseExists, setCourseExists] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const courseIdStr = String(courseId);
@@ -96,15 +99,9 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
       navigate('/login');
       return;
     }
-
-    if (price === 0) {
-      // For free courses, proceed directly with enrollment
-      handlePaymentSuccess(null);
-      return;
-    }
-
-    // For paid courses, show payment options
-    setIsEnrolling(true);
+    
+    // Open enrollment form dialog
+    setIsDialogOpen(true);
   };
 
   const handleExternalPayment = () => {
@@ -147,19 +144,30 @@ const CourseEnrollment: React.FC<CourseEnrollmentProps> = ({
   }
 
   return (
-    <CourseEnrollmentCard
-      title={title}
-      price={price}
-      description={description}
-      features={features}
-      isEnrolling={isEnrolling}
-      setIsEnrolling={setIsEnrolling}
-      customPaymentLink={customPaymentLink}
-      courseId={String(courseId)}
-      onPaymentSuccess={handlePaymentSuccess}
-      handleExternalPayment={handleExternalPayment}
-      handleEnroll={handleEnroll}
-    />
+    <>
+      <CourseEnrollmentCard
+        title={title}
+        price={price}
+        description={description}
+        features={features}
+        isEnrolling={isEnrolling}
+        setIsEnrolling={setIsEnrolling}
+        customPaymentLink={customPaymentLink}
+        courseId={String(courseId)}
+        onPaymentSuccess={handlePaymentSuccess}
+        handleExternalPayment={handleExternalPayment}
+        handleEnroll={handleEnroll}
+      />
+      
+      <EnrollmentFormDialog
+        formType="course"
+        relatedId={String(courseId)}
+        title={`Enroll in ${title}`}
+        description={`Complete this form to enroll in ${title}`}
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
+    </>
   );
 };
 
