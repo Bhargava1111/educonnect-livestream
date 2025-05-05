@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -148,29 +147,29 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
       phone: student?.phone || '',
       isSameAddress: false,
       permanentAddress: {
-        line1: '', // Required field
+        line1: '',           // Required field
         line2: '',
-        city: '', // Required field
-        state: '', // Required field
-        postalCode: '', // Required field
-        country: 'India', // Required field with default value
-      },
+        city: '',            // Required field
+        state: '',           // Required field
+        postalCode: '',      // Required field
+        country: 'India',    // Required field with default value
+      } as Address,          // Type assertion to satisfy TS
       currentAddress: {
-        line1: '', // Required field
+        line1: '',           // Required field
         line2: '',
-        city: '', // Required field
-        state: '', // Required field
-        postalCode: '', // Required field
-        country: 'India', // Required field with default value
-      },
+        city: '',            // Required field
+        state: '',           // Required field
+        postalCode: '',      // Required field
+        country: 'India',    // Required field with default value
+      } as Address,          // Type assertion to satisfy TS
       tenthGrade: {
-        institutionName: '', // Required field
-        boardUniversity: '', // Required field
-        yearOfPassing: '', // Required field
-        totalMarks: '', // Required field
-        obtainedMarks: '', // Required field
+        institutionName: '',  // Required field
+        boardUniversity: '',  // Required field
+        yearOfPassing: '',    // Required field
+        totalMarks: '',       // Required field
+        obtainedMarks: '',    // Required field
         documentUrl: '',
-      },
+      } as EducationDetail,   // Type assertion to satisfy TS
       twelfthGrade: {
         institutionName: '',
         boardUniversity: '',
@@ -251,14 +250,35 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
         gender: data.gender,
         aadharNumber: data.aadharNumber,
         certificateId: data.certificateId,
-        permanentAddress: data.permanentAddress,
-        currentAddress: data.currentAddress,
+        permanentAddress: {
+          line1: data.permanentAddress.line1 || '',
+          line2: data.permanentAddress.line2,
+          city: data.permanentAddress.city || '',
+          state: data.permanentAddress.state || '',
+          postalCode: data.permanentAddress.postalCode || '',
+          country: data.permanentAddress.country || 'India',
+        },
+        currentAddress: {
+          line1: data.currentAddress.line1 || '',
+          line2: data.currentAddress.line2,
+          city: data.currentAddress.city || '',
+          state: data.currentAddress.state || '',
+          postalCode: data.currentAddress.postalCode || '',
+          country: data.currentAddress.country || 'India',
+        },
         isSameAddress: data.isSameAddress,
         fatherName: data.fatherName,
         motherName: data.motherName,
         guardianPhone: data.guardianPhone,
         guardianEmail: data.guardianEmail,
-        tenthGrade: data.tenthGrade,
+        tenthGrade: {
+          institutionName: data.tenthGrade.institutionName || '',
+          boardUniversity: data.tenthGrade.boardUniversity || '',
+          yearOfPassing: data.tenthGrade.yearOfPassing || '',
+          totalMarks: data.tenthGrade.totalMarks || '',
+          obtainedMarks: data.tenthGrade.obtainedMarks || '',
+          documentUrl: data.tenthGrade.documentUrl || '',
+        },
         // For optional education details, ensure we create complete objects if they're provided
         twelfthGrade: data.twelfthGrade ? {
           institutionName: data.twelfthGrade.institutionName || '',
