@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -206,18 +207,18 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
         formType,
         relatedId,
         submittedAt: new Date().toISOString(),
-        status: 'pending',
+        status: 'pending' as const, // Explicitly type this as a literal type
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         phone: data.phone,
         dateOfBirth: format(data.dateOfBirth, 'yyyy-MM-dd'),
         gender: data.gender,
-        aadharNumber: data.aadharNumber,
-        certificateId: data.certificateId,
+        aadharNumber: data.aadharNumber || '',
+        certificateId: data.certificateId || '',
         permanentAddress: {
           line1: data.permanentAddress.line1 || '',
-          line2: data.permanentAddress.line2,
+          line2: data.permanentAddress.line2 || '',
           city: data.permanentAddress.city || '',
           state: data.permanentAddress.state || '',
           postalCode: data.permanentAddress.postalCode || '',
@@ -225,17 +226,17 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
         },
         currentAddress: {
           line1: data.currentAddress.line1 || '',
-          line2: data.currentAddress.line2,
+          line2: data.currentAddress.line2 || '',
           city: data.currentAddress.city || '',
           state: data.currentAddress.state || '',
           postalCode: data.currentAddress.postalCode || '',
           country: data.currentAddress.country || 'India',
         },
         isSameAddress: data.isSameAddress,
-        fatherName: data.fatherName,
-        motherName: data.motherName,
-        guardianPhone: data.guardianPhone,
-        guardianEmail: data.guardianEmail,
+        fatherName: data.fatherName || '',
+        motherName: data.motherName || '',
+        guardianPhone: data.guardianPhone || '',
+        guardianEmail: data.guardianEmail || '',
         tenthGrade: {
           institutionName: data.tenthGrade.institutionName || '',
           boardUniversity: data.tenthGrade.boardUniversity || '',
