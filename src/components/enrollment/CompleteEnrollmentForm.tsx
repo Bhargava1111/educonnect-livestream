@@ -32,7 +32,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { EnrollmentForm } from '@/lib/types';
+import { EnrollmentForm, Address, EducationDetail } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface CompleteEnrollmentFormProps {
@@ -266,7 +266,7 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
           yearOfPassing: data.twelfthGrade.yearOfPassing || '',
           totalMarks: data.twelfthGrade.totalMarks || '',
           obtainedMarks: data.twelfthGrade.obtainedMarks || '',
-          documentUrl: data.twelfthGrade.documentUrl,
+          documentUrl: data.twelfthGrade.documentUrl || '',
         } : undefined,
         degree: data.degree ? {
           institutionName: data.degree.institutionName || '',
@@ -274,7 +274,7 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
           yearOfPassing: data.degree.yearOfPassing || '',
           totalMarks: data.degree.totalMarks || '',
           obtainedMarks: data.degree.obtainedMarks || '',
-          documentUrl: data.degree.documentUrl,
+          documentUrl: data.degree.documentUrl || '',
         } : undefined,
         postGraduation: data.postGraduation ? {
           institutionName: data.postGraduation.institutionName || '',
@@ -282,7 +282,7 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
           yearOfPassing: data.postGraduation.yearOfPassing || '',
           totalMarks: data.postGraduation.totalMarks || '',
           obtainedMarks: data.postGraduation.obtainedMarks || '',
-          documentUrl: data.postGraduation.documentUrl,
+          documentUrl: data.postGraduation.documentUrl || '',
         } : undefined,
         certificateUrl: data.certificateUrl,
         photographUrl: data.photographUrl,
