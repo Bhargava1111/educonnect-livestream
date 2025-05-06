@@ -58,3 +58,15 @@ export const awaitPromise = async <T>(
 ): Promise<T> => {
   return await promise;
 };
+
+/**
+ * Helper function to properly await values and convert promises to direct values
+ * This is specifically designed for auth flows where we need to access properties
+ * of a promise result
+ */
+export const awaitValue = async <T>(value: Promise<T> | T): Promise<T> => {
+  if (value instanceof Promise) {
+    return await value;
+  }
+  return value;
+};

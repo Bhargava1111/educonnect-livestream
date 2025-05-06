@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { getAllStudents, requestPasswordResetOTP } from '@/lib/studentAuth';
+import { awaitValue } from '@/utils/authHelpers';
 
 const ForgotPassword = () => {
   const { toast } = useToast();
@@ -14,27 +14,27 @@ const ForgotPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Check if the student exists
-    const students = getAllStudents();
-    const studentExists = students.some(student => student.email === email);
-
-    if (!studentExists) {
-      toast({
-        title: "Error",
-        description: "No account found with this email address.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
+      // Check if the student exists
+      const students = await getAllStudents();
+      const studentExists = students.some(student => student.email === email);
+
+      if (!studentExists) {
+        toast({
+          title: "Error",
+          description: "No account found with this email address.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Send password reset OTP
-      const result = requestPasswordResetOTP(email);
+      const result = await requestPasswordResetOTP(email);
       
       if (result.success) {
         toast({
@@ -50,13 +50,13 @@ const ForgotPassword = () => {
           variant: "destructive",
         });
       }
-      setIsSubmitting(false);
     } catch (error) {
       toast({
         title: "Error",
         description: "There was a problem sending the reset link. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };

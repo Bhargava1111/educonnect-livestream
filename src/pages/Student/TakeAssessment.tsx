@@ -70,7 +70,7 @@ const TakeAssessment = () => {
     const initialAnswers: { [key: string]: any } = {};
     assessmentData.questions.forEach(question => {
       if (question.type === 'descriptive' || question.type === 'essay') {
-        initialAnswers[question.id] = question.codingTemplate || '';
+        initialAnswers[question.id] = (question.codingTemplate || '');
       }
     });
     setAnswers(initialAnswers);
@@ -409,9 +409,9 @@ const TakeAssessment = () => {
                 <CardHeader>
                   <CardTitle className="text-lg">Question {currentQuestionIndex + 1}</CardTitle>
                   <CardDescription>
-                    {currentQuestion.points || question.marks || 10} points • {
+                    ${currentQuestion.points || currentQuestion.marks || 10} points • {
                       currentQuestion.type === 'multiple-choice' ? 'Multiple Choice' :
-                      currentQuestion.type === 'essay' ? 'Essay' : 'Coding'
+                      currentQuestion.type === 'descriptive' || currentQuestion.type === 'essay' ? 'Essay' : 'Coding'
                     }
                   </CardDescription>
                 </CardHeader>
@@ -437,7 +437,7 @@ const TakeAssessment = () => {
                       </RadioGroup>
                     )}
                     
-                    {currentQuestion.type === 'essay' && (
+                    {currentQuestion.type === 'descriptive' || currentQuestion.type === 'essay' && (
                       <Textarea
                         value={answers[currentQuestion.id] || ''}
                         onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}

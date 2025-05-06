@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -20,31 +19,39 @@ const ResetPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
   
-  const handleVerifyOTP = (e: React.FormEvent) => {
+  const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // First verify the OTP
-    const result = verifyPasswordResetOTP(email, otp);
-    
-    if (result.success) {
-      setOtpVerified(true);
-      toast({
-        title: "OTP Verified",
-        description: "Please enter your new password.",
-      });
-    } else {
+    try {
+      // First verify the OTP
+      const result = await verifyPasswordResetOTP(email, otp);
+      
+      if (result.success) {
+        setOtpVerified(true);
+        toast({
+          title: "OTP Verified",
+          description: "Please enter your new password.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Invalid or expired OTP.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
         title: "Error",
-        description: result.error || "Invalid or expired OTP.",
+        description: "Failed to verify OTP.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
   
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
@@ -70,28 +77,36 @@ const ResetPassword = () => {
       return;
     }
     
-    // Reset the password
-    const result = resetPassword(email, newPassword);
-    
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: "Your password has been reset successfully.",
-      });
+    try {
+      // Reset the password
+      const result = await resetPassword(email, newPassword);
       
-      // Redirect to login page
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } else {
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Your password has been reset successfully.",
+        });
+        
+        // Redirect to login page
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to reset password.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
         title: "Error",
-        description: result.error || "Failed to reset password.",
+        description: "Failed to reset password.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   if (!email) {

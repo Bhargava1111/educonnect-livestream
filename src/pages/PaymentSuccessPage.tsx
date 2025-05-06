@@ -1,18 +1,18 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ChevronRight, FileText } from 'lucide-react';
 import { createEnrollment } from '@/lib/enrollmentService';
-import { getStudentData } from '@/lib/studentAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useStudentData } from '@/hooks/useStudentData';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const { courseId, courseName, paymentMethod } = location.state || {};
+  const { student, loading } = useStudentData();
   
   useEffect(() => {
     // If no course data in state, redirect to courses
@@ -21,9 +21,8 @@ const PaymentSuccessPage = () => {
       return;
     }
     
-    // Get student data and create enrollment
-    const student = getStudentData();
-    if (student && courseId) {
+    // Create enrollment once student data is loaded
+    if (!loading && student && courseId) {
       try {
         // Create enrollment for the student
         createEnrollment(student.id, courseId);
@@ -40,7 +39,7 @@ const PaymentSuccessPage = () => {
         });
       }
     }
-  }, [courseId, courseName, navigate, toast]);
+  }, [courseId, courseName, navigate, toast, student, loading]);
   
   const handleViewCourse = () => {
     navigate(`/courses/${courseId}`);
@@ -49,6 +48,19 @@ const PaymentSuccessPage = () => {
   const handleViewDashboard = () => {
     navigate('/student');
   };
+  
+  // Show loading state when student data is still loading
+  if (loading) {
+    return (
+      <div className="container mx-auto py-12 px-4 max-w-md">
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <p className="text-lg text-gray-500">Processing your enrollment...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto py-12 px-4 max-w-md">

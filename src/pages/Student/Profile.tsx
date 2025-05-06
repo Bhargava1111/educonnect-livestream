@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -17,7 +18,7 @@ import {
 
 const StudentProfile = () => {
   const { toast } = useToast();
-  const { updateProfile } = useAuth();
+  const { user } = useAuth();
   const { student, loading } = useStudentData();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -30,8 +31,8 @@ const StudentProfile = () => {
   
   useEffect(() => {
     if (student) {
-      setFirstName(student.firstName || student.firstName || '');
-      setLastName(student.lastName || student.lastName || '');
+      setFirstName(student.firstName || '');
+      setLastName(student.lastName || '');
       setPhone(student.phone || '');
       setAddress(student.address || '');
       setSkills(student.skills?.join(', ') || '');

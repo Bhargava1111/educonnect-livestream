@@ -29,7 +29,7 @@ export function useStudentData(studentId?: string) {
           // Map the data to match our Enrollment type
           const mappedEnrollments: Enrollment[] = enrollmentData.map(item => ({
             id: item.id,
-            studentId: item.student_id || studentData.id, // Map student_id to studentId
+            studentId: item.student_id || studentData.id, // Use student_id if available, otherwise use studentData.id
             courseId: item.course_id,
             enrollmentDate: item.enrollment_date,
             status: item.status,

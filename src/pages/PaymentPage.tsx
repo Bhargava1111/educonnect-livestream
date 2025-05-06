@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,8 @@ import { isStudentLoggedIn, getStudentData } from '@/lib/studentAuth';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { getPaymentLink } from '@/lib/paymentService';
+import { awaitValue } from '@/utils/authHelpers';
+import { useStudentData } from '@/hooks/useStudentData';
 
 const PaymentPage = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -17,6 +18,7 @@ const PaymentPage = () => {
   const location = useLocation();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'bank' | 'cash'>('online');
+  const { student, loading } = useStudentData();
   
   // Get course data and payment link
   // First try from location state, then from URL param
@@ -24,9 +26,6 @@ const PaymentPage = () => {
   const courseIdToUse = courseId || stateData.courseId;
   const course = courseIdToUse ? getCourseById(courseIdToUse) : null;
   const paymentLink = courseIdToUse ? getPaymentLink(courseIdToUse) : '';
-  
-  // Get student data
-  const student = getStudentData();
   
   // Check if student is logged in
   useEffect(() => {
@@ -81,7 +80,7 @@ const PaymentPage = () => {
   };
   
   // If no course or student data, show loading
-  if (!course || !student) {
+  if (!course || loading) {
     return (
       <div className="container mx-auto py-8 px-4">
         <Button variant="ghost" onClick={handleBack} className="mb-4">
@@ -95,6 +94,10 @@ const PaymentPage = () => {
       </div>
     );
   }
+  
+  // Format student name from available data
+  const studentName = student?.name || 
+    (student?.firstName && student?.lastName ? `${student.firstName} ${student.lastName}` : "Student");
   
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
@@ -119,7 +122,7 @@ const PaymentPage = () => {
               </div>
               <div className="flex justify-between">
                 <span>Student:</span>
-                <span>{student?.name || `${student?.firstName} ${student?.lastName}`}</span>
+                <span>{studentName}</span>
               </div>
               <div className="flex justify-between border-t pt-2 mt-2">
                 <span className="font-bold">Total Amount:</span>
