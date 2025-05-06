@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { loginStudent, isStudentLoggedIn } from '@/lib/studentAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,20 +28,25 @@ const countryCodes = [
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signIn, signInWithPhone, user, isAdmin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [phonePassword, setPhonePassword] = useState(''); // Added phone password field
+  const [phonePassword, setPhonePassword] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
   const [isLoading, setIsLoading] = useState(false);
   const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false);
   
   // Redirect if already logged in
   useEffect(() => {
-    if (isStudentLoggedIn()) {
-      navigate('/');
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
-  }, [navigate]);
+  }, [user, isAdmin, navigate]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,20 +63,9 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Call the login function with email and password
-      const result = loginStudent(email, password, false);
+      const result = await signIn(email, password);
       
-      if (result.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome back! You have been logged in successfully.",
-        });
-        
-        // Small delay to allow toast to be seen before redirect
-        setTimeout(() => {
-          navigate('/');
-        }, 500);
-      } else {
+      if (!result.success) {
         toast({
           title: "Login Failed",
           description: result.error || "Invalid email or password. Please try again.",
@@ -90,7 +84,7 @@ const Login = () => {
     }
   };
 
-  const handlePhoneLogin = (e: React.FormEvent) => {
+  const handlePhoneLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!phoneNumber || phoneNumber.length !== 10 || !/^\d+$/.test(phoneNumber)) {
@@ -118,19 +112,9 @@ const Login = () => {
       const formattedPhone = `${countryCode} ${phoneNumber}`;
       
       // Login with phone number and password
-      const result = loginStudent(formattedPhone, phonePassword, true);
+      const result = await signInWithPhone(formattedPhone, phonePassword);
       
-      if (result.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome back! You have been logged in successfully.",
-        });
-        
-        // Small delay to allow toast to be seen before redirect
-        setTimeout(() => {
-          navigate('/');
-        }, 500);
-      } else {
+      if (!result.success) {
         toast({
           title: "Login Failed",
           description: result.error || "Phone number not registered or incorrect password. Please try again.",
@@ -263,7 +247,6 @@ const Login = () => {
                         <p className="text-sm text-gray-500">Enter your 10-digit phone number without country code</p>
                       </div>
 
-                      {/* Added password field for phone login */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label htmlFor="phonePassword">Password</Label>

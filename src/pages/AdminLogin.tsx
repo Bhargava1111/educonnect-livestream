@@ -1,103 +1,133 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { loginAdmin, isAdminLoggedIn } from '@/lib/auth';
-import { Lock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+
+const ADMIN_EMAIL = "Bhargava@123";
 
 const AdminLogin = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(ADMIN_EMAIL);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn, user, isAdmin } = useAuth();
 
-  // Redirect if already logged in
+  // Redirect if already logged in as admin
   useEffect(() => {
-    if (isAdminLoggedIn()) {
+    if (user && isAdmin) {
       navigate('/admin');
+    } else if (user) {
+      // If logged in but not admin, redirect to home
+      navigate('/');
     }
-  }, [navigate]);
+  }, [user, isAdmin, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    if (loginAdmin(email, password)) {
+    
+    if (!email || !password) {
       toast({
-        title: "Admin Login Successful",
-        description: "You have been logged in as an administrator.",
-      });
-      navigate('/admin');
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid email or password.",
+        title: "Input Error", 
+        description: "Please enter both email and password.",
         variant: "destructive",
       });
+      return;
     }
     
-    setIsLoading(false);
+    setIsLoading(true);
+    
+    try {
+      const result = await signIn(email, password);
+      
+      if (result.success) {
+        if (email !== ADMIN_EMAIL) {
+          toast({
+            title: "Access Denied",
+            description: "You do not have administrator privileges.",
+            variant: "destructive",
+          });
+          navigate('/');
+          return;
+        }
+        
+        // Success handled in the context with automatic redirect
+      } else {
+        toast({
+          title: "Login Failed",
+          description: result.error || "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
+      toast({
+        title: "Login Error",
+        description: "An error occurred while logging in. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-
+  
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12 bg-gradient-to-br from-blue-50 to-purple-50">
       <div className="container max-w-md">
-        <Card>
-          <CardHeader className="space-y-1">
-            <div className="flex justify-center mb-2">
-              <div className="p-2 rounded-full bg-eduBlue-100">
-                <Lock className="h-6 w-6 text-eduBlue-600" />
-              </div>
-            </div>
+        <Card className="border border-purple-100 shadow-lg">
+          <CardHeader className="space-y-1 bg-gradient-to-r from-gray-700 to-gray-900 text-white rounded-t-lg">
             <CardTitle className="text-2xl font-bold text-center">Administrator Login</CardTitle>
-            <CardDescription className="text-center">
-              Enter your credentials to access the admin dashboard
+            <CardDescription className="text-center text-white/80">
+              Enter your credentials to access the admin portal
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email/Username</Label>
+                  <Label htmlFor="email">Admin Email</Label>
                   <Input 
                     id="email" 
+                    type="email" 
+                    placeholder="admin@example.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com" 
-                    required 
+                    required
+                    className="border-gray-200 focus-visible:ring-gray-500" 
                   />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                  </div>
+                  <Label htmlFor="password">Password</Label>
                   <Input 
                     id="password" 
-                    type="password" 
+                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required 
+                    required
+                    className="border-gray-200 focus-visible:ring-gray-500" 
                   />
                 </div>
                 <Button 
-                  className="w-full bg-eduBlue-600 hover:bg-eduBlue-700" 
+                  className="w-full bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black transition-all" 
                   type="submit"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? "Logging in..." : "Login to Admin Portal"}
                 </Button>
               </div>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-500">
-              Use your admin credentials to sign in
-            </p>
+          <CardFooter className="flex justify-center bg-gray-50 rounded-b-lg">
+            <div className="text-center text-sm">
+              <Link to="/" className="text-gray-600 hover:text-gray-800 font-medium">
+                Return to Main Site
+              </Link>
+            </div>
           </CardFooter>
         </Card>
       </div>

@@ -24,21 +24,21 @@ import {
   Users, 
   Video 
 } from 'lucide-react';
-import { isAdminLoggedIn, logoutAdmin } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { isAdmin, user, signOut } = useAuth();
 
   // Check if admin is logged in
   useEffect(() => {
-    if (!isAdminLoggedIn()) {
+    if (!user || !isAdmin) {
       navigate('/admin-login');
     }
-  }, [navigate]);
+  }, [user, isAdmin, navigate]);
 
   const handleLogout = () => {
-    logoutAdmin();
-    navigate('/admin-login');
+    signOut();
   };
 
   // Navigation handlers

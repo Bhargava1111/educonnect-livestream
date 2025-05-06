@@ -45,6 +45,7 @@ import JobDetail from "./pages/JobDetail";
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import StudentActivityPage from "./pages/Admin/StudentActivity";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // This is a test comment to verify that code changes are being applied
 
@@ -54,53 +55,55 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light">
       <BrowserRouter>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<Layout><Home /></Layout>} />
-            <Route path="/courses" element={<Layout><Courses /></Layout>} />
-            <Route path="/courses/:courseId/roadmap" element={<Layout><CourseRoadmap /></Layout>} />
-            <Route path="/courses/:courseId" element={<Layout><CourseCurriculum /></Layout>} />
-            <Route path="/contact" element={<Layout><Contact /></Layout>} />
-            <Route path="/careers" element={<Layout><Careers /></Layout>} />
-            <Route path="/jobs" element={<Layout><Jobs /></Layout>} />
-            <Route path="/placements" element={<Layout><Placements /></Layout>} />
-            <Route path="/live-meetings" element={<Layout><LiveMeetings /></Layout>} />
-            <Route path="/login" element={<Layout><Login /></Layout>} />
-            <Route path="/register" element={<Layout><Register /></Layout>} />
-            <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
-            <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
-            <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/students" element={<AdminStudents />} />
-            <Route path="/admin/courses" element={<AdminCourses />} />
-            <Route path="/admin/jobs" element={<AdminJobs />} />
-            <Route path="/admin/placements" element={<AdminPlacements />} />
-            <Route path="/admin/careers" element={<AdminCareers />} />
-            <Route path="/admin/courses/:courseId" element={<CourseDetails />} />
-            <Route path="/admin/courses/:courseId/roadmap" element={<AdminCourseRoadmap />} />
-            <Route path="/admin/courses/:courseId/assessments" element={<CourseAssessments />} />
-            <Route path="/admin/courses/:courseId/reports" element={<CourseReports />} />
-            <Route path="/admin/live-meetings" element={<AdminLiveMeetings />} />
-            <Route path="/admin/contact" element={<AdminContact />} />
-            <Route path="/admin/assessments" element={<AdminAssessments />} />
-            <Route path="/admin/schedule" element={<AdminSchedule />} />
-            <Route path="/admin/reports" element={<AdminReports />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/admin/students/:id/activity" element={<StudentActivityPage />} />
-            <Route path="/admin/*" element={<AdminDashboard />} />
-            <Route path="/student" element={<StudentDashboard />} />
-            <Route path="/student/courses" element={<StudentCourses />} />
-            <Route path="/student/profile" element={<StudentProfile />} />
-            <Route path="/student/*" element={<StudentDashboard />} />
-            <Route path="/course-enrollment/:courseId" element={<Layout><CourseEnrollmentPage /></Layout>} />
-            <Route path="/payment/:courseId" element={<Layout><PaymentPage /></Layout>} />
-            <Route path="/payment-success" element={<Layout><PaymentSuccessPage /></Layout>} />
-            <Route path="/job/:jobId" element={<Layout><JobDetail /></Layout>} />
-            <Route path="*" element={<Layout><NotFound /></Layout>} />
-          </Routes>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<Layout><Home /></Layout>} />
+              <Route path="/courses" element={<Layout><Courses /></Layout>} />
+              <Route path="/courses/:courseId/roadmap" element={<Layout><CourseRoadmap /></Layout>} />
+              <Route path="/courses/:courseId" element={<Layout><CourseCurriculum /></Layout>} />
+              <Route path="/contact" element={<Layout><Contact /></Layout>} />
+              <Route path="/careers" element={<Layout><Careers /></Layout>} />
+              <Route path="/jobs" element={<Layout><Jobs /></Layout>} />
+              <Route path="/placements" element={<Layout><Placements /></Layout>} />
+              <Route path="/live-meetings" element={<Layout><LiveMeetings /></Layout>} />
+              <Route path="/login" element={<Layout><Login /></Layout>} />
+              <Route path="/register" element={<Layout><Register /></Layout>} />
+              <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
+              <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
+              <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/students" element={<AdminStudents />} />
+              <Route path="/admin/courses" element={<AdminCourses />} />
+              <Route path="/admin/jobs" element={<AdminJobs />} />
+              <Route path="/admin/placements" element={<AdminPlacements />} />
+              <Route path="/admin/careers" element={<AdminCareers />} />
+              <Route path="/admin/courses/:courseId" element={<CourseDetails />} />
+              <Route path="/admin/courses/:courseId/roadmap" element={<AdminCourseRoadmap />} />
+              <Route path="/admin/courses/:courseId/assessments" element={<CourseAssessments />} />
+              <Route path="/admin/courses/:courseId/reports" element={<CourseReports />} />
+              <Route path="/admin/live-meetings" element={<AdminLiveMeetings />} />
+              <Route path="/admin/contact" element={<AdminContact />} />
+              <Route path="/admin/assessments" element={<AdminAssessments />} />
+              <Route path="/admin/schedule" element={<AdminSchedule />} />
+              <Route path="/admin/reports" element={<AdminReports />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/students/:id/activity" element={<StudentActivityPage />} />
+              <Route path="/admin/*" element={<AdminDashboard />} />
+              <Route path="/student" element={<StudentDashboard />} />
+              <Route path="/student/courses" element={<StudentCourses />} />
+              <Route path="/student/profile" element={<StudentProfile />} />
+              <Route path="/student/*" element={<StudentDashboard />} />
+              <Route path="/course-enrollment/:courseId" element={<Layout><CourseEnrollmentPage /></Layout>} />
+              <Route path="/payment/:courseId" element={<Layout><PaymentPage /></Layout>} />
+              <Route path="/payment-success" element={<Layout><PaymentSuccessPage /></Layout>} />
+              <Route path="/job/:jobId" element={<Layout><JobDetail /></Layout>} />
+              <Route path="*" element={<Layout><NotFound /></Layout>} />
+            </Routes>
+          </TooltipProvider>
+        </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
   </QueryClientProvider>

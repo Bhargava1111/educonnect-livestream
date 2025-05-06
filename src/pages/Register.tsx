@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -7,10 +8,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerStudent, isStudentLoggedIn } from "@/lib/studentAuth";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from '@/contexts/AuthContext';
 
 const phoneRegex = /^[0-9]{10}$/;
 
@@ -58,13 +59,14 @@ const Register = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(true);
+  const { signUp, user } = useAuth();
 
   // Redirect if already logged in
   useEffect(() => {
-    if (isStudentLoggedIn()) {
+    if (user) {
       navigate('/');
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,24 +90,25 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Register the user with all required fields
-      const result = registerStudent(
-        values.firstName,
-        values.lastName,
-        `${values.countryCode} ${values.phone}`,
-        values.email,
-        values.password,
-        values.countryCode.substring(1) // Country without + prefix
-      );
+      // Prepare user metadata
+      const userData = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phone: `${values.countryCode} ${values.phone}`,
+        country: values.countryCode.substring(1) // Country without + prefix
+      };
+      
+      // Register the user with Supabase
+      const result = await signUp(values.email, values.password, userData);
       
       if (result.success) {
         toast({
           title: "Registration Successful",
-          description: "Your account has been created successfully. You are now logged in.",
+          description: "Your account has been created successfully. Please check your email for verification.",
         });
         
-        // Navigate to home page after successful registration
-        navigate('/');
+        // Navigate to login page after successful registration
+        navigate('/login');
       } else {
         toast({
           title: "Registration Failed",
