@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -251,7 +250,7 @@ const Home = () => {
                   <p className="text-gray-600">{course.description}</p>
                 </CardContent>
                 <CardFooter>
-                  <Link to={`/courses/${course.id}`} className="w-full">
+                  <Link to={`/courses/${course.id}/roadmap`} className="w-full">
                     <Button className="w-full bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all">View Details</Button>
                   </Link>
                 </CardFooter>
