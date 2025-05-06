@@ -1,30 +1,151 @@
-// Define common interfaces
+
+import { Database } from '@/integrations/supabase/types';
+
+// Custom types that reference Supabase types
+export type Tables = Database['public']['Tables'];
+export type CourseRow = Tables['courses']['Row'];
+export type ProfileRow = Tables['profiles']['Row'];
+export type EnrollmentRow = Tables['enrollments']['Row'];
+export type JobRow = Tables['jobs']['Row'];
+export type EducationRow = Tables['education']['Row'];
+export type EnrollmentFormRow = Tables['enrollment_forms']['Row'];
+export type StudentActivityRow = Tables['student_activities']['Row'];
+
+// Export existing types from the previous implementation for backwards compatibility
 export const COURSES_KEY = 'career_aspire_courses';
 export const JOBS_KEY = 'career_aspire_jobs';
-export const ASSESSMENTS_KEY = 'career_aspire_assessments';
-export const LIVE_MEETINGS_KEY = 'career_aspire_live_meetings';
 export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
-export const PAYMENTS_KEY = 'career_aspire_payments';
-export const PLACEMENTS_KEY = 'career_aspire_placements';
-export const CONTACTS_KEY = 'career_aspire_contacts';
 export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
+export const STUDENT_DATA_KEY = 'career_aspire_student_data';
 export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
-export const EMAIL_NOTIFICATIONS_KEY = 'career_aspire_email_notifications';
 
-// Student interface (update education fields to match usage)
-export interface Student {
+// Legacy types for backward compatibility
+export interface Course {
   id: string;
+  title: string;
+  shortDescription: string;
+  description: string;
+  duration: string;
+  price: number;
+  level: string;
+  students?: number;
+  ratings?: number;
+  instructor: string;
+  status: string;
+  category: string;
+  imageUrl?: string;
+  isFeatured?: boolean;
+  isPublished?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  topics: string[];
+  curriculum?: CourseModule[];
+  roadmap?: RoadmapPhase[];
+}
+
+export interface CourseModule {
+  id: string;
+  title: string;
+  topics: {
+    id: string;
+    title: string;
+  }[];
+}
+
+export interface RoadmapPhase {
+  phase: number;
+  title: string;
+  duration: string;
+  topics: string[];
+  projects: string[];
+}
+
+export interface Enrollment {
+  id: string;
+  studentId: string;
+  courseId: string;
+  enrollmentDate: string;
+  status: string;
+  progress: number;
+  completed?: boolean;
+  certificateIssued?: boolean;
+  lastAccessedDate?: string;
+}
+
+export interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description: string;
+  requirements: string[];
+  salary: string;
+  appliedCount?: number;
+  createdAt: string;
+  lastDate?: string;
+  jobType?: string;
+  experienceLevel?: string;
+  status: 'Open' | 'Closed' | 'Filled';
+  postedAt: string;
+  type: string;
+  externalLink?: string;
+  category?: string;
+  applicationLink?: string;
+}
+
+export interface EnrollmentForm {
+  id: string;
+  studentId: string;
+  formType: 'course' | 'job';
+  relatedId: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedAt: string;
   firstName: string;
   lastName: string;
-  phone: string;
   email: string;
-  country: string;
-  profilePicture?: string;
-  createdAt: string;
-  lastLoginAt?: string;
-  name?: string;
-  enrolledCourses?: string[]; // Track enrolled courses
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  aadharNumber: string;
+  permanentAddress: Address;
+  currentAddress: Address;
+  isSameAddress: boolean;
+  fatherName?: string;
+  motherName?: string;
+  guardianPhone?: string;
+  guardianEmail?: string;
+  tenthGrade?: EducationDetail;
+  twelfthGrade?: EducationDetail;
+  degree?: EducationDetail;
+  postGraduation?: EducationDetail;
+  certificateId?: string;
+  certificateUrl?: string;
+  photographUrl?: string;
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+export interface EducationDetail {
+  institutionName: string;
+  boardOrUniversity: string;
+  yearOfPassing: string;
+  percentage: string;
+}
+
+export interface StudentData {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
   address?: string;
+  profilePicture?: string;
+  registrationDate: string;
+  enrolledCourses?: string[];
   skills?: string[];
   education?: {
     tenth?: {
@@ -46,294 +167,71 @@ export interface Student {
     highest?: string;
   };
   aadharNumber?: string;
-  enrollments?: Array<{
-    courseId: string;
-    progress: number;
-  }>;
 }
 
-// Course interface
-export interface Course {
-  id: string;
-  title: string;
-  shortDescription: string;
-  description: string;
-  duration: string;
-  price: number;
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
-  students: number;
-  ratings: number;
-  instructor: string;
-  status: 'Active' | 'Coming Soon' | 'Ended';
-  category: string;
-  imageUrl?: string;
-  isFeatured?: boolean;
-  isPublished?: boolean;
-  topics?: string[];
-  popular?: boolean;
-  createdAt: string;
-  updatedAt?: string;
-  curriculum?: CourseModule[];
-  roadmap?: RoadmapPhase[];
-  courseType?: string; // Added for Student/Courses.tsx
-}
-
-// Course module
-export interface CourseModule {
-  id: string;
-  title: string;
-  topics: CourseTopic[];
-}
-
-export interface CourseTopic {
-  id: string;
-  title: string;
-}
-
-// Roadmap phase with videos and materials
-export interface RoadmapPhase {
-  phase: number;
-  title: string;
-  duration: string;
-  topics: string[];
-  projects: string[];
-  videos?: RoadmapVideo[]; // New field: videos for the phase
-  materials?: RoadmapMaterial[]; // New field: materials for the phase
-}
-
-// Video for roadmap phase
-export interface RoadmapVideo {
-  id: string;
-  title: string;
-  url: string;
-  description: string;
-  topicIndex: number;
-}
-
-// Material for roadmap phase
-export interface RoadmapMaterial {
-  id: string;
-  title: string;
-  type: 'document' | 'link';
-  url: string;
-  description: string;
-}
-
-// Job interface
-export interface Job {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  salary: string;
-  description: string;
-  requirements: string[];
-  type: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
-  status: 'Open' | 'Closed' | 'Filled';
-  postedAt: string;
-  deadlineDate?: string;
-  contactEmail?: string;
-  applicationLink?: string;
-  category?: string;
-  experience?: string;
-  featured?: boolean;
-  appliedCount?: number;
-  createdAt?: string;
-  lastDate?: string; 
-  jobType?: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Remote';
-  experienceLevel?: string;
-  externalLink?: string;
-  // Make status compatible with 'Active' | 'Inactive' for backward compatibility
-  year?: string; // For backward compatibility
-}
-
-// Assessment interfaces
-export interface Assessment {
-  id: string;
-  title: string;
-  courseId: string;
-  description?: string;
-  type: 'quiz' | 'assignment' | 'project' | 'exam' | 'coding-challenge';
-  totalMarks?: number;
-  passingMarks?: number;
-  duration?: number; // in minutes
-  dueDate?: string;
-  questions: AssessmentQuestion[];
-  isPublished?: boolean;
-  createdAt?: string;
-  requiresScreenshare?: boolean;
-  requiresCamera?: boolean;
-  timeLimit?: number;
-  passingScore?: number; // Add the passingScore field
-}
-
-export interface AssessmentQuestion {
-  id: string;
-  question: string;
-  text?: string; // Added for compatibility
-  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'essay'; // Added 'essay' type
-  options?: string[];
-  correctAnswer?: string | string[];
-  correctAnswerIndex?: number; // Added for compatibility
-  marks: number;
-  points?: number; // Added for compatibility
-  codingTemplate?: string; // Added for TakeAssessment.tsx
-}
-
-// Live meeting interface
-export interface LiveMeeting {
-  id: string;
-  courseId: string;
-  title: string;
-  description: string;
-  hostName: string; // Renamed from instructor
-  scheduledDate: string; // Combined date and time
-  duration: string;
-  meetingLink: string; // Renamed from link
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled' | 'upcoming';
-  createdAt: string;
-  instructor?: string; // For backwards compatibility
-  date?: string; // For backwards compatibility
-  time?: string; // For backwards compatibility
-  link?: string; // For backwards compatibility
-}
-
-// Enrollment interface
-export interface Enrollment {
+export interface StudentActivity {
   id: string;
   studentId: string;
-  courseId: string;
-  enrollmentDate: string;
-  status: 'active' | 'completed' | 'cancelled' | 'on-hold';
-  progress: number;
-  completed: boolean;
-  certificateIssued: boolean;
-  lastAccessedDate?: string;
+  type: 'login' | 'logout' | 'enrollment' | 'course_progress' | 'assessment' | 'job_application';
+  context: Record<string, any>;
+  timestamp: string;
 }
 
-// Payment interfaces
-export interface Payment {
-  id: string;
-  studentId: string;
-  courseId: string;
-  amount: number;
-  paymentDate: string;
-  paymentId: string;
-  status: 'success' | 'pending' | 'failed';
-  paymentMethod: string;
+// Utility type to convert Supabase table types to application types
+export function mapCourseRowToCourse(row: CourseRow): Course {
+  return {
+    id: row.id.toString(),
+    title: row.title,
+    shortDescription: row.short_description,
+    description: row.description,
+    duration: row.duration,
+    price: Number(row.price),
+    level: row.level,
+    instructor: row.instructor,
+    status: row.status,
+    category: row.category,
+    imageUrl: row.image_url || undefined,
+    isFeatured: row.is_featured || false,
+    isPublished: row.is_published || true,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    topics: row.topics || [],
+    curriculum: [], // This would need to be populated separately
+    roadmap: [] // This would need to be populated separately
+  };
 }
 
-// Placement interface
-export interface Placement {
-  id: string;
-  studentId: string;
-  company: string;
-  position: string;
-  packageAmount: string;
-  placementDate: string;
-  description?: string;
-  imageUrl?: string;
-  testimonial?: string;
-  studentName?: string; // Add for backward compatibility
-  salary?: string; // Added for compatibility
-  year?: string; // Added for compatibility
-  courseCompleted?: string; // Added for compatibility
+export function mapJobRowToJob(row: JobRow): Job {
+  return {
+    id: row.id.toString(),
+    title: row.title,
+    company: row.company,
+    location: row.location,
+    description: row.description,
+    requirements: row.requirements || [],
+    salary: row.salary,
+    appliedCount: row.applied_count || 0,
+    createdAt: row.posted_at,
+    lastDate: row.deadline_date || undefined,
+    status: row.status as 'Open' | 'Closed' | 'Filled',
+    postedAt: row.posted_at,
+    type: row.type,
+    externalLink: row.external_link || undefined,
+    category: row.category || undefined,
+    applicationLink: row.application_link || undefined
+  };
 }
 
-// Contact form interface
-export interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  subject?: string;
-  createdAt: string;
-  status: 'new' | 'contacted' | 'resolved';
-}
-
-// Enrollment form interface
-export interface EnrollmentFormSubmission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  courseId?: string;
-  jobId?: string;
-  education?: string;
-  experience?: string;
-  message?: string;
-  createdAt: string;
-  status: 'new' | 'contacted' | 'enrolled' | 'rejected';
-}
-
-export interface Question {
-  id: string;
-  question: string;
-  text?: string; // Added for compatibility
-  type: string;
-  options?: string[];
-  correctAnswer?: string | string[];
-  correctAnswerIndex?: number; // Added for compatibility
-  marks: number;
-  points?: number; // Added for compatibility
-}
-
-// Added for EnrollmentForm.tsx
-export interface EnrollmentForm {
-  id: string;
-  studentId: string;
-  formType: 'course' | 'job';
-  relatedId: string;
-  submittedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-  gender: string;
-  aadharNumber: string;
-  certificateId?: string;
-  permanentAddress: Address;
-  currentAddress: Address;
-  isSameAddress: boolean;
-  fatherName?: string;
-  motherName?: string;
-  guardianPhone?: string;
-  guardianEmail?: string;
-  tenthGrade?: EducationDetail;
-  twelfthGrade?: EducationDetail;
-  degree?: EducationDetail;
-  postGraduation?: EducationDetail;
-  certificateUrl?: string;
-  photographUrl?: string;
-}
-
-export interface Address {
-  line1: string;
-  line2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-}
-
-export interface EducationDetail {
-  institutionName: string;
-  boardUniversity: string;
-  yearOfPassing: string;
-  totalMarks: string;
-  obtainedMarks: string;
-  documentUrl?: string;
-}
-
-export interface EmailNotification {
-  id: string;
-  subject: string;
-  message: string;
-  recipientEmail: string;
-  status: 'sent' | 'pending' | 'failed';
-  sentAt?: string;
-  createdAt: string;
+export function mapEnrollmentRowToEnrollment(row: EnrollmentRow): Enrollment {
+  return {
+    id: row.id.toString(),
+    studentId: row.student_id.toString(),
+    courseId: row.course_id.toString(),
+    enrollmentDate: row.enrollment_date,
+    status: row.status,
+    progress: row.progress,
+    completed: row.completed || false,
+    certificateIssued: row.certificate_issued || false,
+    lastAccessedDate: row.last_accessed_date || undefined
+  };
 }

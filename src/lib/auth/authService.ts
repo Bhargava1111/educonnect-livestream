@@ -1,82 +1,85 @@
 
-import { Student } from '../types';
-import { 
-  getAllStudents, 
-  getStudentByEmail, 
-  getStudentByPhone, 
-  updateStudentInStorage,
-  getCurrentStudent,
-  setCurrentStudent,
-  clearCurrentStudent
-} from './utils';
-import { trackStudentLogin } from './activityService';
+import { supabase } from '@/integrations/supabase/client';
+import { StudentData } from '../types';
 
-// Function to check if a student is logged in
-export const isStudentLoggedIn = (): boolean => {
-  return !!getCurrentStudent();
-};
-
-// Function to simulate student login
-export const loginStudent = (
-  identifier: string, 
-  password: string, 
-  isPhoneLogin: boolean = false
-): { success: boolean; data?: Student; error?: string } => {
+// Check if a student is logged in
+export const isStudentLoggedIn = async (): Promise<boolean> => {
   try {
-    const students = getAllStudents();
-    
-    let student: Student | undefined;
-    
-    if (isPhoneLogin) {
-      // Login with phone
-      student = students.find(s => s.phone === identifier);
-    } else {
-      // Login with email
-      student = students.find(s => s.email === identifier);
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data.session) {
+      return false;
     }
-    
-    if (!student) {
-      return {
-        success: false,
-        error: isPhoneLogin ? "No account found with this phone number" : "No account found with this email"
-      };
-    }
-    
-    // In a real implementation, you'd check the hashed password
-    // For this demo, we'll assume the password is correct
-    
-    // Update last login timestamp
-    const updatedStudent = {
-      ...student,
-      lastLoginAt: new Date().toISOString()
-    };
-    
-    // Update the student in localStorage
-    updateStudentInStorage(updatedStudent);
-    
-    // Track login
-    trackStudentLogin(updatedStudent.id);
-    
-    // Set current student
-    setCurrentStudent(updatedStudent);
-    
-    return {
-      success: true,
-      data: updatedStudent
-    };
+    return true;
   } catch (error) {
-    console.error("Login error:", error);
-    return {
-      success: false,
-      error: "An error occurred during login"
-    };
+    console.error("Error checking student login status:", error);
+    return false;
   }
 };
 
-// Function to simulate student logout
-export const logoutStudent = (): void => {
-  clearCurrentStudent();
+// Login a student
+export const loginStudent = async (email: string, password: string): Promise<{ success: boolean, data?: any, error?: string }> => {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    if (!data.user) {
+      return { success: false, error: "No user data returned" };
+    }
+
+    // Track login activity
+    const { error: activityError } = await supabase.from('student_activities').insert({
+      student_id: data.user.id,
+      activity_type: 'login',
+      context: { method: 'email' }
+    });
+
+    if (activityError) {
+      console.error("Error tracking login activity:", activityError);
+    }
+
+    return {
+      success: true,
+      data: data.user
+    };
+  } catch (error) {
+    console.error("Error during login:", error);
+    return { success: false, error: "An unexpected error occurred during login" };
+  }
 };
 
-// Export the logout function for backward compatibility
-export const logout = logoutStudent;
+// Logout a student
+export const logoutStudent = async (): Promise<{ success: boolean, error?: string }> => {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    
+    if (sessionData.session?.user) {
+      // Track logout activity
+      const { error: activityError } = await supabase.from('student_activities').insert({
+        student_id: sessionData.session.user.id,
+        activity_type: 'logout',
+        context: {}
+      });
+
+      if (activityError) {
+        console.error("Error tracking logout activity:", activityError);
+      }
+    }
+    
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return { success: false, error: "An unexpected error occurred during logout" };
+  }
+};

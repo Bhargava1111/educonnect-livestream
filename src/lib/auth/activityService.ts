@@ -1,141 +1,90 @@
 
-import { STUDENT_ACTIVITY_KEY } from './utils';
+import { supabase } from '@/integrations/supabase/client';
+import { StudentActivityRow } from '../types';
 
-// Activity tracking interfaces
-interface StudentActivity {
-  id: string;
-  studentId: string;
-  action: string;
-  timestamp: string;
-  details?: Record<string, any>;
-}
-
-interface StudentLoginRecord {
-  timestamp: string;
-  device: string;
-}
-
-// Function to track student activity
-export const trackStudentActivity = (
-  studentId: string,
-  action: string,
-  details?: Record<string, any>
-): void => {
+// Get student login history
+export const getStudentLoginHistory = async (studentId: string): Promise<any[]> => {
   try {
-    const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
-    const activityArray: StudentActivity[] = activities ? JSON.parse(activities) : [];
+    const { data, error } = await supabase
+      .from('student_activities')
+      .select('*')
+      .eq('student_id', studentId)
+      .eq('activity_type', 'login')
+      .order('timestamp', { ascending: false });
+      
+    if (error) {
+      console.error("Error fetching login history:", error);
+      return [];
+    }
     
-    const newActivity: StudentActivity = {
-      id: `activity_${Date.now()}`,
-      studentId,
-      action,
-      timestamp: new Date().toISOString(),
-      details
-    };
-    
-    activityArray.push(newActivity);
-    localStorage.setItem(STUDENT_ACTIVITY_KEY, JSON.stringify(activityArray));
+    return data || [];
   } catch (error) {
-    console.error("Error tracking student activity:", error);
-  }
-};
-
-// Function to get student activities
-export const getStudentActivity = (studentId: string): StudentActivity[] => {
-  try {
-    const activities = localStorage.getItem(STUDENT_ACTIVITY_KEY);
-    const activityArray: StudentActivity[] = activities ? JSON.parse(activities) : [];
-    
-    return activityArray.filter(activity => activity.studentId === studentId)
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  } catch (error) {
-    console.error("Error getting student activities:", error);
+    console.error("Error fetching login history:", error);
     return [];
   }
 };
 
-// Function to track student login
-export const trackStudentLogin = (studentId: string, device: string = "Unknown device"): void => {
+// Get student activity
+export const getStudentActivity = async (studentId: string): Promise<any[]> => {
   try {
-    const key = `student_login_history_${studentId}`;
-    const loginHistory = localStorage.getItem(key);
-    const historyArray: StudentLoginRecord[] = loginHistory ? JSON.parse(loginHistory) : [];
+    const { data, error } = await supabase
+      .from('student_activities')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('timestamp', { ascending: false });
+      
+    if (error) {
+      console.error("Error fetching student activity:", error);
+      return [];
+    }
     
-    const newLogin: StudentLoginRecord = {
-      timestamp: new Date().toISOString(),
-      device
-    };
-    
-    historyArray.push(newLogin);
-    localStorage.setItem(key, JSON.stringify(historyArray));
-    
-    // Also track as an activity
-    trackStudentActivity(studentId, "Logged in", { device });
+    return data || [];
   } catch (error) {
-    console.error("Error tracking student login:", error);
-  }
-};
-
-// Function to get student login history
-export const getStudentLoginHistory = (studentId: string): StudentLoginRecord[] => {
-  try {
-    const key = `student_login_history_${studentId}`;
-    const loginHistory = localStorage.getItem(key);
-    const historyArray: StudentLoginRecord[] = loginHistory ? JSON.parse(loginHistory) : [];
-    
-    return historyArray.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  } catch (error) {
-    console.error("Error getting student login history:", error);
+    console.error("Error fetching student activity:", error);
     return [];
   }
 };
 
-// Function to get student total active time
-export const getStudentTotalActiveTime = (studentId: string): number => {
-  try {
-    const key = `student_active_time_${studentId}`;
-    const activeTime = localStorage.getItem(key);
-    return activeTime ? parseInt(activeTime, 10) : 0;
-  } catch (error) {
-    console.error("Error getting student active time:", error);
-    return 0;
+// Format active time
+export const formatActiveTime = (minutes: number): string => {
+  if (minutes < 60) {
+    return `${minutes} minutes`;
   }
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (remainingMinutes === 0) {
+    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  }
+  
+  return `${hours} hour${hours !== 1 ? 's' : ''} and ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`;
 };
 
-// Function to increment student active time
-export const incrementStudentActiveTime = (studentId: string, seconds: number = 60): void => {
+// Get student total active time
+export const getStudentTotalActiveTime = async (studentId: string): Promise<number> => {
+  // This would require custom analytics logic based on your activity tracking
+  // For now, returning a placeholder value
+  return 120; // 2 hours in minutes
+};
+
+// Get student last active time
+export const getStudentLastActiveTime = async (studentId: string): Promise<string | null> => {
   try {
-    const key = `student_active_time_${studentId}`;
-    const currentActiveTime = getStudentTotalActiveTime(studentId);
-    const newActiveTime = currentActiveTime + seconds;
-    localStorage.setItem(key, newActiveTime.toString());
+    const { data, error } = await supabase
+      .from('student_activities')
+      .select('timestamp')
+      .eq('student_id', studentId)
+      .order('timestamp', { ascending: false })
+      .limit(1);
+      
+    if (error || !data || data.length === 0) {
+      return null;
+    }
     
-    // Update last active timestamp
-    localStorage.setItem(`student_last_active_${studentId}`, new Date().toISOString());
+    return data[0].timestamp;
   } catch (error) {
-    console.error("Error incrementing student active time:", error);
-  }
-};
-
-// Function to get student last active time
-export const getStudentLastActiveTime = (studentId: string): string | null => {
-  try {
-    const key = `student_last_active_${studentId}`;
-    return localStorage.getItem(key);
-  } catch (error) {
-    console.error("Error getting student last active time:", error);
+    console.error("Error getting last active time:", error);
     return null;
   }
-};
-
-// Function to format active time in hours and minutes
-export const formatActiveTime = (totalSeconds: number): string => {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  
-  if (hours === 0) {
-    return `${minutes}m`;
-  }
-  
-  return `${hours}h ${minutes}m`;
 };
