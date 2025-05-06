@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -121,7 +122,7 @@ const StudentCourses = () => {
     }
 
     // Update the profile with correct field name
-    updateStudentProfile(student.id, {
+    updateStudentProfile({
       aadhar_number: data.aadhar_number,
     });
 
