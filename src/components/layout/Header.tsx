@@ -13,27 +13,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { Menu, X, ChevronDown } from 'lucide-react';
-import { isStudentLoggedIn, logoutStudent } from '@/lib/studentAuth';
-import { getCurrentStudentSync } from '@/lib/auth/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const isLoggedIn = isStudentLoggedIn();
-  const studentData = isLoggedIn ? getCurrentStudentSync() : null;
-
+  const { user, signOut } = useAuth();
+  
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const handleLogout = () => {
-    logoutStudent();
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out",
-    });
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -60,18 +67,18 @@ const Header = () => {
                   <Link to="/courses">All Courses</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/courses/1">Web Development</Link>
+                  <Link to="/courses/1/roadmap">Web Development</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/courses/2">Cybersecurity</Link>
+                  <Link to="/courses/2/roadmap">Cybersecurity</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/courses/3">MERN Stack</Link>
+                  <Link to="/courses/3/roadmap">MERN Stack</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {isLoggedIn && (
+            {user && (
               <Link to="/live-meetings" className="text-gray-700 hover:text-eduBlue-600 font-medium">
                 Live Sessions
               </Link>
@@ -98,12 +105,12 @@ const Header = () => {
               Contact
             </Link>
             
-            {isLoggedIn ? (
+            {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Avatar className="cursor-pointer">
                     <AvatarFallback>
-                      {studentData?.user_metadata?.firstName ? studentData.user_metadata.firstName.charAt(0) : "U"}
+                      {user?.user_metadata?.firstName ? user.user_metadata.firstName.charAt(0) : "U"}
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
@@ -163,7 +170,7 @@ const Header = () => {
               >
                 Courses
               </Link>
-              {isLoggedIn && (
+              {user && (
                 <Link 
                   to="/live-meetings" 
                   className="text-gray-700 hover:text-eduBlue-600 font-medium"
@@ -194,7 +201,7 @@ const Header = () => {
                 Contact
               </Link>
               
-              {isLoggedIn ? (
+              {user ? (
                 <>
                   <Link 
                     to="/student/dashboard" 
@@ -205,8 +212,8 @@ const Header = () => {
                   </Link>
                   <button 
                     className="text-left text-gray-700 hover:text-eduBlue-600 font-medium"
-                    onClick={() => {
-                      handleLogout();
+                    onClick={async () => {
+                      await handleLogout();
                       toggleMobileMenu();
                     }}
                   >

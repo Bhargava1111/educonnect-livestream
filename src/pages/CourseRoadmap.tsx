@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Check, ChevronLeft, Clock, Code, FileText, GraduationCap, Video } from 'lucide-react';
 
 const CourseRoadmap = () => {
-  const { courseId } = useParams();
+  const { courseId } = useParams<{courseId: string}>();
 
   // Mock data for different course roadmaps
-  const coursesData = {
-    python: {
+  const coursesData: Record<string, any> = {
+    "1": {
       name: "Python Full Stack Development",
       description: "Master Python from basics to building full-stack web applications",
       duration: "16 weeks",
@@ -62,7 +61,7 @@ const CourseRoadmap = () => {
         }
       ]
     },
-    java: {
+    "4": {
       name: "Java Backend Development",
       description: "Become proficient in Java and Spring for enterprise backend development",
       duration: "14 weeks",
@@ -112,7 +111,7 @@ const CourseRoadmap = () => {
         }
       ]
     },
-    mern: {
+    "3": {
       name: "MERN Stack Development",
       description: "Build dynamic web applications using MongoDB, Express, React, and Node.js",
       duration: "14 weeks",
@@ -162,7 +161,7 @@ const CourseRoadmap = () => {
         }
       ]
     },
-    cybersecurity: {
+    "2": {
       name: "Cybersecurity & Ethical Hacking",
       description: "Learn to identify, exploit, and defend against security threats",
       duration: "12 weeks",
@@ -214,13 +213,60 @@ const CourseRoadmap = () => {
     }
   };
   
-  // Determine which course to display based on courseId
-  const courseKey = courseId === '1' ? 'python' : 
-                    courseId === '2' ? 'cybersecurity' : 
-                    courseId === '3' ? 'mern' : 
-                    courseId === '4' ? 'java' : 'python';
+  // Add a default course in case courseId is not found
+  const defaultCourse = {
+    name: "Full-Stack Web Development",
+    description: "Master front-end and back-end technologies for complete web applications",
+    duration: "12 weeks",
+    level: "Intermediate",
+    roadmap: [
+      {
+        phase: 1,
+        title: "Web Fundamentals",
+        duration: "2 weeks",
+        topics: ["HTML5", "CSS3", "JavaScript Basics", "Responsive Design", "Git Version Control"],
+        projects: ["Portfolio Website", "Landing Page"]
+      },
+      {
+        phase: 2,
+        title: "Frontend Development",
+        duration: "3 weeks",
+        topics: ["JavaScript Advanced", "React", "State Management", "API Integration", "Component Design"],
+        projects: ["Single Page Application", "Interactive Dashboard"]
+      },
+      {
+        phase: 3,
+        title: "Backend Development",
+        duration: "3 weeks",
+        topics: ["Node.js", "Express", "REST APIs", "Authentication", "Database Design"],
+        projects: ["API Server", "Authentication System"]
+      },
+      {
+        phase: 4,
+        title: "Database Integration",
+        duration: "2 weeks",
+        topics: ["MongoDB", "SQL", "ORM/ODM", "Data Modeling", "Performance Optimization"],
+        projects: ["Full-Stack CRUD App"]
+      },
+      {
+        phase: 5,
+        title: "Deployment & DevOps",
+        duration: "1 week",
+        topics: ["Cloud Deployment", "CI/CD", "Docker", "Monitoring", "Security Best Practices"],
+        projects: ["Deployed Application"]
+      },
+      {
+        phase: 6,
+        title: "Capstone Project",
+        duration: "1 week",
+        topics: ["Project Planning", "Implementation", "Testing", "Deployment", "Presentation"],
+        projects: ["Complete Web Application"]
+      }
+    ]
+  };
 
-  const course = coursesData[courseKey];
+  // Get the course based on courseId, use courseId directly or fallback to default
+  const course = coursesData[courseId || ""] || defaultCourse;
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -368,7 +414,7 @@ const CourseRoadmap = () => {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {courseKey === 'python' && (
+                {courseId === "1" && (
                   <>
                     <li className="flex items-center">
                       <Badge className="mr-2">$105K+</Badge>
@@ -388,7 +434,7 @@ const CourseRoadmap = () => {
                     </li>
                   </>
                 )}
-                {courseKey === 'java' && (
+                {courseId === "4" && (
                   <>
                     <li className="flex items-center">
                       <Badge className="mr-2">$110K+</Badge>
@@ -408,7 +454,7 @@ const CourseRoadmap = () => {
                     </li>
                   </>
                 )}
-                {courseKey === 'mern' && (
+                {courseId === "3" && (
                   <>
                     <li className="flex items-center">
                       <Badge className="mr-2">$105K+</Badge>
@@ -428,7 +474,7 @@ const CourseRoadmap = () => {
                     </li>
                   </>
                 )}
-                {courseKey === 'cybersecurity' && (
+                {courseId === "2" && (
                   <>
                     <li className="flex items-center">
                       <Badge className="mr-2">$115K+</Badge>
@@ -445,6 +491,26 @@ const CourseRoadmap = () => {
                     <li className="flex items-center">
                       <Badge className="mr-2">$140K+</Badge>
                       <span>Cybersecurity Consultant</span>
+                    </li>
+                  </>
+                )}
+                {!courseId || (courseId !== "1" && courseId !== "2" && courseId !== "3" && courseId !== "4") && (
+                  <>
+                    <li className="flex items-center">
+                      <Badge className="mr-2">$105K+</Badge>
+                      <span>Web Developer</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Badge className="mr-2">$115K+</Badge>
+                      <span>Full Stack Developer</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Badge className="mr-2">$110K+</Badge>
+                      <span>Frontend Developer</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Badge className="mr-2">$120K+</Badge>
+                      <span>Backend Developer</span>
                     </li>
                   </>
                 )}
