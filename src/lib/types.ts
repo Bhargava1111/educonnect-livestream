@@ -1,4 +1,3 @@
-
 import { Database } from '@/integrations/supabase/types';
 
 // Custom types that reference Supabase types
@@ -46,6 +45,7 @@ export interface Course {
   topics: string[];
   curriculum?: CourseModule[];
   roadmap?: RoadmapPhase[];
+  courseType?: string;
 }
 
 // Update CourseModule to support video and material objects
@@ -272,25 +272,30 @@ export interface Assessment {
 export interface AssessmentQuestion {
   id: string;
   question: string;
-  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
+  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
   options?: string[];
   correctAnswer?: string | string[];
   marks?: number;
+  points?: number;
   assessmentId?: string;
   order?: number;
   text?: string; // Some components use text instead of question
+  codingTemplate?: string; // Template for coding questions
+  correctAnswerIndex?: number; // For multiple choice questions
 }
 
 export interface Question {
   id: string;
   text?: string;
   question?: string; // Some components use question instead of text
-  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
+  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
   options?: string[];
   correctAnswer: string | string[];
   points?: number;
   marks?: number; // Some components use marks instead of points
   difficulty?: 'easy' | 'medium' | 'hard';
+  codingTemplate?: string;
+  correctAnswerIndex?: number;
 }
 
 export interface Student {

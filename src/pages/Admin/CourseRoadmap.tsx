@@ -436,7 +436,7 @@ const AdminCourseRoadmap = () => {
             </div>
           </div>
           
-          <Accordion type="multiple" collapsible>
+          <Accordion type="multiple">
             {(updatedCourse?.roadmap || []).map((phase, phaseIndex) => (
               <AccordionItem key={phase.phase} value={`phase-${phase.phase}`}>
                 <AccordionTrigger>

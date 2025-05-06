@@ -69,9 +69,7 @@ const TakeAssessment = () => {
     // Initialize answers object
     const initialAnswers: { [key: string]: any } = {};
     assessmentData.questions.forEach(question => {
-      if (question.type === 'multiple-choice') {
-        initialAnswers[question.id] = null;
-      } else if (question.type === 'essay' || question.type === 'coding') {
+      if (question.type === 'descriptive' || question.type === 'essay') {
         initialAnswers[question.id] = question.codingTemplate || '';
       }
     });
@@ -220,11 +218,11 @@ const TakeAssessment = () => {
     let earnedPoints = 0;
     
     assessment.questions.forEach(question => {
-      const points = question.points || 10;
+      const points = question.points || question.marks || 10;
       totalPoints += points;
       
       if (question.type === 'multiple-choice') {
-        if (answers[question.id] === question.correctAnswerIndex) {
+        if (answers[question.id] === question.correctAnswer) {
           earnedPoints += points;
         }
       }
@@ -411,7 +409,7 @@ const TakeAssessment = () => {
                 <CardHeader>
                   <CardTitle className="text-lg">Question {currentQuestionIndex + 1}</CardTitle>
                   <CardDescription>
-                    {currentQuestion.points || 10} points • {
+                    {currentQuestion.points || question.marks || 10} points • {
                       currentQuestion.type === 'multiple-choice' ? 'Multiple Choice' :
                       currentQuestion.type === 'essay' ? 'Essay' : 'Coding'
                     }

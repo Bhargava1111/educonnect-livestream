@@ -301,16 +301,20 @@ const StudentDashboard = () => {
                             ) : (
                               <ul className="space-y-1 text-gray-500">
                                 <li className="flex items-center">
-                                  <span className={`h-2 w-2 rounded-full mr-2 ${studentData?.name ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                                  Name {studentData?.name ? '✓' : ''}
+                                  <span className={`h-2 w-2 rounded-full mr-2 ${student?.education?.highest ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                  Highest Education {student?.education?.highest ? '✓' : ''}
                                 </li>
                                 <li className="flex items-center">
-                                  <span className={`h-2 w-2 rounded-full mr-2 ${studentData?.phone ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                                  Phone {studentData?.phone ? '✓' : ''}
+                                  <span className={`h-2 w-2 rounded-full mr-2 ${student?.name ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                  Name {student?.name ? '✓' : ''}
                                 </li>
                                 <li className="flex items-center">
-                                  <span className={`h-2 w-2 rounded-full mr-2 ${studentData?.address ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                                  Address {studentData?.address ? '✓' : ''}
+                                  <span className={`h-2 w-2 rounded-full mr-2 ${student?.phone ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                  Phone {student?.phone ? '✓' : ''}
+                                </li>
+                                <li className="flex items-center">
+                                  <span className={`h-2 w-2 rounded-full mr-2 ${student?.address ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                  Address {student?.address ? '✓' : ''}
                                 </li>
                               </ul>
                             )}

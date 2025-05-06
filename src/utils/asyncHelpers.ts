@@ -1,53 +1,47 @@
 
 /**
- * A utility function to safely await promises in components
- * This helps fix the common pattern of trying to use promise values directly in components
+ * Helper function to safely await any Promise and handle the result with types
+ * @param promise The promise to await
+ * @returns The resolved value or null if an error occurred
  */
-export const useAsyncData = async <T>(
-  promiseFunction: () => Promise<T>,
-  defaultValue: T
-): Promise<T> => {
+export const tryCatchAsync = async <T>(promise: Promise<T>): Promise<T | null> => {
   try {
-    const result = await promiseFunction();
-    return result || defaultValue;
+    return await promise;
   } catch (error) {
-    console.error("Error in async operation:", error);
-    return defaultValue;
-  }
-};
-
-/**
- * Helper function to safely call async functions that are expected in a synchronous context
- * For components that haven't been updated to use async/await or useEffect
- */
-export const safelyGetData = async <T>(
-  asyncFunction: (...args: any[]) => Promise<T>,
-  ...args: any[]
-): Promise<T | null> => {
-  try {
-    return await asyncFunction(...args);
-  } catch (error) {
-    console.error("Error safely getting data:", error);
+    console.error("Error in tryCatchAsync:", error);
     return null;
   }
 };
 
 /**
- * Helper function to wrap an async call with try/catch and provide typed response
- * Useful for API calls that need error handling
+ * Helper function to safely await multiple promises and handle the results with types
+ * @param promises The promises to await
+ * @returns An array of resolved values or null if an error occurred
  */
-export const tryCatchAsync = async <T>(
-  asyncFunction: () => Promise<T>,
-  errorHandler?: (error: any) => void
-): Promise<T | null> => {
-  try {
-    return await asyncFunction();
-  } catch (error) {
-    if (errorHandler) {
-      errorHandler(error);
-    } else {
-      console.error("Error in async operation:", error);
+export const tryCatchAsyncAll = async <T>(promises: Promise<T>[]): Promise<(T | null)[]> => {
+  const results: (T | null)[] = [];
+  
+  for (const promise of promises) {
+    try {
+      const result = await promise;
+      results.push(result);
+    } catch (error) {
+      console.error("Error in tryCatchAsyncAll:", error);
+      results.push(null);
     }
-    return null;
   }
+  
+  return results;
+};
+
+/**
+ * Helper function to ensure a value is awaited if it's a Promise
+ * @param valueOrPromise The value or promise to ensure is resolved
+ * @returns The resolved value
+ */
+export const ensureResolved = async <T>(valueOrPromise: T | Promise<T>): Promise<T> => {
+  if (valueOrPromise instanceof Promise) {
+    return await valueOrPromise;
+  }
+  return valueOrPromise;
 };

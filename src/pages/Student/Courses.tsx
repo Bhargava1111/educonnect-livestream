@@ -332,7 +332,7 @@ const StudentCourses = () => {
                         </div>
                         <div>
                           <p className="text-gray-500">Type</p>
-                          <p>{course.courseType || (course.price === 0 ? 'Free' : 'Paid')}</p>
+                          <p>{course.category || 'General'}</p>
                         </div>
                       </div>
                       

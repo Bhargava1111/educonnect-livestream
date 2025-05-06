@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { getAllStudents, getStudentsByEnrolledCourse } from '@/lib/auth/studentService';
 import { getAllCourses } from '@/lib/courseService';
 import { useNavigate } from 'react-router-dom';
+import { tryCatchAsync } from '@/utils/asyncHelpers';
 
 const AdminStudents = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,7 +35,7 @@ const AdminStudents = () => {
     const fetchData = async () => {
       try {
         // Fetch students asynchronously
-        const allStudents = await getAllStudents();
+        const allStudents = await tryCatchAsync(getAllStudents()) || [];
         setStudents(allStudents);
         
         // Get courses (not async)

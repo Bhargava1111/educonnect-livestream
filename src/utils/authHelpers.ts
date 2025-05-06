@@ -37,3 +37,24 @@ export const awaitAuthResult = async <T extends { success: boolean; error?: stri
     } as T;
   }
 };
+
+/**
+ * Helper function to safely await any Promise and handle the result
+ */
+export const safeAwait = async <T>(promise: Promise<T>): Promise<T | null> => {
+  try {
+    return await promise;
+  } catch (error) {
+    console.error("Error in safeAwait:", error);
+    return null;
+  }
+};
+
+/**
+ * Utility function to await an authentication promise and handle it safely
+ */
+export const awaitPromise = async <T>(
+  promise: Promise<T>
+): Promise<T> => {
+  return await promise;
+};

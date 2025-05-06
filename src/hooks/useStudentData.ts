@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { getStudentData, getStudentEnrollments } from '@/lib/auth/studentService';
 import { StudentData, Enrollment } from '@/lib/types';
+import { awaitAuthResult } from '@/utils/authHelpers';
 
 /**
  * Custom hook to fetch and manage student data
@@ -28,7 +29,7 @@ export function useStudentData(studentId?: string) {
           // Map the data to match our Enrollment type
           const mappedEnrollments: Enrollment[] = enrollmentData.map(item => ({
             id: item.id,
-            studentId: item.student_id || studentData.id,
+            studentId: item.student_id || studentData.id, // Map student_id to studentId
             courseId: item.course_id,
             enrollmentDate: item.enrollment_date,
             status: item.status,
