@@ -193,7 +193,8 @@ export const apiGetEnrolledCourses = async (): Promise<Course[]> => {
     }
     
     // Get enrolled courses for the student
-    const enrolledCourseIds = await getStudentEnrollments(currentStudent.id);
+    const enrollmentData = await getStudentEnrollments(currentStudent.id);
+    const enrolledCourseIds = enrollmentData.map(enrollment => enrollment.course_id);
     
     // Get all courses
     const courses = localStorage.getItem('career_aspire_courses');

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { StudentData, ProfileRow } from '../types';
 import { getCurrentStudent } from './utils';
@@ -280,11 +279,21 @@ export const registerStudent = async (userData: {
 // Update student profile
 export const updateStudentProfile = async (userId: string, profileData: Partial<ProfileRow>) => {
   try {
+    // Check if there's an education property and handle it separately
+    const { education, ...validProfileData } = profileData as any;
+    
     // Update the profile using the valid profile data
     await supabase
       .from('profiles')
-      .update(profileData)
+      .update(validProfileData)
       .eq('id', userId);
+    
+    // If education data was provided, update it separately
+    if (education) {
+      // This would need to be implemented based on how education data is stored
+      console.log("Education data update would be handled here", education);
+      // Here you might update education records in a separate table
+    }
     
     return { success: true };
   } catch (error) {

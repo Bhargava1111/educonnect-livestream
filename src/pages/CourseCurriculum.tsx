@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,18 +7,19 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Clock, FileText, Video, Check } from 'lucide-react';
 import CourseEnrollment from '@/components/CourseEnrollment';
-import { isStudentLoggedIn, getStudentData } from '@/lib/studentAuth';
+import { isStudentLoggedIn } from '@/lib/studentAuth';
 import { getCourseById } from '@/lib/courseManagement';
+import { useStudentData } from '@/hooks/useStudentData';
 
 const CourseCurriculum = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const isLoggedIn = isStudentLoggedIn();
-  const studentData = isLoggedIn ? getStudentData() : null;
+  const { student, enrollments, loading: studentLoading } = useStudentData();
   
   // Check if student is enrolled in this course
-  const isEnrolled = studentData?.enrolledCourses?.includes(courseId);
+  const isEnrolled = enrollments.some(e => e.courseId === courseId);
   
   useEffect(() => {
     if (courseId) {
@@ -31,7 +31,7 @@ const CourseCurriculum = () => {
     }
   }, [courseId]);
 
-  if (loading) {
+  if (loading || studentLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
         <h2 className="text-xl font-medium mb-4">Loading course information...</h2>

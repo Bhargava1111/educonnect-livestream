@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Routes, Route, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,8 @@ import {
   Video
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { getStudentData, logoutStudent, getStudentEnrollments } from '@/lib/studentAuth';
+import { logoutStudent } from '@/lib/studentAuth';
+import { useStudentData } from '@/hooks/useStudentData';
 import StudentCourses from './Courses';
 import StudentAssessments from './Assessments';
 import StudentProfile from './Profile';
@@ -30,26 +30,8 @@ const StudentDashboard = () => {
   const [activePage, setActivePage] = useState('dashboard');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [studentData, setStudentData] = useState<any>(null);
-  const [enrollments, setEnrollments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { student, enrollments, loading } = useStudentData();
   
-  useEffect(() => {
-    // Load student data
-    const data = getStudentData();
-    if (!data) {
-      navigate('/login');
-      return;
-    }
-    
-    setStudentData(data);
-    setLoading(false);
-    
-    // Load enrollments
-    const studentEnrollments = getStudentEnrollments();
-    setEnrollments(studentEnrollments);
-  }, [navigate]);
-
   const handleLogout = () => {
     logoutStudent();
     toast({
@@ -72,10 +54,10 @@ const StudentDashboard = () => {
   }
 
   // Get student name and avatar
-  const studentName = studentData?.name || "Student";
-  const studentAvatar = studentData?.profilePicture || "";
-  const enrolledCourses = studentData?.enrolledCourses || [];
-  const hasCompletedProfile = !!(studentData?.name && studentData?.phone && studentData?.address);
+  const studentName = student?.name || "Student";
+  const studentAvatar = student?.profilePicture || "";
+  const enrolledCourseIds = enrollments.map(e => e.courseId) || [];
+  const hasCompletedProfile = !!(student?.name && student?.phone && student?.address);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -102,6 +84,7 @@ const StudentDashboard = () => {
               </div>
             </div>
             
+            {/* Navigation links */}
             <nav className="space-y-1">
               <Link to="/student">
                 <Button 
@@ -209,8 +192,8 @@ const StudentDashboard = () => {
                       <CardTitle className="text-sm font-medium">Enrolled Courses</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{enrolledCourses.length}</div>
-                      {enrolledCourses.length === 0 ? (
+                      <div className="text-2xl font-bold">{enrolledCourseIds.length}</div>
+                      {enrolledCourseIds.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No courses enrolled yet</p>
                       ) : (
                         <p className="text-xs text-muted-foreground">View your course progress</p>
@@ -249,7 +232,7 @@ const StudentDashboard = () => {
                         <CardDescription>Start your learning journey with us</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        {enrolledCourses.length === 0 ? (
+                        {enrolledCourseIds.length === 0 ? (
                           <div className="text-center py-10">
                             <GraduationCap className="mx-auto h-12 w-12 text-gray-300 mb-4" />
                             <h3 className="text-lg font-medium mb-2">No courses enrolled yet</h3>
@@ -262,7 +245,7 @@ const StudentDashboard = () => {
                           </div>
                         ) : (
                           <div className="space-y-4">
-                            {enrolledCourses.map((courseId: string, index: number) => (
+                            {enrolledCourseIds.map((courseId: string, index: number) => (
                               <div key={index} className="border rounded-lg p-4">
                                 <div className="flex justify-between mb-2">
                                   <h4 className="font-medium">Course {courseId}</h4>

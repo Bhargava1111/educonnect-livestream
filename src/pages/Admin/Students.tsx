@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -28,21 +27,27 @@ const AdminStudents = () => {
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [students, setStudents] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
   useEffect(() => {
-    const fetchStudents = async () => {
-      const allStudents = await getAllStudents();
-      setStudents(allStudents);
+    const fetchData = async () => {
+      try {
+        // Fetch students asynchronously
+        const allStudents = await getAllStudents();
+        setStudents(allStudents);
+        
+        // Get courses (not async)
+        const allCourses = getAllCourses();
+        setCourses(allCourses);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     
-    const loadCourses = () => {
-      const allCourses = getAllCourses();
-      setCourses(allCourses);
-    };
-    
-    fetchStudents();
-    loadCourses();
+    fetchData();
   }, []);
   
   // Filter students based on search term and selected course
@@ -50,7 +55,7 @@ const AdminStudents = () => {
     const studentName = `${student.first_name || ''} ${student.last_name || ''}`.trim();
     const matchesSearch = 
       studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.id.toLowerCase().includes(searchTerm.toLowerCase());
+      (student.id && student.id.toLowerCase().includes(searchTerm.toLowerCase()));
     
     // For course filtering, we would need to load enrolled courses for each student
     // This is a simplified version
@@ -89,6 +94,17 @@ const AdminStudents = () => {
   const viewStudentActivity = (studentId: string) => {
     navigate(`/admin/students/${studentId}/activity`);
   };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
+          <span className="ml-2">Loading students...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

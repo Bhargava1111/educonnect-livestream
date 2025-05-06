@@ -24,7 +24,21 @@ export function useStudentData(studentId?: string) {
         
         if (studentData?.id) {
           const enrollmentData = await getStudentEnrollments(studentData.id);
-          setEnrollments(enrollmentData);
+          
+          // Map the data to match our Enrollment type
+          const mappedEnrollments: Enrollment[] = enrollmentData.map(item => ({
+            id: item.id,
+            studentId: item.student_id || studentData.id,
+            courseId: item.course_id,
+            enrollmentDate: item.enrollment_date,
+            status: item.status,
+            progress: item.progress,
+            completed: item.completed || false,
+            certificateIssued: item.certificate_issued || false,
+            lastAccessedDate: item.last_accessed_date
+          }));
+          
+          setEnrollments(mappedEnrollments);
         }
       } catch (err) {
         console.error("Error fetching student data:", err);

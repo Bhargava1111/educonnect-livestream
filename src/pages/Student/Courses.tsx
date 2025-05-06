@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronRight, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { getAllCourses, getCourseById, Course } from "@/lib/courseManagement";
-import { getStudentData, enrollStudentInCourse, updateStudentProfile } from '@/lib/studentAuth';
+import { useStudentData } from '@/hooks/useStudentData';
+import { enrollStudentInCourse, updateStudentProfile } from '@/lib/studentAuth';
 import { useToast } from "@/hooks/use-toast";
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -16,7 +17,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useForm } from "react-hook-form";
 
 interface EnrollmentFormData {
-  aadharNumber: string;
+  aadhar_number: string;
   education: {
     highest: string;
   };
@@ -26,6 +27,8 @@ interface EnrollmentFormData {
 }
 
 const StudentCourses = () => {
+  // Use our custom hook to handle async student data
+  const { student, enrollments, loading: studentLoading } = useStudentData();
   const { toast } = useToast();
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
@@ -38,7 +41,7 @@ const StudentCourses = () => {
 
   const form = useForm<EnrollmentFormData>({
     defaultValues: {
-      aadharNumber: "",
+      aadhar_number: "",
       education: {
         highest: ""
       },
@@ -55,26 +58,24 @@ const StudentCourses = () => {
         console.log("Student courses page: Loaded courses:", courses);
         setAllCourses(courses);
 
-        const student = getStudentData();
-        console.log("Student data:", student);
-
-        if (student && student.enrolledCourses) {
+        if (student && enrollments) {
+          // Get enrolled course IDs from the enrollments
+          const enrolledIds = enrollments.map(enrollment => enrollment.courseId);
+          
           const enrolled = courses.filter(course => 
-            student.enrolledCourses.includes(course.id)
+            enrolledIds.includes(course.id)
           );
           setEnrolledCourses(enrolled);
           
           const available = courses.filter(course => 
-            !student.enrolledCourses.includes(course.id)
+            !enrolledIds.includes(course.id)
           );
           setAvailableCourses(available);
           
           const progress: {[key: string]: number} = {};
-          if (student.enrollments) {
-            student.enrollments.forEach(enrollment => {
-              progress[enrollment.courseId] = enrollment.progress || 0;
-            });
-          }
+          enrollments.forEach(enrollment => {
+            progress[enrollment.courseId] = enrollment.progress || 0;
+          });
           setCourseProgress(progress);
         } else {
           setAvailableCourses(courses);
@@ -91,8 +92,11 @@ const StudentCourses = () => {
       }
     };
 
-    loadCourses();
-  }, [toast]);
+    // Only load courses once we have student data
+    if (!studentLoading) {
+      loadCourses();
+    }
+  }, [student, enrollments, studentLoading, toast]);
 
   const handleEnrollClick = (courseId: string) => {
     const course = allCourses.find(c => c.id === courseId);
@@ -104,18 +108,7 @@ const StudentCourses = () => {
   };
 
   const handleEnrollSubmit = (data: EnrollmentFormData) => {
-    if (!selectedCourseId) return;
-
-    const student = getStudentData();
-    if (!student) {
-      toast({
-        title: "Not Logged In",
-        description: "Please log in to enroll in courses.",
-        variant: "destructive"
-      });
-      setIsEnrollmentDialogOpen(false);
-      return;
-    }
+    if (!selectedCourseId || !student) return;
 
     if (!student.education || !student.education.tenth || !student.education.tenth.school) {
       toast({
@@ -127,17 +120,13 @@ const StudentCourses = () => {
       return;
     }
 
-    // Fix: Pass the student ID as the first argument to updateStudentProfile
+    // Update the profile with correct field name
     updateStudentProfile(student.id, {
-      aadharNumber: data.aadharNumber,
-      education: {
-        ...student.education,
-        highest: data.education.highest
-      }
+      aadhar_number: data.aadhar_number,
     });
 
-    // Then enroll the student with just the courseId
-    const success = enrollStudentInCourse(selectedCourseId);
+    // Then enroll the student
+    const success = enrollStudentInCourse(selectedCourseId, student.id);
     
     if (success) {
       toast({
@@ -186,7 +175,7 @@ const StudentCourses = () => {
     return { videoCount, materialCount };
   };
 
-  if (loading) {
+  if (loading || studentLoading) {
     return <div className="p-6">Loading courses...</div>;
   }
 
@@ -409,11 +398,11 @@ const StudentCourses = () => {
 
           <form onSubmit={form.handleSubmit(handleEnrollSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="aadharNumber">Aadhar Number (for verification)</Label>
+              <Label htmlFor="aadhar_number">Aadhar Number (for verification)</Label>
               <Input 
-                id="aadharNumber"
+                id="aadhar_number"
                 placeholder="Enter your 12-digit Aadhar number"
-                {...form.register("aadharNumber")}
+                {...form.register("aadhar_number")}
               />
             </div>
 
