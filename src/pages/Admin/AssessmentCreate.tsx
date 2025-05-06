@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { 
   Assessment, 
-  AssessmentQuestion, 
+  AssessmentQuestion,
   Question,
   Course,
 } from '@/lib/types';
@@ -40,14 +41,14 @@ const AdminAssessmentCreate = () => {
     courseId: '',
     title: '',
     description: '',
-    type: 'quiz',
     questions: [],
     duration: 60,
     passingScore: 70,
     isPublished: false,
     requiresScreenshare: false,
     requiresCamera: false,
-    timeLimit: 60
+    timeLimit: 60,
+    type: 'quiz'
   });
   
   const [courses, setCourses] = useState<Course[]>([]);
@@ -105,7 +106,7 @@ const AdminAssessmentCreate = () => {
   const handleAddQuestion = () => {
     const newQ: AssessmentQuestion = {
       id: `question_${Date.now()}`,
-      question: newQuestion.question,
+      question: newQuestion.question || '',
       type: newQuestion.type,
       options: newQuestion.options,
       correctAnswer: newQuestion.correctAnswer,
@@ -114,7 +115,7 @@ const AdminAssessmentCreate = () => {
     
     setAssessment(prev => ({
       ...prev,
-      questions: [...prev.questions, newQ]
+      questions: [...prev.questions || [], newQ]
     }));
     
     setNewQuestion({
@@ -130,7 +131,7 @@ const AdminAssessmentCreate = () => {
   const handleRemoveQuestion = (id: string) => {
     setAssessment(prev => ({
       ...prev,
-      questions: prev.questions.filter(q => q.id !== id)
+      questions: prev.questions?.filter(q => q.id !== id) || []
     }));
   };
   
@@ -213,17 +214,16 @@ const AdminAssessmentCreate = () => {
               <Label htmlFor="type">Type</Label>
               <Select 
                 value={assessment.type} 
-                onValueChange={(value) => handleSelectChange('type', value)}
+                onValueChange={(value: 'quiz' | 'coding-challenge' | 'project' | 'exam') => handleSelectChange('type', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select assessment type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="quiz">Quiz</SelectItem>
-                  <SelectItem value="assignment">Assignment</SelectItem>
+                  <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
                   <SelectItem value="project">Project</SelectItem>
                   <SelectItem value="exam">Exam</SelectItem>
-                  <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -296,7 +296,8 @@ const AdminAssessmentCreate = () => {
               <Label htmlFor="newQuestionType">Type</Label>
               <Select 
                 value={newQuestion.type} 
-                onValueChange={(value) => setNewQuestion(prev => ({ ...prev, type: value }))}
+                onValueChange={(value: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding') => 
+                  setNewQuestion(prev => ({ ...prev, type: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select question type" />
@@ -326,7 +327,7 @@ const AdminAssessmentCreate = () => {
           </div>
           
           <div className="mt-4">
-            {assessment.questions.map((question) => (
+            {assessment.questions?.map((question) => (
               <Card key={question.id} className="mb-4">
                 <CardContent className="flex items-center justify-between">
                   <div>

@@ -128,7 +128,7 @@ export const initializeAssessments = (): void => {
         questions: [
           {
             id: 'q1_python',
-            question: 'Question 1: What is the output of the following code?',
+            question: 'What is the output of the following code?',
             options: ['6', '8', '9', '5'],
             correctAnswer: '8',
             type: 'multiple-choice',
@@ -136,7 +136,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q2_python',
-            question: 'Question 2: Which of the following is used to create a list in Python?',
+            question: 'Which of the following is used to create a list in Python?',
             options: ['{}', '[]', '()', '<>'],
             correctAnswer: '[]',
             type: 'multiple-choice',
@@ -144,7 +144,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q3_python',
-            question: 'Question 3: What is the correct file extension for Python files?',
+            question: 'What is the correct file extension for Python files?',
             options: ['.py', '.pt', '.pyth', '.p'],
             correctAnswer: '.py',
             type: 'multiple-choice',
@@ -164,7 +164,7 @@ export const initializeAssessments = (): void => {
         questions: [
           {
             id: 'q1_web',
-            question: 'Question 1: Which HTML tag is used to create a hyperlink?',
+            question: 'Which HTML tag is used to create a hyperlink?',
             options: ['<link>', '<a>', '<href>', '<url>'],
             correctAnswer: '<a>',
             type: 'multiple-choice',
@@ -172,7 +172,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q2_web',
-            question: 'Question 2: Which CSS property is used to change the text color?',
+            question: 'Which CSS property is used to change the text color?',
             options: ['text-color', 'font-color', 'color', 'foreground-color'],
             correctAnswer: 'color',
             type: 'multiple-choice',

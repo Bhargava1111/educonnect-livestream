@@ -48,6 +48,7 @@ export interface Course {
   roadmap?: RoadmapPhase[];
 }
 
+// Update CourseModule to support video and material objects
 export interface CourseModule {
   id: string;
   title: string;
@@ -247,6 +248,7 @@ export interface LiveMeeting {
   link?: string;
 }
 
+// Updated Assessment, Question and AssessmentQuestion interfaces to fix type incompatibilities
 export interface Assessment {
   id: string;
   title: string;
@@ -269,22 +271,21 @@ export interface Assessment {
 
 export interface AssessmentQuestion {
   id: string;
-  question?: string;
-  text?: string; // Some components use text instead of question
-  type?: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
+  question: string;
+  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
   options?: string[];
   correctAnswer?: string | string[];
   marks?: number;
   assessmentId?: string;
-  questionId?: string;
   order?: number;
+  text?: string; // Some components use text instead of question
 }
 
 export interface Question {
   id: string;
   text?: string;
   question?: string; // Some components use question instead of text
-  type?: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
+  type: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
   options?: string[];
   correctAnswer: string | string[];
   points?: number;
@@ -300,7 +301,6 @@ export interface Student {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  // Other student properties
 }
 
 // Utility type to convert Supabase table types to application types

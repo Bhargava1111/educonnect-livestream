@@ -1,4 +1,4 @@
-// Import necessary modules and components
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import {
@@ -45,10 +44,10 @@ const AdminCourseAssessments = () => {
   const [newAssessmentData, setNewAssessmentData] = useState({
     title: '',
     description: '',
-    questions: [],
+    questions: [] as AssessmentQuestion[],
     timeLimit: 60,
     passingScore: 70,
-    type: 'quiz'
+    type: 'quiz' as 'quiz' | 'coding-challenge' | 'project' | 'exam'
   });
 
   useEffect(() => {
@@ -100,7 +99,14 @@ const AdminCourseAssessments = () => {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setNewAssessmentData(prev => ({ ...prev, [name]: value }));
+    if (name === 'type') {
+      setNewAssessmentData(prev => ({
+        ...prev,
+        [name]: value as 'quiz' | 'coding-challenge' | 'project' | 'exam'
+      }));
+    } else {
+      setNewAssessmentData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCreateAssessment = () => {
@@ -108,6 +114,15 @@ const AdminCourseAssessments = () => {
       toast({
         title: "Missing Information",
         description: "Please provide a title for the assessment.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!courseId) {
+      toast({
+        title: "Missing Course ID",
+        description: "Course ID is required.",
         variant: "destructive"
       });
       return;
@@ -125,7 +140,7 @@ const AdminCourseAssessments = () => {
         timeLimit: newAssessmentData.timeLimit
       });
 
-      setAssessments([...assessments, newAssessment]);
+      setAssessments(prevAssessments => [...prevAssessments, newAssessment]);
       setIsCreateDialogOpen(false);
       resetNewAssessmentData();
       
@@ -153,8 +168,7 @@ const AdminCourseAssessments = () => {
         questions: assessmentToEdit.questions || [],
         timeLimit: assessmentToEdit.timeLimit || 60,
         passingScore: assessmentToEdit.passingScore,
-        type: assessmentToEdit.type || 'quiz',
-        
+        type: assessmentToEdit.type || 'quiz'
       });
       setIsEditDialogOpen(true);
     } else {
@@ -170,7 +184,7 @@ const AdminCourseAssessments = () => {
     if (!editingAssessmentId) return;
 
     try {
-      updateAssessment(editingAssessmentId, {
+      const updatedAssessment = updateAssessment(editingAssessmentId, {
         title: newAssessmentData.title,
         description: newAssessmentData.description,
         questions: newAssessmentData.questions,
@@ -180,12 +194,14 @@ const AdminCourseAssessments = () => {
         duration: newAssessmentData.timeLimit
       });
 
-      const updatedAssessments = assessments.map(assessment =>
-        assessment.id === editingAssessmentId
-          ? { ...assessment, title: newAssessmentData.title, description: newAssessmentData.description, timeLimit: newAssessmentData.timeLimit, passingScore: newAssessmentData.passingScore, type: newAssessmentData.type }
-          : assessment
-      );
-      setAssessments(updatedAssessments);
+      if (updatedAssessment) {
+        setAssessments(prevAssessments => 
+          prevAssessments.map(assessment => 
+            assessment.id === editingAssessmentId ? updatedAssessment : assessment
+          )
+        );
+      }
+
       setIsEditDialogOpen(false);
       setEditingAssessmentId(null);
       resetNewAssessmentData();
@@ -333,16 +349,18 @@ const AdminCourseAssessments = () => {
               <Label htmlFor="type" className="text-right">
                 Type
               </Label>
-              <Select onValueChange={(value) => handleSelectChange('type', value)}>
+              <Select
+                value={newAssessmentData.type}
+                onValueChange={(value: string) => handleSelectChange('type', value)}
+              >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="quiz">Quiz</SelectItem>
-                  <SelectItem value="assignment">Assignment</SelectItem>
+                  <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
                   <SelectItem value="project">Project</SelectItem>
                   <SelectItem value="exam">Exam</SelectItem>
-                  <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -422,16 +440,18 @@ const AdminCourseAssessments = () => {
               <Label htmlFor="type" className="text-right">
                 Type
               </Label>
-              <Select onValueChange={(value) => handleSelectChange('type', value)}>
+              <Select
+                value={newAssessmentData.type}
+                onValueChange={(value: string) => handleSelectChange('type', value)}
+              >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="quiz">Quiz</SelectItem>
-                  <SelectItem value="assignment">Assignment</SelectItem>
+                  <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
                   <SelectItem value="project">Project</SelectItem>
                   <SelectItem value="exam">Exam</SelectItem>
-                  <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
                 </SelectContent>
               </Select>
             </div>

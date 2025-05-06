@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { StudentData, ProfileRow } from '../types';
 import { getCurrentStudent } from './utils';
@@ -167,7 +168,7 @@ export const getStudentsByEnrolledCourse = async (courseId: string) => {
 };
 
 // Enroll a student in a course
-export const enrollStudentInCourse = async (studentId: string, courseId: string) => {
+export const enrollStudentInCourse = async (courseId: string, studentId: string) => {
   try {
     // Check if already enrolled
     const { data: existingEnrollment, error: checkError } = await supabase
@@ -279,21 +280,11 @@ export const registerStudent = async (userData: {
 // Update student profile
 export const updateStudentProfile = async (userId: string, profileData: Partial<ProfileRow>) => {
   try {
-    // If education property is present, handle it separately as it's not in ProfileRow
-    const { education, ...validProfileData } = profileData as any;
-    
-    // Update the profile
+    // Update the profile using the valid profile data
     await supabase
       .from('profiles')
-      .update(validProfileData)
+      .update(profileData)
       .eq('id', userId);
-    
-    // If there's education data, handle it in a separate table/function
-    if (education) {
-      // Handle education data separately
-      console.log('Education data to be handled separately:', education);
-      // TODO: Implement education data handling
-    }
     
     return { success: true };
   } catch (error) {
