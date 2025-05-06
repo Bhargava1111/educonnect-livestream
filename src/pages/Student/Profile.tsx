@@ -60,6 +60,7 @@ const StudentProfile = () => {
         }
       };
       
+      // Pass the profile data directly without user ID since it should be handled inside the function
       const result = await updateStudentProfile(profileData);
       
       if (result?.success) {

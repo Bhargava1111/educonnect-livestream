@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { verifyPasswordResetOTP, resetPassword } from '@/lib/studentAuth';
+import { awaitAuthResult } from '@/utils/authHelpers';
 
 const ResetPassword = () => {
   const { toast } = useToast();
@@ -25,7 +27,7 @@ const ResetPassword = () => {
     
     try {
       // First verify the OTP
-      const result = await verifyPasswordResetOTP(email, otp);
+      const result = await awaitAuthResult(verifyPasswordResetOTP, email, otp);
       
       if (result.success) {
         setOtpVerified(true);
@@ -78,8 +80,8 @@ const ResetPassword = () => {
     }
     
     try {
-      // Reset the password
-      const result = await resetPassword(email, newPassword);
+      // Reset the password - using just one argument as expected by the function
+      const result = await awaitAuthResult(resetPassword, newPassword);
       
       if (result.success) {
         toast({

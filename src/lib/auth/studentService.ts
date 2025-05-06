@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { StudentData, ProfileRow } from '../types';
 import { getCurrentStudent } from './utils';
@@ -9,6 +10,7 @@ export const getStudentEnrollments = async (studentId: string) => {
       .from('enrollments')
       .select(`
         id,
+        student_id,
         course_id,
         enrollment_date,
         status,
@@ -277,8 +279,16 @@ export const registerStudent = async (userData: {
 };
 
 // Update student profile
-export const updateStudentProfile = async (userId: string, profileData: Partial<ProfileRow>) => {
+export const updateStudentProfile = async (profileData: Partial<ProfileRow>) => {
   try {
+    // Get the current user
+    const currentUser = await getCurrentStudent();
+    if (!currentUser) {
+      return { success: false, error: "User not authenticated" };
+    }
+
+    const userId = currentUser.id;
+    
     // Check if there's an education property and handle it separately
     const { education, ...validProfileData } = profileData as any;
     

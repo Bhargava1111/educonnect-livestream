@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Request password reset OTP
@@ -29,7 +30,7 @@ export const verifyPasswordResetOTP = async (email: string, otp: string): Promis
   };
 };
 
-// Reset password
+// Reset password - updated to take a single argument
 export const resetPassword = async (password: string): Promise<{ success: boolean, error?: string }> => {
   try {
     const { error } = await supabase.auth.updateUser({
