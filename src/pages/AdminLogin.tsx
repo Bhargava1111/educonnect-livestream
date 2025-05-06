@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
-const ADMIN_EMAIL = "Bhargava@123";
+// Import the admin credentials directly from auth.ts
+import { ADMIN_EMAIL, ADMIN_PASSWORD } from "@/lib/auth"; 
 
 const AdminLogin = () => {
   const { toast } = useToast();
@@ -43,27 +45,42 @@ const AdminLogin = () => {
     setIsLoading(true);
     
     try {
-      const result = await signIn(email, password);
+      // Try direct Supabase login without the context's signIn function
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
       
-      if (result.success) {
-        if (email !== ADMIN_EMAIL) {
-          toast({
-            title: "Access Denied",
-            description: "You do not have administrator privileges.",
-            variant: "destructive",
-          });
-          navigate('/');
-          return;
-        }
-        
-        // Success handled in the context with automatic redirect
-      } else {
+      if (error) {
+        console.error("Admin login error:", error);
         toast({
           title: "Login Failed",
-          description: result.error || "Invalid email or password. Please try again.",
+          description: "Invalid email or password. Please try again.",
           variant: "destructive",
         });
+        setIsLoading(false);
+        return;
       }
+      
+      if (email !== ADMIN_EMAIL) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Access Denied",
+          description: "You do not have administrator privileges.",
+          variant: "destructive",
+        });
+        navigate('/');
+        setIsLoading(false);
+        return;
+      }
+      
+      // If we get here, login was successful
+      toast({
+        title: "Login Successful",
+        description: "Welcome to the admin portal.",
+      });
+      navigate('/admin');
+      
     } catch (error) {
       console.error("Admin login error:", error);
       toast({

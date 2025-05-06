@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { isStudentLoggedIn } from '@/lib/studentAuth';
+import { useAuth } from '@/contexts/AuthContext'; 
 import CompleteEnrollmentForm from './CompleteEnrollmentForm';
 
 interface EnrollmentFormDialogProps {
@@ -30,13 +30,14 @@ const EnrollmentFormDialog: React.FC<EnrollmentFormDialogProps> = ({
   onOpenChange,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Use the Auth context to check if user is logged in
 
   const handleLoginRedirect = () => {
     navigate('/login');
     onOpenChange(false);
   };
   
-  const isLoggedIn = isStudentLoggedIn();
+  const isLoggedIn = !!user;
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

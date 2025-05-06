@@ -4,8 +4,8 @@
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin credentials
-const ADMIN_EMAIL = "Bhargava@123";
-const ADMIN_PASSWORD = "Bhar@123"; // Added password constant for reference
+export const ADMIN_EMAIL = "Bhargava@123";
+export const ADMIN_PASSWORD = "Bhar@123"; // Added password constant for reference
 
 // Session storage key for admin auth
 const ADMIN_AUTH_KEY = "career_aspire_admin_auth";

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -35,6 +36,45 @@ const Courses = () => {
   // Get unique levels and categories for filters
   const levels = Array.from(new Set(courses.map(course => course.level))).filter(Boolean);
   const categories = Array.from(new Set(courses.map(course => course.category))).filter(Boolean);
+
+  // Helper function to render course card
+  const renderCourseCard = (course: Course) => (
+    <Card key={course.id} className="h-full flex flex-col">
+      <CardHeader>
+        <Badge className="w-fit mb-2">{course.category || "General"}</Badge>
+        <CardTitle>{course.title}</CardTitle>
+        <CardDescription>Instructor: {course.instructor || "TBD"}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <p className="text-sm line-clamp-3 mb-4">
+          {course.description || "Learn cutting-edge skills with our expert instructors."}
+        </p>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <p className="text-gray-500">Duration</p>
+            <p>{course.duration}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Level</p>
+            <p>{course.level || "All Levels"}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Price</p>
+            <p>{course.price === 0 ? "Free" : `₹${course.price?.toLocaleString()}`}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Students</p>
+            <p>{course.students || 0}</p>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Link to={`/courses/${course.id}/roadmap`} className="w-full">
+          <Button className="w-full" variant="default">View Details</Button>
+        </Link>
+      </CardFooter>
+    </Card>
+  );
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -103,43 +143,7 @@ const Courses = () => {
                 </Button>
               </div>
             ) : (
-              filteredCourses.map(course => (
-                <Card key={course.id} className="h-full flex flex-col">
-                  <CardHeader>
-                    <Badge className="w-fit mb-2">{course.category || "General"}</Badge>
-                    <CardTitle>{course.title}</CardTitle>
-                    <CardDescription>Instructor: {course.instructor || "TBD"}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-sm line-clamp-3 mb-4">
-                      {course.description || "Learn cutting-edge skills with our expert instructors."}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <p className="text-gray-500">Duration</p>
-                        <p>{course.duration}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Level</p>
-                        <p>{course.level || "All Levels"}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Price</p>
-                        <p>{course.price === 0 ? "Free" : `₹${course.price?.toLocaleString()}`}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Students</p>
-                        <p>{course.students || 0}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Link to={`/courses/${course.id}/roadmap`} className="w-full">
-                      <Button className="w-full">View Details</Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))
+              filteredCourses.map(course => renderCourseCard(course))
             )}
           </div>
         </TabsContent>
@@ -149,43 +153,7 @@ const Courses = () => {
             {filteredCourses
               .sort((a, b) => (b.students || 0) - (a.students || 0))
               .slice(0, 6)
-              .map(course => (
-                <Card key={course.id} className="h-full flex flex-col">
-                  <CardHeader>
-                    <Badge className="w-fit mb-2">{course.category || "General"}</Badge>
-                    <CardTitle>{course.title}</CardTitle>
-                    <CardDescription>Instructor: {course.instructor || "TBD"}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-sm line-clamp-3 mb-4">
-                      {course.description || "Learn cutting-edge skills with our expert instructors."}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <p className="text-gray-500">Duration</p>
-                        <p>{course.duration}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Level</p>
-                        <p>{course.level || "All Levels"}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Price</p>
-                        <p>{course.price === 0 ? "Free" : `₹${course.price?.toLocaleString()}`}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Students</p>
-                        <p>{course.students || 0}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Link to={`/courses/${course.id}/roadmap`} className="w-full">
-                      <Button className="w-full">View Details</Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
+              .map(course => renderCourseCard(course))}
           </div>
         </TabsContent>
         
@@ -193,39 +161,7 @@ const Courses = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses
               .filter(course => course.price === 0)
-              .map(course => (
-                <Card key={course.id} className="h-full flex flex-col">
-                  <CardHeader>
-                    <Badge className="w-fit mb-2">{course.category || "General"}</Badge>
-                    <CardTitle>{course.title}</CardTitle>
-                    <CardDescription>Instructor: {course.instructor || "TBD"}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-sm line-clamp-3 mb-4">
-                      {course.description || "Learn cutting-edge skills with our expert instructors."}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <p className="text-gray-500">Duration</p>
-                        <p>{course.duration}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Level</p>
-                        <p>{course.level || "All Levels"}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Students</p>
-                        <p>{course.students || 0}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Link to={`/courses/${course.id}/roadmap`} className="w-full">
-                      <Button className="w-full">View Details</Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
+              .map(course => renderCourseCard(course))}
           </div>
         </TabsContent>
       </Tabs>
