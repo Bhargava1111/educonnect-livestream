@@ -61,25 +61,16 @@ export const createQuestion = (
   options: string[], 
   correctAnswerIndex: number,
   points: number = 10,
-  type: 'multiple_choice' | 'true_false' | 'short_answer' = 'multiple_choice'
+  type: 'multiple-choice' | 'true-false' | 'short_answer' = 'multiple-choice'
 ): AssessmentQuestion => {
-  const question: Question = {
-    id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-    text: text,
-    options,
-    correctAnswer: options[correctAnswerIndex],
-    points: points,
-    type
-  };
-  
   return {
     id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
     question: text,
     options,
     correctAnswer: options[correctAnswerIndex],
     marks: points,
-    type: type === 'multiple_choice' ? 'multiple-choice' : 
-          type === 'true_false' ? 'true-false' : 'descriptive'
+    type: type === 'multiple-choice' ? 'multiple-choice' : 
+          type === 'true-false' ? 'true-false' : 'descriptive'
   };
 };
 

@@ -43,7 +43,7 @@ const AdminAssessmentCreate = () => {
     type: 'quiz',
     questions: [],
     duration: 60,
-    passingMarks: 70,
+    passingScore: 70,
     isPublished: false,
     requiresScreenshare: false,
     requiresCamera: false,
@@ -106,7 +106,7 @@ const AdminAssessmentCreate = () => {
     const newQ: AssessmentQuestion = {
       id: `question_${Date.now()}`,
       question: newQuestion.question,
-      type: newQuestion.type as any,
+      type: newQuestion.type,
       options: newQuestion.options,
       correctAnswer: newQuestion.correctAnswer,
       marks: Number(newQuestion.marks)
@@ -241,12 +241,12 @@ const AdminAssessmentCreate = () => {
               </div>
               
               <div>
-                <Label htmlFor="passingMarks">Passing Marks (%)</Label>
+                <Label htmlFor="passingScore">Passing Score (%)</Label>
                 <Input 
-                  id="passingMarks" 
-                  name="passingMarks" 
+                  id="passingScore" 
+                  name="passingScore" 
                   type="number" 
-                  value={String(assessment.passingMarks)} 
+                  value={String(assessment.passingScore)} 
                   onChange={handleInputChange} 
                 />
               </div>

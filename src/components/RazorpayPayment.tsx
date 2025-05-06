@@ -66,7 +66,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       const orderId = "order_" + Math.random().toString(36).substring(2, 15);
       
       // Create a pending payment record
-      const payment = createPayment({
+      const payment = await createPayment({
         studentId: studentData.id,
         courseId: courseId,
         amount: amount,
@@ -83,9 +83,9 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
         name: "Career Aspire Technology",
         description: description,
         order_id: orderId,
-        handler: function (response: any) {
+        handler: async function (response: any) {
           // Update payment with success status and razorpay payment ID
-          updatePayment(payment.id, 'success', {
+          await updatePayment(payment.id, 'success', {
             paymentId: response.razorpay_payment_id
           });
           
@@ -97,7 +97,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
           if (onSuccess) onSuccess(response);
         },
         prefill: {
-          name: (studentData.user_metadata?.firstName || '') + ' ' + (studentData.user_metadata?.lastName || ''),
+          name: studentData.user_metadata?.firstName + ' ' + studentData.user_metadata?.lastName,
           email: studentData.email || "",
           contact: studentData.user_metadata?.phone || ""
         },

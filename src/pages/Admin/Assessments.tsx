@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle, CardDescription 
@@ -24,6 +23,7 @@ import {
   Assessment
 } from "@/lib/courseManagement";
 import { Plus, Edit, Trash, Clock, Award } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const AdminAssessments = () => {
   const { toast } = useToast();
@@ -32,6 +32,14 @@ const AdminAssessments = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<Assessment | null>(null);
   const [formData, setFormData] = useState({
+    courseId: '',
+    title: '',
+    description: '',
+    type: 'quiz',
+    timeLimit: 30,
+    passingScore: 70
+  });
+  const [newAssessmentData, setNewAssessmentData] = useState({
     courseId: '',
     title: '',
     description: '',
@@ -202,6 +210,57 @@ const AdminAssessments = () => {
     setIsEditDialogOpen(true);
   };
   
+  const handleCreateAssessment = () => {
+    if (!newAssessmentData.courseId || !newAssessmentData.title) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const newAssessment = createAssessment({
+        courseId: newAssessmentData.courseId,
+        title: newAssessmentData.title,
+        description: newAssessmentData.description,
+        questions: [],
+        passingScore: newAssessmentData.passingScore,
+        type: newAssessmentData.type,
+        duration: newAssessmentData.timeLimit,
+        timeLimit: newAssessmentData.timeLimit
+      });
+
+      setAssessments([...assessments, newAssessment]);
+      setIsCreateDialogOpen(false);
+      resetNewAssessmentData();
+      
+      toast({
+        title: "Assessment Created",
+        description: `${newAssessment.title} has been created successfully.`
+      });
+    } catch (error) {
+      console.error("Error creating assessment:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create assessment. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const resetNewAssessmentData = () => {
+    setNewAssessmentData({
+      courseId: '',
+      title: '',
+      description: '',
+      type: 'quiz',
+      timeLimit: 30,
+      passingScore: 70
+    });
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">

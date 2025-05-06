@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -11,9 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { 
-  getCourseById, updateCourseRoadmap, RoadmapPhase
+  getCourseById, updateCourseRoadmap, RoadmapPhase, Video, Material
 } from "@/lib/courseManagement";
-import { ChevronLeft, Plus, Save, Trash, X, Upload, Video, FileText } from 'lucide-react';
+import { ChevronLeft, Plus, Save, Trash, X, Upload, Video as VideoIcon, FileText } from 'lucide-react';
 
 interface RoadmapMaterial {
   id: string;
@@ -169,7 +168,7 @@ const AdminCourseRoadmap = () => {
       title: newVideo.title,
       url: newVideo.url,
       description: newVideo.description,
-      topicIndex: currentTopicIndex
+      topicIndex: currentTopicIndex !== null ? currentTopicIndex : undefined
     });
     
     setRoadmap(updatedRoadmap);
@@ -204,7 +203,7 @@ const AdminCourseRoadmap = () => {
     updatedRoadmap[currentPhaseIndex].materials.push({
       id: `material_${Date.now()}`,
       title: newMaterial.title,
-      type: newMaterial.type as 'document' | 'link',
+      type: newMaterial.type,
       url: newMaterial.url,
       description: newMaterial.description
     });
@@ -316,7 +315,7 @@ const AdminCourseRoadmap = () => {
                           size="sm"
                           onClick={() => openAddVideoDialog(phaseIndex, topicIndex)}
                         >
-                          <Video className="h-4 w-4 mr-1" />
+                          <VideoIcon className="h-4 w-4 mr-1" />
                           Add Video
                         </Button>
                         <Button
@@ -384,7 +383,7 @@ const AdminCourseRoadmap = () => {
                     <div className="space-y-2">
                       {phase.videos.map((video, videoIndex) => (
                         <div key={videoIndex} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                          <Video className="h-4 w-4 text-eduBlue-600" />
+                          <VideoIcon className="h-4 w-4 text-eduBlue-600" />
                           <div className="flex-1">
                             <p className="font-medium">{video.title}</p>
                             <p className="text-xs text-gray-500">

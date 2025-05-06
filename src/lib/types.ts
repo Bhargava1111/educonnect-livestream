@@ -1,3 +1,4 @@
+
 import { Database } from '@/integrations/supabase/types';
 
 // Custom types that reference Supabase types
@@ -62,8 +63,24 @@ export interface RoadmapPhase {
   duration: string;
   topics: string[];
   projects: string[];
-  videos?: string[];
-  materials?: string[];
+  videos?: Video[];
+  materials?: Material[];
+}
+
+export interface Video {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+  topicIndex?: number;
+}
+
+export interface Material {
+  id: string;
+  title: string;
+  type: 'document' | 'link';
+  url: string;
+  description?: string;
 }
 
 export interface Enrollment {
@@ -245,7 +262,6 @@ export interface Assessment {
   // Additional properties used in the application
   type?: 'quiz' | 'coding-challenge' | 'project' | 'exam';
   timeLimit?: number;
-  passingMarks?: number;
   isPublished?: boolean;
   requiresScreenshare?: boolean;
   requiresCamera?: boolean;
@@ -254,21 +270,21 @@ export interface Assessment {
 export interface AssessmentQuestion {
   id: string;
   question?: string;
-  type?: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
+  text?: string; // Some components use text instead of question
+  type?: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
   options?: string[];
   correctAnswer?: string | string[];
   marks?: number;
   assessmentId?: string;
   questionId?: string;
   order?: number;
-  text?: string; // Some components use text instead of question
 }
 
 export interface Question {
   id: string;
   text?: string;
   question?: string; // Some components use question instead of text
-  type?: 'multiple_choice' | 'true_false' | 'short_answer' | 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
+  type?: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding' | 'multiple_choice' | 'true_false' | 'short_answer';
   options?: string[];
   correctAnswer: string | string[];
   points?: number;

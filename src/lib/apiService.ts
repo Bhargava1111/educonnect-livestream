@@ -201,7 +201,8 @@ export const apiGetEnrolledCourses = async (): Promise<Course[]> => {
     
     // Filter courses by enrollment
     return parsedCourses.filter(course => 
-      Array.isArray(enrolledCourseIds) && enrolledCourseIds.includes(course.id)
+      Array.isArray(enrolledCourseIds) && 
+      enrolledCourseIds.includes(course.id)
     );
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
