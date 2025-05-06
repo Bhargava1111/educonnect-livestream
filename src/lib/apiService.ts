@@ -1,3 +1,4 @@
+
 // Implement API service methods for interacting with backend services
 import axios from 'axios';
 import { Student, Course, Job, Placement } from './types';
@@ -5,9 +6,9 @@ import {
   isStudentLoggedIn,
   loginStudent,
   logoutStudent,
-  getStudentEnrollments,
-  getCurrentStudent
+  getStudentEnrollments
 } from './courseManagement';
+import { getCurrentStudent, getCurrentStudentSync, mapUserToStudent } from './auth/utils';
 
 // Mock API base URL - would be replaced with actual API URL in production
 const API_BASE_URL = 'https://api.careeraspire.com';
@@ -40,7 +41,7 @@ export const apiLogin = async (email: string, password: string): Promise<{ succe
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // Use the local authentication function for now
-    return loginStudent(email, password, false);
+    return loginStudent(email, password);
     
     /* Real implementation would be like:
     const response = await api.post('/auth/login', { email, password });
@@ -179,12 +180,20 @@ export const apiGetEnrolledCourses = async (): Promise<Course[]> => {
       return [];
     }
     
-    const currentStudent = getCurrentStudent();
+    // First try to get user data synchronously
+    let currentStudent = getCurrentStudentSync();
+    
+    // If sync fails, use async approach
+    if (!currentStudent) {
+      currentStudent = await getCurrentStudent();
+    }
+    
     if (!currentStudent) {
       return [];
     }
     
-    const enrolledCourseIds = getStudentEnrollments(currentStudent.id);
+    // Get enrolled courses for the student
+    const enrolledCourseIds = await getStudentEnrollments(currentStudent.id);
     
     // Get all courses
     const courses = localStorage.getItem('career_aspire_courses');
@@ -192,7 +201,7 @@ export const apiGetEnrolledCourses = async (): Promise<Course[]> => {
     
     // Filter courses by enrollment
     return parsedCourses.filter(course => 
-      enrolledCourseIds.includes(course.id)
+      Array.isArray(enrolledCourseIds) && enrolledCourseIds.includes(course.id)
     );
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
@@ -207,7 +216,15 @@ export const apiGetStudentProfile = async (): Promise<Student | null> => {
       return null;
     }
     
-    return getCurrentStudent();
+    // First try to get user data synchronously
+    let currentStudent = getCurrentStudentSync();
+    
+    // If sync fails, use async approach
+    if (!currentStudent) {
+      currentStudent = await getCurrentStudent();
+    }
+    
+    return mapUserToStudent(currentStudent);
   } catch (error) {
     console.error("Error fetching student profile:", error);
     return null;
@@ -223,7 +240,14 @@ export const apiUpdateStudentProfile = async (
       return { success: false, error: "Not logged in" };
     }
     
-    const currentStudent = getCurrentStudent();
+    // First try to get user data synchronously
+    let currentStudent = getCurrentStudentSync();
+    
+    // If sync fails, use async approach
+    if (!currentStudent) {
+      currentStudent = await getCurrentStudent();
+    }
+    
     if (!currentStudent) {
       return { success: false, error: "Student not found" };
     }
@@ -231,9 +255,14 @@ export const apiUpdateStudentProfile = async (
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));
     
+    const studentObj = mapUserToStudent(currentStudent);
+    if (!studentObj) {
+      return { success: false, error: "Could not map user to student" };
+    }
+    
     // Update the student profile
     const updatedStudent: Student = {
-      ...currentStudent,
+      ...studentObj,
       ...profileData
     };
     

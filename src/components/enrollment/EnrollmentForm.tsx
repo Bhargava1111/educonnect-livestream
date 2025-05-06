@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { getCurrentStudent } from '@/lib/auth/utils';
+import { getCurrentStudent, getCurrentStudentSync, mapUserToStudent } from '@/lib/auth/utils';
 import { enrollStudentInCourse } from '@/lib/auth/studentService';
 import { applyForJob } from '@/lib/jobService';
 import { Label } from '@/components/ui/label';
@@ -38,14 +38,21 @@ const EnrollmentForm: React.FC<EnrollmentFormProps> = ({ formType, relatedId, on
 
   useEffect(() => {
     const loadStudentData = async () => {
-      const userData = await getCurrentStudent();
+      // Try synchronous first for better UX
+      let userData = getCurrentStudentSync();
+      
+      // Fall back to async if needed
+      if (!userData) {
+        userData = await getCurrentStudent();
+      }
+      
       setStudent(userData);
       
       // Populate form with user data if available
       if (userData) {
         setFormData(prev => ({
           ...prev,
-          name: userData.user_metadata?.name || '',
+          name: userData.user_metadata?.name || `${userData.user_metadata?.firstName || ''} ${userData.user_metadata?.lastName || ''}`.trim(),
           email: userData.email || '',
           phone: userData.user_metadata?.phone || '',
           address: userData.user_metadata?.address || ''

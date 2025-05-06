@@ -235,31 +235,45 @@ export interface Assessment {
   title: string;
   description: string;
   courseId: string;
-  totalQuestions: number;
+  totalQuestions?: number;
   duration: number; // in minutes
   passingScore: number;
-  status: 'draft' | 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
+  status?: 'draft' | 'active' | 'inactive';
+  createdAt?: string;
+  updatedAt?: string;
   questions?: AssessmentQuestion[];
+  // Additional properties used in the application
+  type?: 'quiz' | 'coding-challenge' | 'project' | 'exam';
+  timeLimit?: number;
+  passingMarks?: number;
+  isPublished?: boolean;
+  requiresScreenshare?: boolean;
+  requiresCamera?: boolean;
 }
 
 export interface AssessmentQuestion {
   id: string;
-  assessmentId: string;
-  questionId: string;
-  question?: Question;
-  order: number;
+  question?: string;
+  type?: 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
+  options?: string[];
+  correctAnswer?: string | string[];
+  marks?: number;
+  assessmentId?: string;
+  questionId?: string;
+  order?: number;
+  text?: string; // Some components use text instead of question
 }
 
 export interface Question {
   id: string;
-  text: string;
-  type: 'multiple_choice' | 'true_false' | 'short_answer';
+  text?: string;
+  question?: string; // Some components use question instead of text
+  type?: 'multiple_choice' | 'true_false' | 'short_answer' | 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding';
   options?: string[];
   correctAnswer: string | string[];
-  points: number;
-  difficulty: 'easy' | 'medium' | 'hard';
+  points?: number;
+  marks?: number; // Some components use marks instead of points
+  difficulty?: 'easy' | 'medium' | 'hard';
 }
 
 export interface Student {
@@ -267,6 +281,9 @@ export interface Student {
   name: string;
   email: string;
   enrolledCourses: string[];
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
   // Other student properties
 }
 

@@ -23,16 +23,17 @@ const StudentActivityComponent: React.FC<StudentActivityProps> = ({ studentId })
     const fetchActivityData = async () => {
       try {
         const activityData = await getStudentActivity(studentId);
-        setActivities(activityData);
+        setActivities(Array.isArray(activityData) ? activityData : []);
         
         const loginData = await getStudentLoginHistory(studentId);
-        setLoginHistory(loginData);
+        setLoginHistory(Array.isArray(loginData) ? loginData : []);
         
         const totalActiveSeconds = await getStudentTotalActiveTime(studentId);
-        setActiveTime(formatActiveTime(totalActiveSeconds));
+        const formattedTime = formatActiveTime(typeof totalActiveSeconds === 'number' ? totalActiveSeconds : 0);
+        setActiveTime(formattedTime);
         
         const lastActiveTime = await getStudentLastActiveTime(studentId);
-        setLastActive(lastActiveTime);
+        setLastActive(typeof lastActiveTime === 'string' ? lastActiveTime : null);
       } catch (error) {
         console.error("Error fetching activity data:", error);
       }

@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { Student } from '@/lib/types';
 
 // Get the current student - async version
 export const getCurrentStudent = async (): Promise<User | null> => {
@@ -31,8 +32,7 @@ export const getCurrentSession = async (): Promise<Session | null> => {
 };
 
 // Synchronous version that returns cached session user
-// Note: This doesn't work with newer versions of Supabase client
-// It's just a polyfill for backward compatibility
+// This is for backward compatibility with components that expect synchronous behavior
 export const getCurrentStudentSync = (): User | null => {
   try {
     // Local storage check for session - manual implementation since 
@@ -51,4 +51,19 @@ export const getCurrentStudentSync = (): User | null => {
     console.error("Error getting current student sync:", error);
     return null;
   }
+};
+
+// Helper function to map User to Student type
+export const mapUserToStudent = (user: User | null): Student | null => {
+  if (!user) return null;
+  
+  return {
+    id: user.id,
+    name: user.user_metadata?.name || `${user.user_metadata?.firstName || ''} ${user.user_metadata?.lastName || ''}`.trim(),
+    email: user.email || '',
+    enrolledCourses: user.user_metadata?.enrolledCourses || [],
+    firstName: user.user_metadata?.firstName,
+    lastName: user.user_metadata?.lastName,
+    phone: user.user_metadata?.phone
+  };
 };

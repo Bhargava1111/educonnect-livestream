@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,14 +13,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { Menu, X, ChevronDown } from 'lucide-react';
-import { isStudentLoggedIn, logoutStudent, getCurrentStudent } from '@/lib/studentAuth';
+import { isStudentLoggedIn, logoutStudent } from '@/lib/studentAuth';
+import { getCurrentStudentSync } from '@/lib/auth/utils';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const isLoggedIn = isStudentLoggedIn();
-  const studentData = isLoggedIn ? getCurrentStudent() : null;
+  const studentData = isLoggedIn ? getCurrentStudentSync() : null;
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -102,7 +103,7 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Avatar className="cursor-pointer">
                     <AvatarFallback>
-                      {studentData?.firstName ? studentData.firstName.charAt(0) : "U"}
+                      {studentData?.user_metadata?.firstName ? studentData.user_metadata.firstName.charAt(0) : "U"}
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>

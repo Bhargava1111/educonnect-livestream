@@ -22,6 +22,7 @@ export const createAssessment = (assessment: Omit<Assessment, 'id'>): Assessment
   const newAssessment = {
     ...assessment,
     id: `assessment_${Date.now()}`,
+    questions: assessment.questions || []
   };
   
   assessments.push(newAssessment);
@@ -60,15 +61,25 @@ export const createQuestion = (
   options: string[], 
   correctAnswerIndex: number,
   points: number = 10,
-  type: 'multiple-choice' | 'coding' | 'essay' = 'multiple-choice'
+  type: 'multiple_choice' | 'true_false' | 'short_answer' = 'multiple_choice'
 ): AssessmentQuestion => {
+  const question: Question = {
+    id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    text: text,
+    options,
+    correctAnswer: options[correctAnswerIndex],
+    points: points,
+    type
+  };
+  
   return {
     id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
     question: text,
     options,
     correctAnswer: options[correctAnswerIndex],
     marks: points,
-    type: type as 'multiple-choice' | 'true-false' | 'fill-in-blanks' | 'descriptive' | 'coding'
+    type: type === 'multiple_choice' ? 'multiple-choice' : 
+          type === 'true_false' ? 'true-false' : 'descriptive'
   };
 };
 
@@ -126,7 +137,7 @@ export const initializeAssessments = (): void => {
         questions: [
           {
             id: 'q1_python',
-            question: `Question 1: What is the output of the following code?`,
+            question: 'Question 1: What is the output of the following code?',
             options: ['6', '8', '9', '5'],
             correctAnswer: '8',
             type: 'multiple-choice',
@@ -134,7 +145,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q2_python',
-            question: `Question 2: Which of the following is used to create a list in Python?`,
+            question: 'Question 2: Which of the following is used to create a list in Python?',
             options: ['{}', '[]', '()', '<>'],
             correctAnswer: '[]',
             type: 'multiple-choice',
@@ -142,7 +153,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q3_python',
-            question: `Question 3: What is the correct file extension for Python files?`,
+            question: 'Question 3: What is the correct file extension for Python files?',
             options: ['.py', '.pt', '.pyth', '.p'],
             correctAnswer: '.py',
             type: 'multiple-choice',
@@ -151,7 +162,8 @@ export const initializeAssessments = (): void => {
         ],
         timeLimit: 30,
         passingScore: 70,
-        type: 'quiz'
+        type: 'quiz',
+        duration: 30
       },
       {
         id: 'assessment_web_dev',
@@ -161,7 +173,7 @@ export const initializeAssessments = (): void => {
         questions: [
           {
             id: 'q1_web',
-            question: `Question 1: Which HTML tag is used to create a hyperlink?`,
+            question: 'Question 1: Which HTML tag is used to create a hyperlink?',
             options: ['<link>', '<a>', '<href>', '<url>'],
             correctAnswer: '<a>',
             type: 'multiple-choice',
@@ -169,7 +181,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q2_web',
-            question: `Question 2: Which CSS property is used to change the text color?`,
+            question: 'Question 2: Which CSS property is used to change the text color?',
             options: ['text-color', 'font-color', 'color', 'foreground-color'],
             correctAnswer: 'color',
             type: 'multiple-choice',
@@ -178,7 +190,8 @@ export const initializeAssessments = (): void => {
         ],
         timeLimit: 20,
         passingScore: 70,
-        type: 'quiz'
+        type: 'quiz',
+        duration: 20
       }
     ];
     
