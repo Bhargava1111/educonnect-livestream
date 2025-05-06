@@ -1,4 +1,3 @@
-
 import { Database } from '@/integrations/supabase/types';
 
 // Custom types that reference Supabase types
@@ -19,6 +18,9 @@ export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
 export const STUDENT_DATA_KEY = 'career_aspire_student_data';
 export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
 export const PAYMENTS_KEY = 'career_aspire_payments';
+export const LIVE_MEETINGS_KEY = 'career_aspire_live_meetings';
+export const ASSESSMENTS_KEY = 'career_aspire_assessments';
+export const PLACEMENTS_KEY = 'career_aspire_placements';
 
 // Legacy types for backward compatibility
 export interface Course {
@@ -37,6 +39,7 @@ export interface Course {
   imageUrl?: string;
   isFeatured?: boolean;
   isPublished?: boolean;
+  popular?: boolean;
   createdAt: string;
   updatedAt: string;
   topics: string[];
@@ -59,6 +62,8 @@ export interface RoadmapPhase {
   duration: string;
   topics: string[];
   projects: string[];
+  videos?: string[];
+  materials?: string[];
 }
 
 export interface Enrollment {
@@ -207,6 +212,64 @@ export interface Placement {
   salary?: string;
 }
 
+export interface LiveMeeting {
+  id: string;
+  title: string;
+  description: string;
+  courseId: string;
+  scheduledDate: string;
+  duration: string;
+  meetingLink: string;
+  hostName: string;
+  status: 'scheduled' | 'completed' | 'cancelled' | 'upcoming';
+  createdAt: string;
+  // For backward compatibility with the UI
+  instructor?: string;
+  date?: string;
+  time?: string;
+  link?: string;
+}
+
+export interface Assessment {
+  id: string;
+  title: string;
+  description: string;
+  courseId: string;
+  totalQuestions: number;
+  duration: number; // in minutes
+  passingScore: number;
+  status: 'draft' | 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+  questions?: AssessmentQuestion[];
+}
+
+export interface AssessmentQuestion {
+  id: string;
+  assessmentId: string;
+  questionId: string;
+  question?: Question;
+  order: number;
+}
+
+export interface Question {
+  id: string;
+  text: string;
+  type: 'multiple_choice' | 'true_false' | 'short_answer';
+  options?: string[];
+  correctAnswer: string | string[];
+  points: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface Student {
+  id: string;
+  name: string;
+  email: string;
+  enrolledCourses: string[];
+  // Other student properties
+}
+
 // Utility type to convert Supabase table types to application types
 export function mapCourseRowToCourse(row: CourseRow): Course {
   return {
@@ -223,6 +286,7 @@ export function mapCourseRowToCourse(row: CourseRow): Course {
     imageUrl: row.image_url || undefined,
     isFeatured: row.is_featured || false,
     isPublished: row.is_published || true,
+    popular: row.popular || false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     topics: row.topics || [],

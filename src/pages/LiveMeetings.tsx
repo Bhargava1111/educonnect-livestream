@@ -17,13 +17,14 @@ const LiveMeetings = () => {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
   const [meetings, setMeetings] = useState<LiveMeeting[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
+  const [studentData, setStudentData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Check if student is logged in
   const isLoggedIn = isStudentLoggedIn();
-  const studentData = isLoggedIn ? getStudentData() : null;
   
   // Use useCallback to prevent recreation on each render
-  const loadData = useCallback(() => {
+  const loadData = useCallback(async () => {
     // Ensure meeting statuses are updated
     updateMeetingStatuses();
     
@@ -33,7 +34,18 @@ const LiveMeetings = () => {
     
     setMeetings(allMeetings);
     setCourses(allCourses);
-  }, []);
+
+    if (isLoggedIn) {
+      try {
+        const data = await getStudentData();
+        setStudentData(data);
+      } catch (err) {
+        console.error("Error loading student data:", err);
+      }
+    }
+    
+    setIsLoading(false);
+  }, [isLoggedIn]);
   
   useEffect(() => {
     loadData();
@@ -77,6 +89,14 @@ const LiveMeetings = () => {
     const course = courses.find(c => c.id === courseId);
     return course ? course.title : 'Unknown Course';
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-10 px-4 text-center">
+        <p>Loading meetings...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-10 px-4">

@@ -22,7 +22,7 @@ const AdminSchedule = () => {
   const [meetingDuration, setMeetingDuration] = useState('60 minutes');
   const [meetingLink, setMeetingLink] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<any[]>([]);
 
   useEffect(() => {
     const allCourses = getAllCourses();
