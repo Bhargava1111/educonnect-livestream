@@ -20,20 +20,25 @@ const StudentActivityComponent: React.FC<StudentActivityProps> = ({ studentId })
   
   useEffect(() => {
     // Load student activity data
-    const activityData = getStudentActivity(studentId);
-    setActivities(activityData);
+    const fetchActivityData = async () => {
+      try {
+        const activityData = await getStudentActivity(studentId);
+        setActivities(activityData);
+        
+        const loginData = await getStudentLoginHistory(studentId);
+        setLoginHistory(loginData);
+        
+        const totalActiveSeconds = await getStudentTotalActiveTime(studentId);
+        setActiveTime(formatActiveTime(totalActiveSeconds));
+        
+        const lastActiveTime = await getStudentLastActiveTime(studentId);
+        setLastActive(lastActiveTime);
+      } catch (error) {
+        console.error("Error fetching activity data:", error);
+      }
+    };
     
-    // Load login history
-    const loginData = getStudentLoginHistory(studentId);
-    setLoginHistory(loginData);
-    
-    // Get active time
-    const totalActiveSeconds = getStudentTotalActiveTime(studentId);
-    setActiveTime(formatActiveTime(totalActiveSeconds));
-    
-    // Get last active time
-    const lastActiveTime = getStudentLastActiveTime(studentId);
-    setLastActive(lastActiveTime);
+    fetchActivityData();
   }, [studentId]);
   
   // Filter activities

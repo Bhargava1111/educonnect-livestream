@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -24,6 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { StudentData } from '@/lib/types';
 
 // Define the form schema with Zod
 const enrollmentFormSchema = z.object({
@@ -113,19 +114,36 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const student = getStudentData();
+  const [student, setStudent] = useState<StudentData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getStudentData();
+        setStudent(data);
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchStudentData();
+  }, []);
 
   // Initialize form with default values
   const form = useForm<EnrollmentFormValues>({
     resolver: zodResolver(enrollmentFormSchema),
     defaultValues: {
-      firstName: student?.firstName || '',
-      lastName: student?.lastName || '',
-      email: student?.email || '',
+      firstName: '',
+      lastName: '',
+      email: '',
       dateOfBirth: undefined,
       gender: undefined,
-      phone: student?.phone || '',
+      phone: '',
       isSameAddress: false,
       permanentAddress: {
         line1: '',           // Required field
@@ -178,6 +196,16 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
     },
   });
 
+  // Update form values when student data is loaded
+  useEffect(() => {
+    if (student) {
+      form.setValue('firstName', student.firstName || '');
+      form.setValue('lastName', student.lastName || '');
+      form.setValue('email', student.email || '');
+      form.setValue('phone', student.phone || '');
+    }
+  }, [student, form]);
+
   // Watch for address fields to sync if same address is checked
   const isSameAddress = form.watch('isSameAddress');
   const permanentAddress = form.watch('permanentAddress');
@@ -202,12 +230,13 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      const formData = {
+      // Convert form data to the format expected by the API
+      const enrollmentFormData = {
         studentId: student.id,
         formType,
         relatedId,
         submittedAt: new Date().toISOString(),
-        status: 'pending' as const, // Explicitly type this as a literal type
+        status: 'pending' as const,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
@@ -217,20 +246,16 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
         aadharNumber: data.aadharNumber || '',
         certificateId: data.certificateId || '',
         permanentAddress: {
-          line1: data.permanentAddress.line1 || '',
-          line2: data.permanentAddress.line2 || '',
-          city: data.permanentAddress.city || '',
-          state: data.permanentAddress.state || '',
-          postalCode: data.permanentAddress.postalCode || '',
-          country: data.permanentAddress.country || 'India',
+          street: `${data.permanentAddress.line1} ${data.permanentAddress.line2 || ''}`,
+          city: data.permanentAddress.city,
+          state: data.permanentAddress.state,
+          pincode: data.permanentAddress.postalCode,
         },
         currentAddress: {
-          line1: data.currentAddress.line1 || '',
-          line2: data.currentAddress.line2 || '',
-          city: data.currentAddress.city || '',
-          state: data.currentAddress.state || '',
-          postalCode: data.currentAddress.postalCode || '',
-          country: data.currentAddress.country || 'India',
+          street: `${data.currentAddress.line1} ${data.currentAddress.line2 || ''}`,
+          city: data.currentAddress.city,
+          state: data.currentAddress.state,
+          pincode: data.currentAddress.postalCode,
         },
         isSameAddress: data.isSameAddress,
         fatherName: data.fatherName || '',
@@ -238,42 +263,34 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
         guardianPhone: data.guardianPhone || '',
         guardianEmail: data.guardianEmail || '',
         tenthGrade: {
-          institutionName: data.tenthGrade.institutionName || '',
-          boardUniversity: data.tenthGrade.boardUniversity || '',
-          yearOfPassing: data.tenthGrade.yearOfPassing || '',
-          totalMarks: data.tenthGrade.totalMarks || '',
-          obtainedMarks: data.tenthGrade.obtainedMarks || '',
-          documentUrl: data.tenthGrade.documentUrl || '',
+          institutionName: data.tenthGrade.institutionName,
+          boardOrUniversity: data.tenthGrade.boardUniversity,
+          yearOfPassing: data.tenthGrade.yearOfPassing,
+          percentage: data.tenthGrade.obtainedMarks,
         },
         // For optional education details, ensure we create complete objects if they're provided
         twelfthGrade: data.twelfthGrade ? {
           institutionName: data.twelfthGrade.institutionName || '',
-          boardUniversity: data.twelfthGrade.boardUniversity || '',
+          boardOrUniversity: data.twelfthGrade.boardUniversity || '',
           yearOfPassing: data.twelfthGrade.yearOfPassing || '',
-          totalMarks: data.twelfthGrade.totalMarks || '',
-          obtainedMarks: data.twelfthGrade.obtainedMarks || '',
-          documentUrl: data.twelfthGrade.documentUrl || '',
+          percentage: data.twelfthGrade.obtainedMarks || '',
         } : undefined,
         degree: data.degree ? {
           institutionName: data.degree.institutionName || '',
-          boardUniversity: data.degree.boardUniversity || '',
+          boardOrUniversity: data.degree.boardUniversity || '',
           yearOfPassing: data.degree.yearOfPassing || '',
-          totalMarks: data.degree.totalMarks || '',
-          obtainedMarks: data.degree.obtainedMarks || '',
-          documentUrl: data.degree.documentUrl || '',
+          percentage: data.degree.obtainedMarks || '',
         } : undefined,
         postGraduation: data.postGraduation ? {
           institutionName: data.postGraduation.institutionName || '',
-          boardUniversity: data.postGraduation.boardUniversity || '',
+          boardOrUniversity: data.postGraduation.boardUniversity || '',
           yearOfPassing: data.postGraduation.yearOfPassing || '',
-          totalMarks: data.postGraduation.totalMarks || '',
-          obtainedMarks: data.postGraduation.obtainedMarks || '',
-          documentUrl: data.postGraduation.documentUrl || '',
+          percentage: data.postGraduation.obtainedMarks || '',
         } : undefined,
       };
 
       // Submit enrollment form
-      const result = await submitEnrollmentForm(formData);
+      const result = await submitEnrollmentForm(enrollmentFormData);
       
       toast({
         title: "Success!",
@@ -296,6 +313,15 @@ const CompleteEnrollmentForm: React.FC<CompleteEnrollmentFormProps> = ({
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading student data...</span>
+      </div>
+    );
   }
 
   // Rest of the form rendering logic

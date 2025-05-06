@@ -1,16 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { getCurrentStudent } from '@/lib/studentAuth';
+import { getCurrentStudent } from '@/lib/auth/utils';
 import { enrollStudentInCourse } from '@/lib/auth/studentService';
 import { applyForJob } from '@/lib/jobService';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { User } from '@supabase/supabase-js';
 
 interface EnrollmentFormProps {
   formType: 'course' | 'job';
@@ -21,19 +22,39 @@ interface EnrollmentFormProps {
 const EnrollmentForm: React.FC<EnrollmentFormProps> = ({ formType, relatedId, onSuccess }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const student = getCurrentStudent();
+  const [student, setStudent] = useState<User | null>(null);
   
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: student?.name || '',
-    email: student?.email || '',
-    phone: student?.phone || '',
-    address: student?.address || '',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
     qualification: '',
     experience: '',
     message: '',
     paymentMethod: 'online'
   });
+
+  useEffect(() => {
+    const loadStudentData = async () => {
+      const userData = await getCurrentStudent();
+      setStudent(userData);
+      
+      // Populate form with user data if available
+      if (userData) {
+        setFormData(prev => ({
+          ...prev,
+          name: userData.user_metadata?.name || '',
+          email: userData.email || '',
+          phone: userData.user_metadata?.phone || '',
+          address: userData.user_metadata?.address || ''
+        }));
+      }
+    };
+    
+    loadStudentData();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -78,7 +99,8 @@ const EnrollmentForm: React.FC<EnrollmentFormProps> = ({ formType, relatedId, on
       let success = false;
       
       if (formType === 'course') {
-        success = enrollStudentInCourse(relatedId, student.id);
+        const result = await enrollStudentInCourse(relatedId, student.id);
+        success = result.success;
         if (success) {
           toast({
             title: "Enrollment Successful",
@@ -92,7 +114,7 @@ const EnrollmentForm: React.FC<EnrollmentFormProps> = ({ formType, relatedId, on
           }
         }
       } else if (formType === 'job') {
-        const result = applyForJob(relatedId, student.id);
+        const result = await applyForJob(relatedId, student.id);
         success = result.success;
         
         if (success) {

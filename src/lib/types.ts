@@ -18,6 +18,7 @@ export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
 export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
 export const STUDENT_DATA_KEY = 'career_aspire_student_data';
 export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activities';
+export const PAYMENTS_KEY = 'career_aspire_payments';
 
 // Legacy types for backward compatibility
 export interface Course {
@@ -167,6 +168,8 @@ export interface StudentData {
     highest?: string;
   };
   aadharNumber?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface StudentActivity {
@@ -175,6 +178,33 @@ export interface StudentActivity {
   type: 'login' | 'logout' | 'enrollment' | 'course_progress' | 'assessment' | 'job_application';
   context: Record<string, any>;
   timestamp: string;
+}
+
+export interface Payment {
+  id: string;
+  studentId: string;
+  courseId: string;
+  amount: number;
+  paymentDate: string;
+  paymentId: string;
+  status: 'success' | 'pending' | 'failed';
+  paymentMethod: string;
+}
+
+export interface Placement {
+  id: string;
+  studentId: string;
+  studentName: string;
+  company: string;
+  position: string;
+  packageAmount: string;
+  placementDate: string;
+  description?: string;
+  testimonial?: string;
+  year: string;
+  courseCompleted: string;
+  imageUrl?: string;
+  salary?: string;
 }
 
 // Utility type to convert Supabase table types to application types

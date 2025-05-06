@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { createPayment, updatePayment } from '@/lib/paymentService';
-import { getCurrentStudent } from '@/lib/studentAuth';
+import { getCurrentStudent } from '@/lib/auth/utils';
 
 // Define the props interface for the component
 interface RazorpayPaymentProps {
@@ -51,7 +51,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       await loadRazorpay();
       
       // Get student data
-      const studentData = getCurrentStudent();
+      const studentData = await getCurrentStudent();
       if (!studentData) {
         throw new Error("User not logged in");
       }
@@ -91,9 +91,9 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
           if (onSuccess) onSuccess(response);
         },
         prefill: {
-          name: studentData.firstName + ' ' + studentData.lastName || "",
+          name: studentData.user_metadata?.firstName + ' ' + studentData.user_metadata?.lastName || "",
           email: studentData.email || "",
-          contact: studentData.phone || ""
+          contact: studentData.user_metadata?.phone || ""
         },
         notes: {
           course_name: courseName,

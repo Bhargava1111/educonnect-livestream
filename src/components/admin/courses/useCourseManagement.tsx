@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -72,7 +71,7 @@ export function useCourseManagement() {
     });
   };
   
-  const handleSelectChange = (name: string, value: 'Beginner' | 'Intermediate' | 'Advanced' | 'Active' | 'Coming Soon' | 'Ended' | 'Free' | 'Paid') => {
+  const handleSelectChange = (name: string, value: any) => {
     setFormData(prev => {
       const newFormData = { ...prev, [name]: value };
       
@@ -93,10 +92,10 @@ export function useCourseManagement() {
         shortDescription: formData.shortDescription || formData.description.substring(0, 150) + "...",
         price: formData.courseType === 'Free' ? 0 : Number(formData.price),
         duration: formData.duration,
-        level: formData.level,
+        level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced',
         instructor: formData.instructor,
         imageUrl: formData.imageUrl,
-        status: formData.status,
+        status: formData.status as 'Active' | 'Coming Soon' | 'Ended',
         category: formData.category,
         topics: [],
         isFeatured: false,
@@ -142,10 +141,10 @@ export function useCourseManagement() {
         shortDescription: formData.shortDescription || formData.description.substring(0, 150) + "...",
         price: formData.courseType === 'Free' ? 0 : Number(formData.price),
         duration: formData.duration,
-        level: formData.level,
+        level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced',
         instructor: formData.instructor,
         imageUrl: formData.imageUrl,
-        status: formData.status,
+        status: formData.status as 'Active' | 'Coming Soon' | 'Ended',
         category: formData.category
       });
       
@@ -201,10 +200,10 @@ export function useCourseManagement() {
       shortDescription: course.shortDescription,
       duration: course.duration,
       price: course.price,
-      level: course.level,
+      level: course.level as 'Beginner' | 'Intermediate' | 'Advanced',
       instructor: course.instructor || '',
       imageUrl: course.imageUrl || '',
-      status: course.status || 'Active',
+      status: course.status as 'Active' | 'Coming Soon' | 'Ended',
       category: course.category || '',
       courseType: course.price === 0 ? 'Free' : 'Paid'
     });
@@ -224,8 +223,24 @@ export function useCourseManagement() {
     handleSelectChange,
     handleAddCourse,
     handleEditCourse,
-    handleDeleteCourse,
-    openEditModal,
+    handleDeleteCourse: deleteCourse,
+    openEditModal: (course: Course) => {
+      setSelectedCourse(course);
+      setFormData({
+        title: course.title,
+        description: course.description,
+        shortDescription: course.shortDescription,
+        duration: course.duration,
+        price: course.price,
+        level: course.level as 'Beginner' | 'Intermediate' | 'Advanced',
+        instructor: course.instructor || '',
+        imageUrl: course.imageUrl || '',
+        status: course.status as 'Active' | 'Coming Soon' | 'Ended',
+        category: course.category || '',
+        courseType: course.price === 0 ? 'Free' : 'Paid'
+      });
+      setIsEditModalOpen(true);
+    },
     loadCourses,
   };
 }
