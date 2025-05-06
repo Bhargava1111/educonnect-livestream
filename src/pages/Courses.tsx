@@ -130,7 +130,7 @@ const Courses = () => {
                       </div>
                       <div>
                         <p className="text-gray-500">Students</p>
-                        <p>{course.enrollments || 0}</p>
+                        <p>{course.students || 0}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -148,7 +148,7 @@ const Courses = () => {
         <TabsContent value="popular">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses
-              .sort((a, b) => (b.enrollments || 0) - (a.enrollments || 0))
+              .sort((a, b) => (b.students || 0) - (a.students || 0))
               .slice(0, 6)
               .map(course => (
                 <Card key={course.id} className="h-full flex flex-col">
@@ -176,7 +176,7 @@ const Courses = () => {
                       </div>
                       <div>
                         <p className="text-gray-500">Students</p>
-                        <p>{course.enrollments || 0}</p>
+                        <p>{course.students || 0}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -216,7 +216,7 @@ const Courses = () => {
                       </div>
                       <div>
                         <p className="text-gray-500">Students</p>
-                        <p>{course.enrollments || 0}</p>
+                        <p>{course.students || 0}</p>
                       </div>
                     </div>
                   </CardContent>
