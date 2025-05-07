@@ -7,10 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
-// Import the admin credentials directly from auth.ts
-import { ADMIN_EMAIL, ADMIN_PASSWORD } from "@/lib/auth"; 
+// Import the admin credentials and login function directly from auth.ts
+import { ADMIN_EMAIL, ADMIN_PASSWORD, loginAdmin } from "@/lib/auth"; 
 
 const AdminLogin = () => {
   const { toast } = useToast();
@@ -18,7 +17,7 @@ const AdminLogin = () => {
   const [email, setEmail] = useState(ADMIN_EMAIL);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // Redirect if already logged in as admin
   useEffect(() => {
@@ -45,31 +44,15 @@ const AdminLogin = () => {
     setIsLoading(true);
     
     try {
-      // Try direct Supabase login without the context's signIn function
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
+      // Use the loginAdmin function from auth.ts
+      const success = await loginAdmin(email, password);
       
-      if (error) {
-        console.error("Admin login error:", error);
+      if (!success) {
         toast({
           title: "Login Failed",
           description: "Invalid email or password. Please try again.",
           variant: "destructive",
         });
-        setIsLoading(false);
-        return;
-      }
-      
-      if (email !== ADMIN_EMAIL) {
-        await supabase.auth.signOut();
-        toast({
-          title: "Access Denied",
-          description: "You do not have administrator privileges.",
-          variant: "destructive",
-        });
-        navigate('/');
         setIsLoading(false);
         return;
       }
