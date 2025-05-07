@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 
 // Import the admin credentials and login function directly from auth.ts
-import { ADMIN_EMAIL, ADMIN_PASSWORD, loginAdmin } from "@/lib/auth"; 
+import { ADMIN_EMAIL, ADMIN_PASSWORD, loginAdmin, isAdminLoggedIn } from "@/lib/auth"; 
 
 const AdminLogin = () => {
   const { toast } = useToast();
@@ -21,9 +21,10 @@ const AdminLogin = () => {
 
   // Redirect if already logged in as admin
   useEffect(() => {
-    if (user && isAdmin) {
+    // Check both auth context and local storage for admin status
+    if ((user && isAdmin) || isAdminLoggedIn()) {
       navigate('/admin');
-    } else if (user) {
+    } else if (user && !isAdmin) {
       // If logged in but not admin, redirect to home
       navigate('/');
     }
@@ -62,7 +63,9 @@ const AdminLogin = () => {
         title: "Login Successful",
         description: "Welcome to the admin portal.",
       });
-      navigate('/admin');
+      
+      // Force navigation to admin page
+      window.location.href = '/admin';
       
     } catch (error) {
       console.error("Admin login error:", error);

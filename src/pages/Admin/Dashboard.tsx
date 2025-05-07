@@ -25,6 +25,7 @@ import {
   Video 
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminLoggedIn } from '@/lib/auth';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -32,7 +33,9 @@ const AdminDashboard = () => {
 
   // Check if admin is logged in
   useEffect(() => {
-    if (!user || !isAdmin) {
+    // Now check both auth context and local storage
+    if ((!user && !isAdminLoggedIn()) || (!isAdmin && !isAdminLoggedIn())) {
+      console.log("Access denied to admin dashboard. Redirecting to login.");
       navigate('/admin-login');
     }
   }, [user, isAdmin, navigate]);

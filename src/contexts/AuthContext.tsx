@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
+import { isAdminLoggedIn, getAdminData } from '@/lib/auth';
 
 interface AuthContextType {
   session: Session | null;
@@ -26,6 +26,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Function to check and update admin status
+  const updateAdminStatus = () => {
+    // Check if user is admin via Supabase email
+    const isSupabaseAdmin = session?.user?.email === 'Bhargava@123';
+    
+    // Check if admin is logged in via localStorage
+    const isLocalStorageAdmin = isAdminLoggedIn();
+    
+    // Set admin status if either condition is true
+    setIsAdmin(isSupabaseAdmin || isLocalStorageAdmin);
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -34,13 +46,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // Check if user is admin - this is simplified, in a real app you might check roles in a database
-        if (currentSession?.user) {
-          const userEmail = currentSession.user.email;
-          setIsAdmin(userEmail === 'Bhargava@123');
-        } else {
-          setIsAdmin(false);
-        }
+        // Update admin status whenever auth state changes
+        setTimeout(() => {
+          updateAdminStatus();
+        }, 0);
       }
     );
 
@@ -49,11 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
-      // Check if user is admin
-      if (currentSession?.user) {
-        const userEmail = currentSession.user.email;
-        setIsAdmin(userEmail === 'Bhargava@123');
-      }
+      // Check for admin status from both sources
+      setTimeout(() => {
+        updateAdminStatus();
+      }, 0);
       
       setIsLoading(false);
     });
@@ -88,8 +96,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
+      // Check admin status again after sign in
+      setTimeout(() => {
+        updateAdminStatus();
+      }, 0);
+
       // Redirect based on role
-      if (data.user?.email === 'Bhargava@123') {
+      if (data.user?.email === 'Bhargava@123' || isAdminLoggedIn()) {
         navigate('/admin');
       } else {
         navigate('/');
