@@ -102,6 +102,45 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          created_at: string
+          event_type: string
+          html_content: string
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string
+          text_content: string
+          updated_at: string
+          variables: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          html_content: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          text_content: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          html_content?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          text_content?: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Relationships: []
+      }
       enrollment_forms: {
         Row: {
           aadhar_number: string
@@ -302,6 +341,141 @@ export type Database = {
         }
         Relationships: []
       }
+      live_meetings: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string
+          duration: string
+          id: string
+          instructor_id: string | null
+          instructor_name: string
+          join_password: string | null
+          meeting_id: string | null
+          meeting_link: string
+          platform: string
+          recording_url: string | null
+          scheduled_date: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description: string
+          duration: string
+          id?: string
+          instructor_id?: string | null
+          instructor_name: string
+          join_password?: string | null
+          meeting_id?: string | null
+          meeting_link: string
+          platform?: string
+          recording_url?: string | null
+          scheduled_date: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string
+          duration?: string
+          id?: string
+          instructor_id?: string | null
+          instructor_name?: string
+          join_password?: string | null
+          meeting_id?: string | null
+          meeting_link?: string
+          platform?: string
+          recording_url?: string | null
+          scheduled_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          link: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message: string
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          course_id: string
+          created_at: string
+          currency: string
+          id: string
+          order_id: string | null
+          payment_details: Json | null
+          payment_id: string
+          payment_method: string | null
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          course_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id?: string | null
+          payment_details?: Json | null
+          payment_id: string
+          payment_method?: string | null
+          status: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          course_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id?: string | null
+          payment_details?: Json | null
+          payment_id?: string
+          payment_method?: string | null
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           aadhar_number: string | null
@@ -365,6 +539,48 @@ export type Database = {
           id?: string
           student_id?: string
           timestamp?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string
+          id: string
+          settings: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          settings: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          settings?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
         }
         Relationships: []
       }
