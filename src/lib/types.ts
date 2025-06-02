@@ -2,6 +2,11 @@
 // Storage keys for localStorage
 export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
 export const ASSESSMENTS_KEY = 'career_aspire_assessments';
+export const PAYMENTS_KEY = 'career_aspire_payments';
+export const COURSES_KEY = 'career_aspire_courses';
+export const JOBS_KEY = 'career_aspire_jobs';
+export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activity';
+export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
 
 // Remove duplicate LiveMeeting interface to prevent conflicts
 // The LiveMeeting interface is now defined in the services file
@@ -29,6 +34,7 @@ export interface Course {
   students?: number;
   isFeatured?: boolean;
   isPublished?: boolean;
+  topics?: string[];
 }
 
 export interface CourseModule {
@@ -60,6 +66,7 @@ export interface Job {
   externalLink?: string;
   appliedCount?: number;
   postedAt?: string;
+  createdAt?: string;
 }
 
 export interface Placement {
@@ -97,7 +104,7 @@ export interface Assessment {
 export interface Question {
   id: string;
   text: string;
-  type: 'multiple-choice' | 'true-false' | 'short-answer';
+  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'descriptive';
   options?: string[];
   correctAnswer: string | string[];
   marks: number;
@@ -152,11 +159,85 @@ export interface Student {
   createdAt: string;
   lastLoginDate?: string;
   isActive: boolean;
+  name?: string; // Legacy field
+  address?: string; // Additional field
 }
 
 // Legacy interface for backward compatibility
 export interface StudentData extends Student {
-  name?: string;
   enrollmentDate?: string;
   courseProgress?: { [courseId: string]: number };
+}
+
+export interface Payment {
+  id: string;
+  studentId: string;
+  courseId: string;
+  amount: number;
+  paymentDate: string;
+  paymentId: string;
+  status: 'success' | 'pending' | 'failed';
+  paymentMethod: string;
+}
+
+export interface EnrollmentForm {
+  id: string;
+  studentId: string;
+  relatedId: string;
+  formType: string;
+  status: string;
+  submittedAt: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  aadharNumber: string;
+  permanentAddress: any;
+  currentAddress: any;
+  isSameAddress: boolean;
+  tenthGrade?: any;
+  twelfthGrade?: any;
+  degree?: any;
+  postGraduation?: any;
+  fatherName?: string;
+  motherName?: string;
+  guardianPhone?: string;
+  guardianEmail?: string;
+  certificateId?: string;
+  certificateUrl?: string;
+  photographUrl?: string;
+}
+
+export interface RoadmapPhase {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  modules: string[];
+  isActive: boolean;
+}
+
+// Database-related interfaces
+export interface StudentActivityRow {
+  id: string;
+  student_id: string;
+  activity_type: string;
+  context: any;
+  timestamp: string;
+}
+
+export interface ProfileRow {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  country: string;
+  address?: string;
+  skills?: string[];
+  profile_picture?: string;
+  aadhar_number?: string;
+  created_at: string;
+  updated_at: string;
 }
