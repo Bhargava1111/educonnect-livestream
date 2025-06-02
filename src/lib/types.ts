@@ -1,4 +1,8 @@
 
+// Storage keys for localStorage
+export const ENROLLMENTS_KEY = 'career_aspire_enrollments';
+export const ASSESSMENTS_KEY = 'career_aspire_assessments';
+
 // Remove duplicate LiveMeeting interface to prevent conflicts
 // The LiveMeeting interface is now defined in the services file
 
@@ -18,6 +22,13 @@ export interface Course {
   instructor: string;
   createdAt: string;
   isPopular?: boolean;
+  // Additional fields for database compatibility
+  shortDescription?: string;
+  imageUrl?: string;
+  status?: string;
+  students?: number;
+  isFeatured?: boolean;
+  isPublished?: boolean;
 }
 
 export interface CourseModule {
@@ -40,6 +51,15 @@ export interface Job {
   applicationDeadline: string;
   contactEmail: string;
   isActive: boolean;
+  // Additional fields for database compatibility
+  category?: string;
+  lastDate?: string;
+  jobType?: string;
+  experienceLevel?: string;
+  status?: string;
+  externalLink?: string;
+  appliedCount?: number;
+  postedAt?: string;
 }
 
 export interface Placement {
@@ -51,6 +71,14 @@ export interface Placement {
   salary: string;
   placementDate: string;
   image: string;
+  // Additional fields for database compatibility
+  studentId?: string;
+  packageAmount?: string;
+  description?: string;
+  testimonial?: string;
+  year?: string;
+  courseCompleted?: string;
+  imageUrl?: string;
 }
 
 export interface Assessment {
@@ -74,7 +102,12 @@ export interface Question {
   correctAnswer: string | string[];
   marks: number;
   explanation?: string;
+  // Legacy field for backward compatibility
+  question?: string;
 }
+
+// Legacy type alias for backward compatibility
+export interface AssessmentQuestion extends Question {}
 
 export interface StudentAssessment {
   id: string;
@@ -95,4 +128,35 @@ export interface AssessmentResponse {
   answer: string | string[];
   isCorrect: boolean;
   marksAwarded: number;
+}
+
+export interface Enrollment {
+  id: string;
+  studentId: string;
+  courseId: string;
+  enrollmentDate: string;
+  status: 'active' | 'completed' | 'suspended';
+  progress: number;
+  completed: boolean;
+  certificateIssued: boolean;
+  lastAccessedDate?: string;
+}
+
+export interface Student {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  enrolledCourses: string[];
+  createdAt: string;
+  lastLoginDate?: string;
+  isActive: boolean;
+}
+
+// Legacy interface for backward compatibility
+export interface StudentData extends Student {
+  name?: string;
+  enrollmentDate?: string;
+  courseProgress?: { [courseId: string]: number };
 }
