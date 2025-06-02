@@ -7,9 +7,7 @@ export const COURSES_KEY = 'career_aspire_courses';
 export const JOBS_KEY = 'career_aspire_jobs';
 export const STUDENT_ACTIVITY_KEY = 'career_aspire_student_activity';
 export const ENROLLMENT_FORMS_KEY = 'career_aspire_enrollment_forms';
-
-// Remove duplicate LiveMeeting interface to prevent conflicts
-// The LiveMeeting interface is now defined in the services file
+export const PLACEMENTS_KEY = 'career_aspire_placements';
 
 export interface Course {
   id: string;
@@ -28,7 +26,6 @@ export interface Course {
   createdAt: string;
   updatedAt?: string;
   isPopular?: boolean;
-  // Additional fields for database compatibility
   shortDescription?: string;
   imageUrl?: string;
   status?: string;
@@ -59,7 +56,6 @@ export interface Job {
   applicationDeadline: string;
   contactEmail: string;
   isActive: boolean;
-  // Additional fields for database compatibility
   category?: string;
   lastDate?: string;
   jobType?: string;
@@ -81,7 +77,6 @@ export interface Placement {
   salary: string;
   placementDate: string;
   image: string;
-  // Additional fields for database compatibility
   studentId?: string;
   packageAmount?: string;
   description?: string;
@@ -102,21 +97,24 @@ export interface Assessment {
   passingMarks: number;
   isActive: boolean;
   createdAt: string;
+  type?: 'quiz' | 'exam' | 'assignment';
+  duration?: number;
+  passingScore?: number;
+  isPublished?: boolean;
+  requiresScreenshare?: boolean;
 }
 
 export interface Question {
   id: string;
   text: string;
-  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'descriptive';
+  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'descriptive' | 'fill-in-blanks' | 'coding';
   options?: string[];
   correctAnswer: string | string[];
   marks: number;
   explanation?: string;
-  // Legacy field for backward compatibility
   question?: string;
 }
 
-// Legacy type alias for backward compatibility
 export interface AssessmentQuestion extends Question {}
 
 export interface StudentAssessment {
@@ -162,11 +160,10 @@ export interface Student {
   createdAt: string;
   lastLoginDate?: string;
   isActive: boolean;
-  name?: string; // Legacy field
-  address?: string; // Additional field
+  name?: string;
+  address?: string;
 }
 
-// Legacy interface for backward compatibility
 export interface StudentData extends Student {
   enrollmentDate?: string;
   courseProgress?: { [courseId: string]: number };
@@ -232,27 +229,90 @@ export interface RoadmapPhase {
   phase?: number;
   topics?: string[];
   projects?: string[];
+  videos?: Video[];
+  materials?: Material[];
 }
 
-// Database-related interfaces
-export interface StudentActivityRow {
+export interface Video {
   id: string;
-  student_id: string;
-  activity_type: string;
-  context: any;
+  title: string;
+  url: string;
+  duration: string;
+  description?: string;
+}
+
+export interface Material {
+  id: string;
+  title: string;
+  type: 'pdf' | 'doc' | 'link' | 'image';
+  url: string;
+  description?: string;
+}
+
+export interface OTPVerification {
+  id: string;
+  email: string;
+  phone?: string;
+  otp: string;
+  type: 'email' | 'sms' | 'whatsapp';
+  expiresAt: string;
+  verified: boolean;
+  createdAt: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  message: string;
+  response: string;
   timestamp: string;
+  type: 'support' | 'general' | 'course';
 }
 
-export interface ProfileRow {
+export interface PaymentTransaction {
   id: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  country: string;
-  address?: string;
-  skills?: string[];
-  profile_picture?: string;
-  aadhar_number?: string;
-  created_at: string;
-  updated_at: string;
+  userId: string;
+  courseId?: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  paymentGateway: 'razorpay' | 'stripe' | 'upi';
+  transactionId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NotificationTemplate {
+  id: string;
+  type: 'email' | 'sms' | 'whatsapp' | 'push';
+  event: string;
+  subject?: string;
+  content: string;
+  variables: string[];
+  isActive: boolean;
+}
+
+export interface DatabaseTypes {
+  StudentActivityRow: {
+    id: string;
+    student_id: string;
+    activity_type: string;
+    context: any;
+    timestamp: string;
+  };
+  
+  ProfileRow: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    country: string;
+    address?: string;
+    skills?: string[];
+    profile_picture?: string;
+    aadhar_number?: string;
+    created_at: string;
+    updated_at: string;
+  };
 }
