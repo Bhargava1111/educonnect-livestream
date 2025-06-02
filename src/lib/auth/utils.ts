@@ -62,8 +62,10 @@ export const mapUserToStudent = (user: User | null): Student | null => {
     name: user.user_metadata?.name || `${user.user_metadata?.firstName || ''} ${user.user_metadata?.lastName || ''}`.trim(),
     email: user.email || '',
     enrolledCourses: user.user_metadata?.enrolledCourses || [],
-    firstName: user.user_metadata?.firstName,
-    lastName: user.user_metadata?.lastName,
-    phone: user.user_metadata?.phone
+    firstName: user.user_metadata?.firstName || '',
+    lastName: user.user_metadata?.lastName || '',
+    phone: user.user_metadata?.phone || '',
+    createdAt: user.created_at || new Date().toISOString(),
+    isActive: true
   };
 };

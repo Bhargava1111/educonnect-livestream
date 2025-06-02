@@ -26,6 +26,7 @@ export interface Course {
   curriculum: CourseModule[];
   instructor: string;
   createdAt: string;
+  updatedAt?: string;
   isPopular?: boolean;
   // Additional fields for database compatibility
   shortDescription?: string;
@@ -35,6 +36,7 @@ export interface Course {
   isFeatured?: boolean;
   isPublished?: boolean;
   topics?: string[];
+  roadmap?: RoadmapPhase[];
 }
 
 export interface CourseModule {
@@ -67,6 +69,7 @@ export interface Job {
   appliedCount?: number;
   postedAt?: string;
   createdAt?: string;
+  applicationLink?: string;
 }
 
 export interface Placement {
@@ -167,6 +170,15 @@ export interface Student {
 export interface StudentData extends Student {
   enrollmentDate?: string;
   courseProgress?: { [courseId: string]: number };
+  profilePicture?: string;
+  registrationDate?: string;
+  skills?: string[];
+  education?: {
+    tenth?: any;
+    twelfth?: any;
+    degree?: any;
+  };
+  aadharNumber?: string;
 }
 
 export interface Payment {
@@ -217,6 +229,9 @@ export interface RoadmapPhase {
   duration: string;
   modules: string[];
   isActive: boolean;
+  phase?: number;
+  topics?: string[];
+  projects?: string[];
 }
 
 // Database-related interfaces

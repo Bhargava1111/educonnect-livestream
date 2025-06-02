@@ -1,4 +1,3 @@
-
 import { 
   Course, 
   RoadmapPhase, 
@@ -25,87 +24,50 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 24999,
         level: 'Beginner',
         students: 125,
-        ratings: 4.8,
+        rating: 4.8,
         instructor: 'Priya Sharma',
         status: 'Active',
         category: 'Testing',
         imageUrl: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 125,
         curriculum: [
           {
             id: 'module_1',
             title: 'Testing Fundamentals',
-            topics: [
-              { id: 'topic_1', title: 'Introduction to Software Testing' },
-              { id: 'topic_2', title: 'Testing Types and Levels' },
-              { id: 'topic_3', title: 'Test Planning and Documentation' }
-            ]
+            duration: '3 weeks',
+            topics: ['Introduction to Software Testing', 'Testing Types and Levels', 'Test Planning and Documentation']
           },
           {
             id: 'module_2',
             title: 'Manual Testing Techniques',
-            topics: [
-              { id: 'topic_4', title: 'Black Box Testing' },
-              { id: 'topic_5', title: 'White Box Testing' },
-              { id: 'topic_6', title: 'Regression and Smoke Testing' }
-            ]
+            duration: '3 weeks',
+            topics: ['Black Box Testing', 'White Box Testing', 'Regression and Smoke Testing']
           },
           {
             id: 'module_3',
             title: 'Automation Testing',
-            topics: [
-              { id: 'topic_7', title: 'Introduction to Selenium' },
-              { id: 'topic_8', title: 'Test Automation Frameworks' },
-              { id: 'topic_9', title: 'CI/CD Integration' }
-            ]
+            duration: '3 weeks',
+            topics: ['Introduction to Selenium', 'Test Automation Frameworks', 'CI/CD Integration']
           }
         ],
         roadmap: [
           {
-            phase: 1,
+            id: '1',
             title: "Testing Fundamentals",
+            description: "Learn the basics of software testing",
             duration: "3 weeks",
+            modules: ["SDLC & STLC", "Testing Methodologies", "Test Case Design", "Defect Tracking", "Test Planning"],
+            isActive: true,
+            phase: 1,
             topics: ["SDLC & STLC", "Testing Methodologies", "Test Case Design", "Defect Tracking", "Test Planning"],
             projects: ["Test Plan Document", "Test Case Suite"]
-          },
-          {
-            phase: 2,
-            title: "Manual Testing",
-            duration: "3 weeks",
-            topics: ["Functional Testing", "UI Testing", "Usability Testing", "Cross-Browser Testing", "Mobile Testing"],
-            projects: ["E-commerce Application Testing", "Bug Report Documentation"]
-          },
-          {
-            phase: 3,
-            title: "Automation Basics",
-            duration: "2 weeks",
-            topics: ["Introduction to Selenium", "WebDriver Setup", "Element Locators", "Basic Test Scripts", "Test Execution"],
-            projects: ["Simple Automated Test Suite"]
-          },
-          {
-            phase: 4,
-            title: "Advanced Automation",
-            duration: "2 weeks",
-            topics: ["TestNG Framework", "Data-Driven Testing", "Page Object Model", "Cross-Browser Automation", "Reporting"],
-            projects: ["Framework Implementation"]
-          },
-          {
-            phase: 5,
-            title: "API Testing & Tools",
-            duration: "1 week",
-            topics: ["REST API Basics", "Postman Tool", "JMeter Basics", "Performance Testing", "Security Testing"],
-            projects: ["API Test Collection"]
-          },
-          {
-            phase: 6,
-            title: "Industry Project & Placement Preparation",
-            duration: "1 week",
-            topics: ["Project Implementation", "Testing Documentation", "Interview Preparation", "Resume Building", "Mock Interviews"],
-            projects: ["End-to-End Testing Project"]
           }
         ]
       },
@@ -118,16 +80,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 29999,
         level: 'Intermediate',
         students: 210,
-        ratings: 4.9,
+        rating: 4.9,
         instructor: 'Rahul Khanna',
         status: 'Active',
         category: 'Web Development',
         imageUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 210,
         curriculum: [
           {
             id: 'module_1',
@@ -188,16 +153,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 27999,
         level: 'Beginner',
         students: 145,
-        ratings: 4.7,
+        rating: 4.7,
         instructor: 'Sameer Khan',
         status: 'Active',
         category: 'Programming',
         imageUrl: 'https://images.unsplash.com/photo-1526379879527-8559ecfcb0c8?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1526379879527-8559ecfcb0c8?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 145,
         curriculum: [
           {
             id: 'module_1',
@@ -234,7 +202,7 @@ const initializeCoursesIfNeeded = (): Course[] => {
             projects: ["Static Website"]
           },
           {
-            phase: 3,
+            id: '3',
             title: "Django Framework",
             duration: "4 weeks",
             topics: ["Django Setup", "MVT Architecture", "Models & ORM", "Views & URLs", "Templates"],
@@ -265,16 +233,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 28999,
         level: 'Intermediate',
         students: 132,
-        ratings: 4.8,
+        rating: 4.8,
         instructor: 'Alisha Patel',
         status: 'Active',
         category: 'Web Development',
         imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 132,
         curriculum: []
       },
       {
@@ -286,16 +257,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 29999,
         level: 'Intermediate',
         students: 128,
-        ratings: 4.9,
+        rating: 4.9,
         instructor: 'Vikram Singh',
         status: 'Active',
         category: 'Security',
         imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 128,
         curriculum: []
       },
       {
@@ -307,16 +281,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 26999,
         level: 'Intermediate',
         students: 118,
-        ratings: 4.7,
+        rating: 4.7,
         instructor: 'Ravi Kumar',
         status: 'Active',
         category: 'Programming',
         imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 118,
         curriculum: []
       },
       {
@@ -328,16 +305,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 32999,
         level: 'Intermediate',
         students: 105,
-        ratings: 4.8,
+        rating: 4.8,
         instructor: 'Neha Gupta',
         status: 'Active',
         category: 'Data Science',
         imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 105,
         curriculum: []
       },
       {
@@ -349,16 +329,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 28999,
         level: 'Intermediate',
         students: 98,
-        ratings: 4.6,
+        rating: 4.6,
         instructor: 'Arun Mehta',
         status: 'Active',
         category: 'Web Development',
         imageUrl: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 98,
         curriculum: []
       },
       {
@@ -370,16 +353,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 22999,
         level: 'Beginner',
         students: 87,
-        ratings: 4.7,
+        rating: 4.7,
         instructor: 'Sneha Sharma',
         status: 'Active',
         category: 'Web Development',
         imageUrl: 'https://images.unsplash.com/photo-1581276879432-15e50529f34b?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1581276879432-15e50529f34b?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 87,
         curriculum: []
       },
       {
@@ -391,16 +377,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 27999,
         level: 'Intermediate',
         students: 75,
-        ratings: 4.8,
+        rating: 4.8,
         instructor: 'Rohit Verma',
         status: 'Active',
         category: 'Mobile Development',
         imageUrl: 'https://images.unsplash.com/photo-1526925539332-aa3b66e35444?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1526925539332-aa3b66e35444?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 75,
         curriculum: []
       },
       {
@@ -412,16 +401,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 29999,
         level: 'Advanced',
         students: 62,
-        ratings: 4.9,
+        rating: 4.9,
         instructor: 'Amit Sharma',
         status: 'Coming Soon',
         category: 'DevOps',
         imageUrl: 'https://images.unsplash.com/photo-1508830524289-0adcbe822b40?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1508830524289-0adcbe822b40?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 62,
         curriculum: []
       },
       {
@@ -433,16 +425,19 @@ const initializeCoursesIfNeeded = (): Course[] => {
         price: 120000,
         level: 'Advanced',
         students: 45,
-        ratings: 4.9,
+        rating: 4.9,
         instructor: 'Dr. Rajesh Kumar',
         status: 'Active',
         category: 'Academic Program',
         imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&h=400',
+        image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&h=400',
         isFeatured: true,
         isPublished: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topics: [],
+        features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
+        studentsEnrolled: 45,
         curriculum: []
       }
     ];
@@ -467,8 +462,12 @@ export const createCourse = (course: Omit<Course, 'id'>): Course => {
     ...course,
     id: `course_${Date.now()}`,
     imageUrl: course.imageUrl || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
+    image: course.imageUrl || course.image || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=400',
     students: course.students || 0,
-    ratings: course.ratings || 0
+    studentsEnrolled: course.studentsEnrolled || course.students || 0,
+    rating: course.rating || 0,
+    features: course.features || [],
+    curriculum: course.curriculum || []
   };
   
   courses.push(newCourse);

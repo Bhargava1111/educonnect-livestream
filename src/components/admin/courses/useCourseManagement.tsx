@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -95,17 +96,19 @@ export function useCourseManagement() {
         level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced',
         instructor: formData.instructor,
         imageUrl: formData.imageUrl,
+        image: formData.imageUrl,
         status: formData.status as 'Active' | 'Coming Soon' | 'Ended',
         category: formData.category,
         topics: [],
         isFeatured: false,
         isPublished: true,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         curriculum: [],
         roadmap: [],
         students: 0,
-        ratings: 0
+        studentsEnrolled: 0,
+        rating: 0,
+        features: []
       });
       
       console.log("New course created:", newCourse);
@@ -144,6 +147,7 @@ export function useCourseManagement() {
         level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced',
         instructor: formData.instructor,
         imageUrl: formData.imageUrl,
+        image: formData.imageUrl,
         status: formData.status as 'Active' | 'Coming Soon' | 'Ended',
         category: formData.category
       });
@@ -223,24 +227,8 @@ export function useCourseManagement() {
     handleSelectChange,
     handleAddCourse,
     handleEditCourse,
-    handleDeleteCourse: deleteCourse,
-    openEditModal: (course: Course) => {
-      setSelectedCourse(course);
-      setFormData({
-        title: course.title,
-        description: course.description,
-        shortDescription: course.shortDescription,
-        duration: course.duration,
-        price: course.price,
-        level: course.level as 'Beginner' | 'Intermediate' | 'Advanced',
-        instructor: course.instructor || '',
-        imageUrl: course.imageUrl || '',
-        status: course.status as 'Active' | 'Coming Soon' | 'Ended',
-        category: course.category || '',
-        courseType: course.price === 0 ? 'Free' : 'Paid'
-      });
-      setIsEditModalOpen(true);
-    },
+    handleDeleteCourse,
+    openEditModal,
     loadCourses,
   };
 }

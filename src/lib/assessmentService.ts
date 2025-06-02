@@ -65,7 +65,8 @@ export const createQuestion = (
 ): AssessmentQuestion => {
   return {
     id: `question_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-    question: text,
+    text: text,
+    question: text, // Legacy field
     options,
     correctAnswer: options[correctAnswerIndex],
     marks: points,
@@ -128,6 +129,7 @@ export const initializeAssessments = (): void => {
         questions: [
           {
             id: 'q1_python',
+            text: 'What is the output of the following code?',
             question: 'What is the output of the following code?',
             options: ['6', '8', '9', '5'],
             correctAnswer: '8',
@@ -136,6 +138,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q2_python',
+            text: 'Which of the following is used to create a list in Python?',
             question: 'Which of the following is used to create a list in Python?',
             options: ['{}', '[]', '()', '<>'],
             correctAnswer: '[]',
@@ -144,6 +147,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q3_python',
+            text: 'What is the correct file extension for Python files?',
             question: 'What is the correct file extension for Python files?',
             options: ['.py', '.pt', '.pyth', '.p'],
             correctAnswer: '.py',
@@ -152,9 +156,10 @@ export const initializeAssessments = (): void => {
           }
         ],
         timeLimit: 30,
-        passingScore: 70,
-        type: 'quiz',
-        duration: 30
+        passingMarks: 70,
+        totalMarks: 30,
+        isActive: true,
+        createdAt: new Date().toISOString()
       },
       {
         id: 'assessment_web_dev',
@@ -164,6 +169,7 @@ export const initializeAssessments = (): void => {
         questions: [
           {
             id: 'q1_web',
+            text: 'Which HTML tag is used to create a hyperlink?',
             question: 'Which HTML tag is used to create a hyperlink?',
             options: ['<link>', '<a>', '<href>', '<url>'],
             correctAnswer: '<a>',
@@ -172,6 +178,7 @@ export const initializeAssessments = (): void => {
           },
           {
             id: 'q2_web',
+            text: 'Which CSS property is used to change the text color?',
             question: 'Which CSS property is used to change the text color?',
             options: ['text-color', 'font-color', 'color', 'foreground-color'],
             correctAnswer: 'color',
@@ -180,9 +187,10 @@ export const initializeAssessments = (): void => {
           }
         ],
         timeLimit: 20,
-        passingScore: 70,
-        type: 'quiz',
-        duration: 20
+        passingMarks: 70,
+        totalMarks: 20,
+        isActive: true,
+        createdAt: new Date().toISOString()
       }
     ];
     
