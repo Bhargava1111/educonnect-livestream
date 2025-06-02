@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { StudentData, ProfileRow } from '../types';
 import { getCurrentStudent } from './utils';
@@ -45,97 +44,75 @@ export const getStudentEnrollments = async (studentId: string) => {
 // Get student data
 export const getStudentData = async (studentId?: string): Promise<StudentData | null> => {
   try {
-    // If no studentId provided, get current student
-    if (!studentId) {
-      const currentStudent = await getCurrentStudent();
-      if (!currentStudent) {
-        return null;
-      }
-      studentId = currentStudent.id;
-    }
+    const currentUser = await getCurrentStudent();
+    const targetId = studentId || currentUser?.id;
     
-    // Get user profile from Supabase
+    if (!targetId) {
+      console.log("No student ID provided and no current user");
+      return null;
+    }
+
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', studentId)
-      .single();
-      
-    if (profileError || !profile) {
+      .eq('id', targetId)
+      .maybeSingle();
+
+    if (profileError) {
       console.error("Error fetching profile:", profileError);
       return null;
     }
-    
-    // Get user auth data
-    const { data: authData, error: authError } = await supabase.auth.admin.getUserById(studentId);
-    
-    if (authError || !authData.user) {
-      console.error("Error fetching user data:", authError);
+
+    if (!profile) {
+      console.log("No profile found for student:", targetId);
       return null;
     }
-    
-    // Get education data
-    const { data: educationData, error: educationError } = await supabase
+
+    const { data: education, error: educationError } = await supabase
       .from('education')
       .select('*')
-      .eq('user_id', studentId);
-      
+      .eq('user_id', targetId);
+
     if (educationError) {
-      console.error("Error fetching education data:", educationError);
+      console.error("Error fetching education:", educationError);
     }
-    
-    // Format education data
-    const education = {
-      tenth: educationData?.find(e => e.education_type === 'tenth'),
-      twelfth: educationData?.find(e => e.education_type === 'twelfth'),
-      degree: educationData?.find(e => e.education_type === 'degree')
-    };
-    
-    // Get enrollments
-    const { data: enrollments, error: enrollmentsError } = await supabase
-      .from('enrollments')
-      .select('course_id')
-      .eq('student_id', studentId);
-      
-    if (enrollmentsError) {
-      console.error("Error fetching enrollments:", enrollmentsError);
-    }
-    
-    // Format student data
+
+    // Group education by type
+    const educationMap = education?.reduce((acc, edu) => {
+      acc[edu.education_type] = {
+        school: edu.school_university || '',
+        percentage: edu.percentage || '',
+        yearOfCompletion: edu.year_of_completion || ''
+      };
+      return acc;
+    }, {} as any) || {};
+
     const studentData: StudentData = {
-      id: studentId,
+      id: profile.id,
+      firstName: profile.first_name || '',
+      lastName: profile.last_name || '',
       name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-      email: authData.user.email || '',
+      email: currentUser?.email || '',
       phone: profile.phone || '',
       address: profile.address || '',
       profilePicture: profile.profile_picture || '',
       registrationDate: profile.created_at,
-      enrolledCourses: enrollments?.map(e => e.course_id) || [],
+      createdAt: profile.created_at,
+      enrolledCourses: [],
       skills: profile.skills || [],
       education: {
-        tenth: education.tenth ? {
-          school: education.tenth.school_university || '',
-          percentage: education.tenth.percentage || '',
-          yearOfCompletion: education.tenth.year_of_completion || ''
-        } : undefined,
-        twelfth: education.twelfth ? {
-          school: education.twelfth.school_university || '',
-          percentage: education.twelfth.percentage || '',
-          yearOfCompletion: education.twelfth.year_of_completion || ''
-        } : undefined,
-        degree: education.degree ? {
-          university: education.degree.school_university || '',
-          course: education.degree.course || '',
-          percentage: education.degree.percentage || '',
-          yearOfCompletion: education.degree.year_of_completion || ''
-        } : undefined
+        tenth: educationMap.tenth || { school: '', percentage: '', yearOfCompletion: '' },
+        twelfth: educationMap.twelfth || { school: '', percentage: '', yearOfCompletion: '' },
+        degree: educationMap.degree || { school: '', percentage: '', yearOfCompletion: '' }
       },
-      aadharNumber: profile.aadhar_number || ''
+      aadharNumber: profile.aadhar_number || '',
+      isActive: true,
+      lastLoginDate: new Date().toISOString()
     };
-    
+
     return studentData;
   } catch (error) {
-    console.error("Error getting student data:", error);
+    console.error("Error in getStudentData:", error);
     return null;
   }
 };

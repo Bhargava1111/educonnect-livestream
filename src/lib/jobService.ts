@@ -124,18 +124,25 @@ export const incrementJobApplicationCount = (id: string): void => {
   }
 };
 
-export const applyForJob = (jobId: string, studentId: string): boolean => {
+export const applyForJob = (jobId: string, studentId: string): { success: boolean; url?: string } => {
   try {
     incrementJobApplicationCount(jobId);
-    // Here you could add logic to track which students applied
-    // For now, we'll just increment the counter
-    return true;
+    const job = getJobById(jobId);
+    const applicationUrl = job?.applicationLink || job?.externalLink;
+    
+    return {
+      success: true,
+      url: applicationUrl
+    };
   } catch (error) {
     console.error('Error applying for job:', error);
-    return false;
+    return { success: false };
   }
 };
 
 export const getJobApplicationLink = (job: Job): string => {
   return job.applicationLink || job.externalLink || '#';
 };
+
+// Re-export Job type for components
+export type { Job };

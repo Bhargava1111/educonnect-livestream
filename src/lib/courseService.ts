@@ -97,48 +97,58 @@ const initializeCoursesIfNeeded = (): Course[] => {
           {
             id: 'module_1',
             title: 'Frontend Development',
-            topics: [
-              { id: 'topic_1', title: 'HTML5 & CSS3' },
-              { id: 'topic_2', title: 'JavaScript Fundamentals' },
-              { id: 'topic_3', title: 'React.js' }
-            ]
+            duration: '4 weeks',
+            topics: ['HTML5 & CSS3', 'JavaScript Fundamentals', 'React.js']
           },
           {
             id: 'module_2',
             title: 'Backend Development',
-            topics: [
-              { id: 'topic_4', title: 'Node.js' },
-              { id: 'topic_5', title: 'Express.js' },
-              { id: 'topic_6', title: 'MongoDB' }
-            ]
+            duration: '4 weeks',
+            topics: ['Node.js', 'Express.js', 'MongoDB']
           }
         ],
         roadmap: [
           {
-            phase: 1,
+            id: '1',
             title: "Web Fundamentals",
+            description: "Learn the basics of web development",
             duration: "3 weeks",
+            modules: ["HTML5", "CSS3", "Responsive Design", "JavaScript Basics", "Git & GitHub"],
+            isActive: true,
+            phase: 1,
             topics: ["HTML5", "CSS3", "Responsive Design", "JavaScript Basics", "Git & GitHub"],
             projects: ["Portfolio Website"]
           },
           {
-            phase: 2,
+            id: '2',
             title: "Frontend Development",
+            description: "Build interactive user interfaces",
             duration: "4 weeks",
+            modules: ["JavaScript Advanced", "React.js", "Redux", "UI Libraries", "REST API Interaction"],
+            isActive: true,
+            phase: 2,
             topics: ["JavaScript Advanced", "React.js", "Redux", "UI Libraries", "REST API Interaction"],
             projects: ["E-commerce Frontend"]
           },
           {
-            phase: 3,
+            id: '3',
             title: "Backend Development",
+            description: "Create server-side applications",
             duration: "4 weeks",
+            modules: ["Node.js", "Express.js", "MongoDB", "Authentication", "API Development"],
+            isActive: true,
+            phase: 3,
             topics: ["Node.js", "Express.js", "MongoDB", "Authentication", "API Development"],
             projects: ["RESTful API"]
           },
           {
-            phase: 4,
+            id: '4',
             title: "Full Stack Integration",
+            description: "Combine frontend and backend",
             duration: "3 weeks",
+            modules: ["Full Stack Architecture", "Deployment", "Performance Optimization", "Testing", "Security"],
+            isActive: true,
+            phase: 4,
             topics: ["Full Stack Architecture", "Deployment", "Performance Optimization", "Testing", "Security"],
             projects: ["Complete Web Application"]
           }
@@ -170,55 +180,69 @@ const initializeCoursesIfNeeded = (): Course[] => {
           {
             id: 'module_1',
             title: 'Python Basics',
-            topics: [
-              { id: 'topic_1', title: 'Python Syntax & Data Types' },
-              { id: 'topic_2', title: 'Control Flow & Functions' },
-              { id: 'topic_3', title: 'Object-Oriented Programming' }
-            ]
+            duration: '4 weeks',
+            topics: ['Python Syntax & Data Types', 'Control Flow & Functions', 'Object-Oriented Programming']
           },
           {
             id: 'module_2',
             title: 'Web Development with Django',
-            topics: [
-              { id: 'topic_4', title: 'Django Basics' },
-              { id: 'topic_5', title: 'Models & Databases' },
-              { id: 'topic_6', title: 'Views & Templates' }
-            ]
+            duration: '4 weeks',
+            topics: ['Django Basics', 'Models & Databases', 'Views & Templates']
           }
         ],
         roadmap: [
           {
-            phase: 1,
+            id: '1',
             title: "Python Fundamentals",
+            description: "Master Python programming basics",
             duration: "4 weeks",
+            modules: ["Python Syntax", "Data Types", "Functions", "OOP", "Modules & Packages"],
+            isActive: true,
+            phase: 1,
             topics: ["Python Syntax", "Data Types", "Functions", "OOP", "Modules & Packages"],
             projects: ["Terminal-based Application"]
           },
           {
-            phase: 2,
+            id: '2',
             title: "Web Development Basics",
+            description: "Learn web development fundamentals",
             duration: "3 weeks",
+            modules: ["HTML/CSS", "JavaScript Basics", "DOM Manipulation", "Responsive Design"],
+            isActive: true,
+            phase: 2,
             topics: ["HTML/CSS", "JavaScript Basics", "DOM Manipulation", "Responsive Design"],
             projects: ["Static Website"]
           },
           {
             id: '3',
             title: "Django Framework",
+            description: "Build web applications with Django",
             duration: "4 weeks",
+            modules: ["Django Setup", "MVT Architecture", "Models & ORM", "Views & URLs", "Templates"],
+            isActive: true,
+            phase: 3,
             topics: ["Django Setup", "MVT Architecture", "Models & ORM", "Views & URLs", "Templates"],
             projects: ["Blog Application"]
           },
           {
-            phase: 4,
+            id: '4',
             title: "Database & API",
+            description: "Work with databases and APIs",
             duration: "3 weeks",
+            modules: ["PostgreSQL", "Django REST Framework", "API Design", "Authentication"],
+            isActive: true,
+            phase: 4,
             topics: ["PostgreSQL", "Django REST Framework", "API Design", "Authentication"],
             projects: ["RESTful API Service"]
           },
           {
-            phase: 5,
+            id: '5',
             title: "Frontend Integration",
+            description: "Integrate frontend with backend",
             duration: "2 weeks",
+            modules: ["AJAX", "Fetch API", "Frontend Frameworks Basics", "API Integration"],
+            isActive: true,
+            phase: 5,
             topics: ["AJAX", "Fetch API", "Frontend Frameworks Basics", "API Integration"],
             projects: ["Full-stack Web Application"]
           }
@@ -246,7 +270,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 132,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_cyber',
@@ -270,7 +295,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 128,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_java',
@@ -294,7 +320,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 118,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_data',
@@ -318,7 +345,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 105,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_mean',
@@ -342,7 +370,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 98,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_frontend',
@@ -366,7 +395,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 87,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_mobile',
@@ -390,7 +420,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 75,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_devops',
@@ -414,7 +445,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 62,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       },
       {
         id: 'course_mca',
@@ -438,7 +470,8 @@ const initializeCoursesIfNeeded = (): Course[] => {
         topics: [],
         features: ['Live Classes', 'Hands-on Projects', 'Industry Certification'],
         studentsEnrolled: 45,
-        curriculum: []
+        curriculum: [],
+        roadmap: []
       }
     ];
     localStorage.setItem(COURSES_KEY, JSON.stringify(defaultCourses));
@@ -467,7 +500,8 @@ export const createCourse = (course: Omit<Course, 'id'>): Course => {
     studentsEnrolled: course.studentsEnrolled || course.students || 0,
     rating: course.rating || 0,
     features: course.features || [],
-    curriculum: course.curriculum || []
+    curriculum: course.curriculum || [],
+    roadmap: course.roadmap || []
   };
   
   courses.push(newCourse);

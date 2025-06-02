@@ -29,14 +29,16 @@ export const PlacementForm: React.FC<PlacementFormProps> = ({
     studentName: defaultValues?.studentName || '',
     company: defaultValues?.company || '',
     position: defaultValues?.position || '',
-    packageAmount: defaultValues?.packageAmount || '',
+    packageAmount: defaultValues?.packageAmount || defaultValues?.salary || '',
     placementDate: defaultValues?.placementDate || new Date().toISOString().split('T')[0],
     description: defaultValues?.description || '',
     testimonial: defaultValues?.testimonial || '',
     year: defaultValues?.year || new Date().getFullYear().toString(),
     courseCompleted: defaultValues?.courseCompleted || '',
-    imageUrl: defaultValues?.imageUrl || '',
-    salary: defaultValues?.salary || ''
+    imageUrl: defaultValues?.imageUrl || defaultValues?.image || '',
+    salary: defaultValues?.salary || defaultValues?.packageAmount || '',
+    course: defaultValues?.course || defaultValues?.courseCompleted || '',
+    image: defaultValues?.image || defaultValues?.imageUrl || ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -140,11 +142,11 @@ export const PlacementForm: React.FC<PlacementFormProps> = ({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="courseCompleted">Course Completed</Label>
+                <Label htmlFor="course">Course Completed</Label>
                 <Input
-                  id="courseCompleted"
-                  name="courseCompleted"
-                  value={formData.courseCompleted}
+                  id="course"
+                  name="course"
+                  value={formData.course}
                   onChange={handleChange}
                   required
                 />
@@ -173,11 +175,11 @@ export const PlacementForm: React.FC<PlacementFormProps> = ({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="imageUrl">Image URL</Label>
+              <Label htmlFor="image">Image URL</Label>
               <Input
-                id="imageUrl"
-                name="imageUrl"
-                value={formData.imageUrl}
+                id="image"
+                name="image"
+                value={formData.image}
                 onChange={handleChange}
                 placeholder="URL to company logo or student photo"
               />

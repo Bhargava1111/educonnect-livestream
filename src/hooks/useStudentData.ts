@@ -26,13 +26,13 @@ export function useStudentData(studentId?: string) {
         if (studentData?.id) {
           const enrollmentData = await getStudentEnrollments(studentData.id);
           
-          // Map the data to match our Enrollment type
+          // Map the data to match our Enrollment type with proper status casting
           const mappedEnrollments: Enrollment[] = enrollmentData.map(item => ({
             id: item.id,
-            studentId: item.student_id || studentData.id, // Use explicit student_id field if available or fallback
+            studentId: item.student_id || studentData.id,
             courseId: item.course_id,
             enrollmentDate: item.enrollment_date,
-            status: item.status,
+            status: (item.status as 'active' | 'completed' | 'suspended') || 'active',
             progress: item.progress,
             completed: item.completed || false,
             certificateIssued: item.certificate_issued || false,
