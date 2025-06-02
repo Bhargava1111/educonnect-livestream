@@ -16,3 +16,9 @@ export const createMeeting = create;
 export const updateMeeting = update;
 export const deleteMeeting = remove;
 export { getMeetingsByCourse };
+
+// Add the missing updateMeetingStatuses function
+export const updateMeetingStatuses = () => {
+  // This was a localStorage-based function, now it's handled by the database
+  console.log('Meeting statuses are automatically managed by the database');
+};

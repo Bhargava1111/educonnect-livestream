@@ -25,26 +25,9 @@ import {
   createLiveMeeting,
   getAllLiveMeetings,
   updateLiveMeeting,
-  deleteLiveMeeting
-} from '@/lib/liveMeetingService';
-import { LiveMeeting } from '@/lib/types';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription as UIDialogDescription,
-  DialogHeader,
-  DialogTitle as UIDialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+  deleteLiveMeeting,
+  LiveMeeting
+} from '@/lib/services/liveMeetingService';
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -59,18 +42,21 @@ const AdminLiveMeetings = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
 
-  // Updated to match the LiveMeeting type
-  const [newMeeting, setNewMeeting] = useState<Omit<LiveMeeting, "id">>({
-    courseId: '',
+  // Updated form state to match database schema
+  const [newMeeting, setNewMeeting] = useState({
+    course_id: '',
     title: '',
     description: '',
-    hostName: '', // Use hostName instead of instructor
-    scheduledDate: '', // Combined date and time
+    instructor_name: '',
+    scheduled_date: '',
     duration: '',
-    meetingLink: '', // Use meetingLink instead of link
-    status: 'upcoming',
-    createdAt: new Date().toISOString(),
-    // Backward compatibility fields
+    meeting_link: '',
+    platform: 'Manual',
+    status: 'scheduled',
+    // Legacy fields for backward compatibility
+    courseId: '',
+    hostName: '',
+    meetingLink: '',
     instructor: '',
     date: '',
     time: '',
@@ -79,8 +65,12 @@ const AdminLiveMeetings = () => {
 
   useEffect(() => {
     const fetchMeetings = async () => {
-      const meetingsData = getAllLiveMeetings();
-      setMeetings(meetingsData);
+      try {
+        const meetingsData = await getAllLiveMeetings();
+        setMeetings(meetingsData);
+      } catch (error) {
+        console.error('Error fetching meetings:', error);
+      }
     };
 
     const fetchCourses = async () => {
@@ -104,15 +94,15 @@ const AdminLiveMeetings = () => {
     setSelectedMeetingId(null);
   };
 
-  const handleAddMeeting = () => {
+  const handleAddMeeting = async () => {
     if (
-      !newMeeting.courseId ||
+      !newMeeting.course_id ||
       !newMeeting.title ||
       !newMeeting.description ||
-      !newMeeting.hostName ||
-      !newMeeting.scheduledDate ||
+      !newMeeting.instructor_name ||
+      !newMeeting.scheduled_date ||
       !newMeeting.duration ||
-      !newMeeting.meetingLink
+      !newMeeting.meeting_link
     ) {
       toast({
         title: "Missing Information",
@@ -122,87 +112,89 @@ const AdminLiveMeetings = () => {
       return;
     }
 
-    const newMeetingData: Omit<LiveMeeting, "id"> = {
-      courseId: newMeeting.courseId,
+    const meetingData = {
+      course_id: newMeeting.course_id,
       title: newMeeting.title,
       description: newMeeting.description,
-      hostName: newMeeting.hostName,
-      scheduledDate: newMeeting.scheduledDate,
+      instructor_name: newMeeting.instructor_name,
+      scheduled_date: newMeeting.scheduled_date,
       duration: newMeeting.duration,
-      meetingLink: newMeeting.meetingLink,
-      status: newMeeting.status,
-      createdAt: new Date().toISOString(),
-      instructor: newMeeting.instructor,
-      date: newMeeting.date,
-      time: newMeeting.time,
-      link: newMeeting.link
+      meeting_link: newMeeting.meeting_link,
+      platform: newMeeting.platform,
+      status: newMeeting.status
     };
 
-    createLiveMeeting(newMeetingData);
-    setMeetings([...meetings, { id: `meeting_${Date.now()}`, ...newMeetingData }]);
-    toast({
-      title: "Success",
-      description: "Meeting added successfully.",
-    });
-    handleCloseDialog();
-
-    // Update the form field handling to set both new and old properties for backward compatibility
-    setNewMeeting({
-      courseId: '',
-      title: '',
-      description: '',
-      hostName: '', 
-      scheduledDate: '',
-      duration: '',
-      meetingLink: '',
-      status: 'upcoming',
-      createdAt: new Date().toISOString(),
-      // For backward compatibility
-      instructor: '',
-      date: '',
-      time: '',
-      link: ''
-    });
+    const result = await createLiveMeeting(meetingData);
+    
+    if (result.success && result.data) {
+      const updatedMeetings = await getAllLiveMeetings();
+      setMeetings(updatedMeetings);
+      toast({
+        title: "Success",
+        description: "Meeting added successfully.",
+      });
+      handleCloseDialog();
+      resetForm();
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Failed to create meeting.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleEditMeeting = () => {
+  const handleEditMeeting = async () => {
     if (!selectedMeetingId) return;
 
-    const updatedMeetingData: Omit<LiveMeeting, "id"> = {
-      courseId: newMeeting.courseId,
+    const updateData = {
+      course_id: newMeeting.course_id,
       title: newMeeting.title,
       description: newMeeting.description,
-      hostName: newMeeting.hostName,
-      scheduledDate: newMeeting.scheduledDate,
+      instructor_name: newMeeting.instructor_name,
+      scheduled_date: newMeeting.scheduled_date,
       duration: newMeeting.duration,
-      meetingLink: newMeeting.meetingLink,
-      status: newMeeting.status,
-      createdAt: new Date().toISOString(),
-      instructor: newMeeting.instructor,
-      date: newMeeting.date,
-      time: newMeeting.time,
-      link: newMeeting.link
+      meeting_link: newMeeting.meeting_link,
+      platform: newMeeting.platform,
+      status: newMeeting.status
     };
 
-    updateLiveMeeting(selectedMeetingId, updatedMeetingData);
-    const updatedMeetings = meetings.map(meeting =>
-      meeting.id === selectedMeetingId ? { id: selectedMeetingId, ...updatedMeetingData } : meeting
-    );
-    setMeetings(updatedMeetings);
-    toast({
-      title: "Success",
-      description: "Meeting updated successfully.",
-    });
-    handleCloseDialog();
+    const result = await updateLiveMeeting(selectedMeetingId, updateData);
+    
+    if (result.success) {
+      const updatedMeetings = await getAllLiveMeetings();
+      setMeetings(updatedMeetings);
+      toast({
+        title: "Success",
+        description: "Meeting updated successfully.",
+      });
+      handleCloseDialog();
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Failed to update meeting.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteMeeting = (id: string) => {
-    deleteLiveMeeting(id);
-    setMeetings(meetings.filter(meeting => meeting.id !== id));
-    toast({
-      title: "Success",
-      description: "Meeting deleted successfully.",
-    });
+  const handleDeleteMeeting = async (id: string) => {
+    const result = await deleteLiveMeeting(id);
+    
+    if (result.success) {
+      const updatedMeetings = await getAllLiveMeetings();
+      setMeetings(updatedMeetings);
+      toast({
+        title: "Success",
+        description: "Meeting deleted successfully.",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Failed to delete meeting.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -211,21 +203,20 @@ const AdminLiveMeetings = () => {
     setNewMeeting(prev => {
       const updated = { ...prev, [name]: value };
       
-      // Handle backward compatibility between old and new field names
-      if (name === 'instructor') {
-        updated.hostName = value;
-      } else if (name === 'hostName') {
+      // Handle field mappings for backward compatibility
+      if (name === 'course_id') {
+        updated.courseId = value;
+      } else if (name === 'instructor_name') {
         updated.instructor = value;
-      } else if (name === 'link') {
-        updated.meetingLink = value;
-      } else if (name === 'meetingLink') {
+        updated.hostName = value;
+      } else if (name === 'meeting_link') {
         updated.link = value;
+        updated.meetingLink = value;
       } else if (name === 'date' || name === 'time') {
-        // If date or time changes, update the scheduledDate
         const date = name === 'date' ? value : prev.date;
         const time = name === 'time' ? value : prev.time;
         if (date && time) {
-          updated.scheduledDate = `${date}T${time}`;
+          updated.scheduled_date = `${date}T${time}`;
         }
       }
       
@@ -239,22 +230,52 @@ const AdminLiveMeetings = () => {
       setSelectedMeetingId(id);
       setIsEditMode(true);
       setIsDialogOpen(true);
+      
+      const scheduledDate = new Date(meetingToEdit.scheduled_date);
+      const dateString = scheduledDate.toISOString().split('T')[0];
+      const timeString = scheduledDate.toTimeString().slice(0, 5);
+      
       setNewMeeting({
-        courseId: meetingToEdit.courseId,
+        course_id: meetingToEdit.course_id,
         title: meetingToEdit.title,
         description: meetingToEdit.description,
-        hostName: meetingToEdit.hostName,
-        scheduledDate: meetingToEdit.scheduledDate,
+        instructor_name: meetingToEdit.instructor_name,
+        scheduled_date: meetingToEdit.scheduled_date,
         duration: meetingToEdit.duration,
-        meetingLink: meetingToEdit.meetingLink,
+        meeting_link: meetingToEdit.meeting_link,
+        platform: meetingToEdit.platform,
         status: meetingToEdit.status,
-        createdAt: meetingToEdit.createdAt,
-        instructor: meetingToEdit.instructor,
-        date: meetingToEdit.date,
-        time: meetingToEdit.time,
-        link: meetingToEdit.link
+        // Legacy fields
+        courseId: meetingToEdit.course_id,
+        hostName: meetingToEdit.instructor_name,
+        meetingLink: meetingToEdit.meeting_link,
+        instructor: meetingToEdit.instructor_name,
+        date: dateString,
+        time: timeString,
+        link: meetingToEdit.meeting_link
       });
     }
+  };
+
+  const resetForm = () => {
+    setNewMeeting({
+      course_id: '',
+      title: '',
+      description: '',
+      instructor_name: '',
+      scheduled_date: '',
+      duration: '',
+      meeting_link: '',
+      platform: 'Manual',
+      status: 'scheduled',
+      courseId: '',
+      hostName: '',
+      meetingLink: '',
+      instructor: '',
+      date: '',
+      time: '',
+      link: ''
+    });
   };
 
   return (
@@ -280,7 +301,6 @@ const AdminLiveMeetings = () => {
                   <TableHead>Description</TableHead>
                   <TableHead>Instructor</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Link</TableHead>
                   <TableHead>Status</TableHead>
@@ -289,29 +309,31 @@ const AdminLiveMeetings = () => {
               </TableHeader>
               <TableBody>
                 <ScrollArea>
-                  {meetings.map((meeting) => (
-                    <TableRow key={meeting.id}>
-                      <TableCell>{courses.find(course => course.id === meeting.courseId)?.title || 'Unknown'}</TableCell>
-                      <TableCell>{meeting.title}</TableCell>
-                      <TableCell>{meeting.description}</TableCell>
-                      <TableCell>{meeting.hostName}</TableCell>
-                      <TableCell>{meeting.date}</TableCell>
-                      <TableCell>{meeting.time}</TableCell>
-                      <TableCell>{meeting.duration}</TableCell>
-                      <TableCell>{meeting.link}</TableCell>
-                      <TableCell>{meeting.status}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(meeting.id)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteMeeting(meeting.id)}>
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {meetings.map((meeting) => {
+                    const scheduledDate = new Date(meeting.scheduled_date);
+                    return (
+                      <TableRow key={meeting.id}>
+                        <TableCell>{courses.find(course => course.id === meeting.course_id)?.title || 'Unknown'}</TableCell>
+                        <TableCell>{meeting.title}</TableCell>
+                        <TableCell>{meeting.description}</TableCell>
+                        <TableCell>{meeting.instructor_name}</TableCell>
+                        <TableCell>{scheduledDate.toLocaleDateString()} {scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                        <TableCell>{meeting.duration}</TableCell>
+                        <TableCell>{meeting.meeting_link}</TableCell>
+                        <TableCell>{meeting.status}</TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(meeting.id)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteMeeting(meeting.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </ScrollArea>
               </TableBody>
             </Table>
@@ -330,13 +352,13 @@ const AdminLiveMeetings = () => {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="courseId">Course</Label>
+                <Label htmlFor="course_id">Course</Label>
                 <select
-                  id="courseId"
+                  id="course_id"
                   className="border rounded-md px-4 py-2 w-full"
-                  value={newMeeting.courseId}
+                  value={newMeeting.course_id}
                   onChange={handleInputChange}
-                  name="courseId"
+                  name="course_id"
                 >
                   <option value="">Select a course</option>
                   {courses.map((course) => (
@@ -371,12 +393,12 @@ const AdminLiveMeetings = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="instructor">Instructor</Label>
+                <Label htmlFor="instructor_name">Instructor</Label>
                 <Input
                   type="text"
-                  id="instructor"
-                  name="instructor"
-                  value={newMeeting.instructor}
+                  id="instructor_name"
+                  name="instructor_name"
+                  value={newMeeting.instructor_name}
                   onChange={handleInputChange}
                   className="w-full"
                 />
@@ -384,29 +406,16 @@ const AdminLiveMeetings = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="scheduled_date">Date</Label>
                 <Input
                   type="date"
-                  id="date"
-                  name="date"
-                  value={newMeeting.date}
+                  id="scheduled_date"
+                  name="scheduled_date"
+                  value={newMeeting.scheduled_date}
                   onChange={handleInputChange}
                   className="w-full"
                 />
               </div>
-              <div>
-                <Label htmlFor="time">Time</Label>
-                <Input
-                  type="time"
-                  id="time"
-                  name="time"
-                  value={newMeeting.time}
-                  onChange={handleInputChange}
-                  className="w-full"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="duration">Duration</Label>
                 <Input
@@ -418,16 +427,32 @@ const AdminLiveMeetings = () => {
                   className="w-full"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="link">Link</Label>
+                <Label htmlFor="meeting_link">Link</Label>
                 <Input
                   type="text"
-                  id="link"
-                  name="link"
-                  value={newMeeting.link}
+                  id="meeting_link"
+                  name="meeting_link"
+                  value={newMeeting.meeting_link}
                   onChange={handleInputChange}
                   className="w-full"
                 />
+              </div>
+              <div>
+                <Label htmlFor="platform">Platform</Label>
+                <select
+                  id="platform"
+                  name="platform"
+                  value={newMeeting.platform}
+                  onChange={handleInputChange}
+                  className="border rounded-md px-4 py-2 w-full"
+                >
+                  <option value="Manual">Manual</option>
+                  <option value="Zoom">Zoom</option>
+                  <option value="Google Meet">Google Meet</option>
+                </select>
               </div>
             </div>
             <div>
@@ -439,7 +464,7 @@ const AdminLiveMeetings = () => {
                 onChange={handleInputChange}
                 className="border rounded-md px-4 py-2 w-full"
               >
-                <option value="upcoming">Upcoming</option>
+                <option value="scheduled">Scheduled</option>
                 <option value="ongoing">Ongoing</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>

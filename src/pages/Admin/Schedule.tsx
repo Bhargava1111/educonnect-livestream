@@ -10,8 +10,7 @@ import { format } from "date-fns";
 import { ListChecks, Clock, Calendar as CalendarIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getAllCourses } from '@/lib/courseManagement';
-import { createLiveMeeting } from '@/lib/liveMeetingService';
-import { LiveMeeting } from '@/lib/types';
+import { createLiveMeeting, LiveMeeting } from '@/lib/services/liveMeetingService';
 
 const AdminSchedule = () => {
   const [meetingTitle, setMeetingTitle] = useState('');
@@ -32,7 +31,7 @@ const AdminSchedule = () => {
     }
   }, []);
 
-  const handleAddMeeting = () => {
+  const handleAddMeeting = async () => {
     if (!selectedCourse || !meetingTitle || !meetingDescription || !meetingInstructor || !meetingDate || !meetingTime || !meetingLink) {
       alert('Please fill in all fields.');
       return;
@@ -42,34 +41,33 @@ const AdminSchedule = () => {
     const formattedDate = meetingDate ? meetingDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
     const scheduledDate = `${formattedDate}T${meetingTime}:00`;
 
-    // Create a new meeting with all required fields
-    const newMeetingData: Omit<LiveMeeting, "id"> = {
-      courseId: selectedCourse,
+    // Create a new meeting with database schema
+    const newMeetingData = {
+      course_id: selectedCourse,
       title: meetingTitle,
       description: meetingDescription,
-      hostName: meetingInstructor,
-      scheduledDate: scheduledDate,
+      instructor_name: meetingInstructor,
+      scheduled_date: scheduledDate,
       duration: meetingDuration,
-      meetingLink: meetingLink,
-      status: 'upcoming',
-      createdAt: new Date().toISOString(),
-      // For backward compatibility
-      instructor: meetingInstructor,
-      date: formattedDate,
-      time: meetingTime,
-      link: meetingLink
+      meeting_link: meetingLink,
+      platform: 'Manual',
+      status: 'scheduled'
     };
 
-    createLiveMeeting(newMeetingData);
-
-    setMeetingTitle('');
-    setMeetingDescription('');
-    setMeetingInstructor('');
-    setMeetingDate(undefined);
-    setMeetingTime('09:00');
-    setMeetingDuration('60 minutes');
-    setMeetingLink('');
-    alert('Meeting scheduled successfully!');
+    const result = await createLiveMeeting(newMeetingData);
+    
+    if (result.success) {
+      setMeetingTitle('');
+      setMeetingDescription('');
+      setMeetingInstructor('');
+      setMeetingDate(undefined);
+      setMeetingTime('09:00');
+      setMeetingDuration('60 minutes');
+      setMeetingLink('');
+      alert('Meeting scheduled successfully!');
+    } else {
+      alert('Error scheduling meeting: ' + (result.error || 'Unknown error'));
+    }
   };
 
   return (

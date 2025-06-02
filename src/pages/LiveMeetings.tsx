@@ -7,8 +7,8 @@ import { Calendar, Clock, Video } from 'lucide-react';
 import { getStudentData, isStudentLoggedIn } from '@/lib/studentAuth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { LiveMeeting } from '@/lib/types';
-import { getAllLiveMeetings, updateMeetingStatuses } from '@/lib/liveMeetingService';
+import { LiveMeeting } from '@/lib/services/liveMeetingService';
+import { getAllLiveMeetings } from '@/lib/services/liveMeetingService';
 import { getAllCourses } from '@/lib/courseService';
 
 const LiveMeetings = () => {
@@ -25,26 +25,27 @@ const LiveMeetings = () => {
   
   // Use useCallback to prevent recreation on each render
   const loadData = useCallback(async () => {
-    // Ensure meeting statuses are updated
-    updateMeetingStatuses();
-    
-    // Load meetings and courses
-    const allMeetings = getAllLiveMeetings();
-    const allCourses = getAllCourses();
-    
-    setMeetings(allMeetings);
-    setCourses(allCourses);
+    try {
+      // Load meetings and courses
+      const allMeetings = await getAllLiveMeetings();
+      const allCourses = getAllCourses();
+      
+      setMeetings(allMeetings);
+      setCourses(allCourses);
 
-    if (isLoggedIn) {
-      try {
-        const data = await getStudentData();
-        setStudentData(data);
-      } catch (err) {
-        console.error("Error loading student data:", err);
+      if (isLoggedIn) {
+        try {
+          const data = await getStudentData();
+          setStudentData(data);
+        } catch (err) {
+          console.error("Error loading student data:", err);
+        }
       }
+    } catch (error) {
+      console.error("Error loading meetings:", error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   }, [isLoggedIn]);
   
   useEffect(() => {
@@ -55,13 +56,14 @@ const LiveMeetings = () => {
   const filteredMeetings = meetings.filter(meeting => {
     // If logged in, only show meetings for enrolled courses
     if (isLoggedIn && studentData && studentData.enrolledCourses) {
-      if (!studentData.enrolledCourses.includes(meeting.courseId)) {
+      if (!studentData.enrolledCourses.includes(meeting.course_id)) {
         return false;
       }
     }
     
-    // Filter based on active tab
-    return meeting.status === activeTab;
+    // Filter based on active tab and convert database status to legacy format
+    const legacyStatus = meeting.status === 'scheduled' ? 'upcoming' : meeting.status;
+    return legacyStatus === activeTab;
   });
   
   // Join meeting handler
@@ -88,6 +90,20 @@ const LiveMeetings = () => {
   const getCourseNameById = (courseId: string): string => {
     const course = courses.find(c => c.id === courseId);
     return course ? course.title : 'Unknown Course';
+  };
+
+  // Convert database meeting to legacy format for display
+  const convertMeetingForDisplay = (meeting: LiveMeeting) => {
+    const date = new Date(meeting.scheduled_date);
+    return {
+      ...meeting,
+      date: date.toLocaleDateString(),
+      time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      link: meeting.meeting_link,
+      courseId: meeting.course_id,
+      hostName: meeting.instructor_name,
+      status: meeting.status === 'scheduled' ? 'upcoming' : meeting.status
+    };
   };
 
   if (isLoading) {
@@ -139,48 +155,51 @@ const LiveMeetings = () => {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredMeetings.map((meeting) => (
-                <Card key={meeting.id} className="overflow-hidden">
-                  <CardHeader className="bg-eduBlue-50 pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle>{meeting.title}</CardTitle>
-                        <CardDescription className="mt-1">
-                          Course: {getCourseNameById(meeting.courseId)}
-                        </CardDescription>
+              {filteredMeetings.map((meeting) => {
+                const displayMeeting = convertMeetingForDisplay(meeting);
+                return (
+                  <Card key={meeting.id} className="overflow-hidden">
+                    <CardHeader className="bg-eduBlue-50 pb-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle>{meeting.title}</CardTitle>
+                          <CardDescription className="mt-1">
+                            Course: {getCourseNameById(meeting.course_id)}
+                          </CardDescription>
+                        </div>
+                        <Badge variant={displayMeeting.status === 'upcoming' ? 'default' : 'secondary'}>
+                          {displayMeeting.status === 'upcoming' ? 'Upcoming' : 'Completed'}
+                        </Badge>
                       </div>
-                      <Badge variant={meeting.status === 'upcoming' ? 'default' : 'secondary'}>
-                        {meeting.status === 'upcoming' ? 'Upcoming' : 'Completed'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-4">
-                    <p className="text-gray-700">{meeting.description}</p>
-                    
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex items-center text-sm">
-                        <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>{meeting.date}</span>
+                    </CardHeader>
+                    <CardContent className="pt-4 space-y-4">
+                      <p className="text-gray-700">{meeting.description}</p>
+                      
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center text-sm">
+                          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                          <span>{displayMeeting.date}</span>
+                        </div>
+                        
+                        <div className="flex items-center text-sm">
+                          <Clock className="h-4 w-4 mr-2 text-gray-500" />
+                          <span>{displayMeeting.time} ({meeting.duration})</span>
+                        </div>
                       </div>
                       
-                      <div className="flex items-center text-sm">
-                        <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>{meeting.time} ({meeting.duration})</span>
-                      </div>
-                    </div>
-                    
-                    {meeting.status === 'upcoming' && (
-                      <Button 
-                        className="w-full mt-2" 
-                        onClick={() => joinMeeting(meeting.link)}
-                      >
-                        <Video className="h-4 w-4 mr-2" />
-                        Join Session
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      {displayMeeting.status === 'upcoming' && (
+                        <Button 
+                          className="w-full mt-2" 
+                          onClick={() => joinMeeting(meeting.meeting_link)}
+                        >
+                          <Video className="h-4 w-4 mr-2" />
+                          Join Session
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </>
