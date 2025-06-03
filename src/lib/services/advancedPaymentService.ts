@@ -35,13 +35,18 @@ export const getPaymentAnalytics = async (): Promise<PaymentAnalytics> => {
     // Get all payment transactions
     const { data: transactions, error } = await supabase
       .from('payment_transactions')
-      .select(`
-        *,
-        profiles!payment_transactions_student_id_fkey(first_name, last_name),
-        courses!payment_transactions_course_id_fkey(title)
-      `);
+      .select('*');
 
     if (error) throw error;
+
+    // Get profiles and courses separately to avoid relationship issues
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, first_name, last_name');
+
+    const { data: courses } = await supabase
+      .from('courses')
+      .select('id, title');
 
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -80,11 +85,13 @@ export const getPaymentAnalytics = async (): Promise<PaymentAnalytics> => {
       });
     }
 
-    // Top courses by revenue
+    // Top courses by revenue - manually join with courses data
     const courseRevenue = new Map();
     completedTransactions.forEach(t => {
       const courseId = t.course_id;
-      const courseName = t.courses?.title || 'Unknown Course';
+      const course = courses?.find(c => c.id === courseId);
+      const courseName = course?.title || 'Unknown Course';
+      
       const current = courseRevenue.get(courseId) || { courseName, revenue: 0, enrollments: 0 };
       current.revenue += Number(t.amount);
       current.enrollments += 1;
@@ -115,25 +122,36 @@ export const getPaymentAnalytics = async (): Promise<PaymentAnalytics> => {
 
 export const getPaymentTransactions = async (limit = 50, offset = 0): Promise<PaymentTransaction[]> => {
   try {
-    const { data, error } = await supabase
+    const { data: transactions, error } = await supabase
       .from('payment_transactions')
-      .select(`
-        *,
-        profiles!payment_transactions_student_id_fkey(first_name, last_name),
-        courses!payment_transactions_course_id_fkey(title)
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) throw error;
 
-    return (data || []).map(transaction => ({
-      ...transaction,
-      student_name: transaction.profiles ? 
-        `${transaction.profiles.first_name || ''} ${transaction.profiles.last_name || ''}`.trim() : 
-        'Unknown Student',
-      course_name: transaction.courses?.title || 'Unknown Course'
-    }));
+    // Get profiles and courses separately to avoid relationship issues
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, first_name, last_name');
+
+    const { data: courses } = await supabase
+      .from('courses')
+      .select('id, title');
+
+    return (transactions || []).map(transaction => {
+      const profile = profiles?.find(p => p.id === transaction.student_id);
+      const course = courses?.find(c => c.id === transaction.course_id);
+      
+      return {
+        ...transaction,
+        status: transaction.status as 'pending' | 'completed' | 'failed' | 'refunded',
+        student_name: profile ? 
+          `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 
+          'Unknown Student',
+        course_name: course?.title || 'Unknown Course'
+      };
+    });
   } catch (error) {
     console.error('Error fetching payment transactions:', error);
     throw error;
