@@ -33,9 +33,9 @@ const Courses = () => {
     return matchesSearch && matchesLevel && matchesCategory;
   });
 
-  // Get unique levels and categories for filters
-  const levels = Array.from(new Set(courses.map(course => course.level))).filter(Boolean);
-  const categories = Array.from(new Set(courses.map(course => course.category))).filter(Boolean);
+  // Get unique levels and categories for filters - filter out empty/null values
+  const levels = Array.from(new Set(courses.map(course => course.level))).filter(level => level && level.trim() !== '');
+  const categories = Array.from(new Set(courses.map(course => course.category))).filter(category => category && category.trim() !== '');
 
   // Helper function to render course card
   const renderCourseCard = (course: Course) => (
@@ -96,7 +96,7 @@ const Courses = () => {
               <SelectValue placeholder="Filter by level" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Levels</SelectItem>
+              <SelectItem value="all">All Levels</SelectItem>
               {levels.map((level) => (
                 <SelectItem key={level} value={level}>{level}</SelectItem>
               ))}
@@ -109,7 +109,7 @@ const Courses = () => {
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}

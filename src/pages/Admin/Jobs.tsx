@@ -41,8 +41,8 @@ const AdminJobs = () => {
     (filterCategory === 'all' || job.category === filterCategory)
   );
 
-  // Get unique categories
-  const categories = Array.from(new Set(jobs.map(job => job.category).filter(Boolean)));
+  // Get unique categories - filter out empty/null values
+  const categories = Array.from(new Set(jobs.map(job => job.category).filter(category => category && category.trim() !== '')));
 
   // Handle CSV export
   const handleExportCSV = () => {
@@ -90,7 +90,7 @@ const AdminJobs = () => {
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category} value={category || ''}>
+                <SelectItem key={category} value={category}>
                   {category}
                 </SelectItem>
               ))}
