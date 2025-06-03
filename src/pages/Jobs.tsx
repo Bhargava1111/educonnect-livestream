@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Briefcase, MapPin, Calendar, ExternalLink, Filter } from 'lucide-react';
-import { getActiveJobs, incrementJobApplyCount, Job } from "@/lib/jobService";
+import { getActiveJobs, incrementJobApplicationCount, Job } from "@/lib/jobService";
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -72,7 +71,7 @@ const Jobs = () => {
 
   const handleApplyClick = (job: Job) => {
     // Track application click
-    incrementJobApplyCount(job.id);
+    incrementJobApplicationCount(job.id);
     
     // Redirect to external application link if available
     if (job.externalLink) {
