@@ -1,802 +1,694 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Edit, Trash2, Video, FileText } from 'lucide-react';
-import { toast } from "@/hooks/use-toast";
-import { getAllCourses, getCourseById, updateCourse } from '@/lib/courseService';
-import { Course, CourseModule, RoadmapPhase, Video as VideoType, Material as MaterialType } from '@/lib/types';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-
-interface Video {
-  id: string;
-  title: string;
-  url: string;
-  description?: string;
-  topicIndex?: number;
-}
-
-interface Material {
-  id: string;
-  title: string;
-  type: 'document' | 'link';
-  url: string;
-  description?: string;
-}
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Edit, Trash2, Play, FileText, Link, Download } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { Course, RoadmapPhase, Video, Material } from '@/lib/types';
+import { getCourseById, updateCourse } from '@/lib/courseService';
 
 const AdminCourseRoadmap = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const [course, setCourse] = useState<Course | null>(null);
-  const [updatedCourse, setUpdatedCourse] = useState<Course | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
-  const [newPhase, setNewPhase] = useState({ phase: 1, title: '', duration: '', topics: [''], projects: [''] });
-  const [isEditPhaseDialogOpen, setIsEditPhaseDialogOpen] = useState(false);
-  const [currentPhase, setCurrentPhase] = useState<RoadmapPhase | null>(null);
-  const [editedPhase, setEditedPhase] = useState<RoadmapPhase | null>(null);
-  const [isAddVideoDialogOpen, setIsAddVideoDialogOpen] = useState(false);
-  const [newVideo, setNewVideo] = useState({ title: '', url: '', description: '', topicIndex: 0 });
-  const [isAddMaterialDialogOpen, setIsAddMaterialDialogOpen] = useState(false);
-  const [newMaterial, setNewMaterial] = useState({ title: '', type: 'document', url: '', description: '' });
-  
+  const [selectedPhase, setSelectedPhase] = useState<RoadmapPhase | null>(null);
+  const [isPhaseDialogOpen, setIsPhaseDialogOpen] = useState(false);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
+  const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState(false);
+  const [editingPhase, setEditingPhase] = useState<RoadmapPhase | null>(null);
+  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
+  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
+
+  const [newPhase, setNewPhase] = useState<Partial<RoadmapPhase>>({
+    title: '',
+    description: '',
+    duration: '',
+    topics: [],
+    projects: [],
+    videos: [],
+    materials: [],
+    isActive: true
+  });
+
+  const [newVideo, setNewVideo] = useState<Partial<Video>>({
+    title: '',
+    url: '',
+    duration: '',
+    description: ''
+  });
+
+  const [newMaterial, setNewMaterial] = useState<Partial<Material>>({
+    title: '',
+    type: 'pdf',
+    url: '',
+    description: ''
+  });
+
   useEffect(() => {
-    const loadData = () => {
-      try {
-        const allCourses = getAllCourses();
-        setCourses(allCourses);
-        
-        if (courseId) {
-          const selectedCourse = getCourseById(courseId);
-          if (selectedCourse) {
-            setCourse(selectedCourse);
-            // Initialize updatedCourse with a deep copy of selectedCourse
-            setUpdatedCourse(JSON.parse(JSON.stringify(selectedCourse)));
-          } else {
-            toast({
-              title: "Course Not Found",
-              description: "The course ID is invalid.",
-              variant: "destructive"
-            });
-            navigate('/admin/courses');
-          }
+    if (courseId) {
+      const courseData = getCourseById(courseId);
+      if (courseData) {
+        setCourse(courseData);
+        if (!courseData.roadmap) {
+          setCourse(prev => prev ? { ...prev, roadmap: [] } : null);
         }
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load data. Please refresh the page.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    loadData();
-  }, [courseId, navigate]);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      return { ...prev, [name]: value };
-    });
-  };
-  
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      return { ...prev, [name]: checked };
-    });
-  };
-  
-  const handleTopicChange = (index: number, value: string) => {
-    setNewPhase(prev => {
-      const updatedTopics = [...prev.topics];
-      updatedTopics[index] = value;
-      return { ...prev, topics: updatedTopics };
-    });
-  };
-  
-  const handleAddTopic = () => {
-    setNewPhase(prev => ({ ...prev, topics: [...prev.topics, ''] }));
-  };
-  
-  const handleRemoveTopic = (index: number) => {
-    setNewPhase(prev => {
-      const updatedTopics = [...prev.topics];
-      updatedTopics.splice(index, 1);
-      return { ...prev, topics: updatedTopics };
-    });
-  };
-  
-  const handleProjectChange = (index: number, value: string) => {
-    setNewPhase(prev => {
-      const updatedProjects = [...prev.projects];
-      updatedProjects[index] = value;
-      return { ...prev, projects: updatedProjects };
-    });
-  };
-  
-  const handleAddProject = () => {
-    setNewPhase(prev => ({ ...prev, projects: [...prev.projects, ''] }));
-  };
-  
-  const handleRemoveProject = (index: number) => {
-    setNewPhase(prev => {
-      const updatedProjects = [...prev.projects];
-      updatedProjects.splice(index, 1);
-      return { ...prev, projects: updatedProjects };
-    });
-  };
-  
-  const handleAddPhase = () => {
-    if (!updatedCourse) return;
-    
-    if (!newPhase.title || !newPhase.duration) {
-      toast({
-        title: "Required Fields Missing",
-        description: "Please fill in all required fields for the phase.",
-        variant: "destructive"
-      });
-      return;
     }
-    
-    const phaseToAdd: RoadmapPhase = {
-      phase: newPhase.phase,
-      title: newPhase.title,
-      duration: newPhase.duration,
-      topics: newPhase.topics,
-      projects: newPhase.projects,
+  }, [courseId]);
+
+  const resetNewPhase = () => {
+    setNewPhase({
+      title: '',
+      description: '',
+      duration: '',
+      topics: [],
+      projects: [],
       videos: [],
-      materials: []
-    };
-    
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      const updatedRoadmap = [...(prev.roadmap || []), phaseToAdd];
-      updatedRoadmap.sort((a, b) => a.phase - b.phase);
-      return { ...prev, roadmap: updatedRoadmap };
-    });
-    
-    setNewPhase({ phase: 1, title: '', duration: '', topics: [''], projects: [''] });
-    setIsAddPhaseDialogOpen(false);
-  };
-  
-  const handleEditPhase = (phase: RoadmapPhase) => {
-    setCurrentPhase(phase);
-    setEditedPhase({ ...phase });
-    setIsEditPhaseDialogOpen(true);
-  };
-  
-  const handleEditedPhaseInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEditedPhase(prev => {
-      if (!prev) return prev;
-      return { ...prev, [name]: value };
-    });
-  };
-  
-  const handleUpdatePhase = () => {
-    if (!updatedCourse || !currentPhase || !editedPhase) return;
-    
-    if (!editedPhase.title || !editedPhase.duration) {
-      toast({
-        title: "Required Fields Missing",
-        description: "Please fill in all required fields for the phase.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      const updatedRoadmap = [...(prev.roadmap || [])];
-      const phaseIndex = updatedRoadmap.findIndex(p => p.phase === currentPhase.phase);
-      
-      if (phaseIndex !== -1) {
-        updatedRoadmap[phaseIndex] = { ...editedPhase };
-      }
-      
-      return { ...prev, roadmap: updatedRoadmap };
-    });
-    
-    setIsEditPhaseDialogOpen(false);
-  };
-  
-  const handleRemovePhase = (phaseToRemove: RoadmapPhase) => {
-    if (!updatedCourse) return;
-    
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      const updatedRoadmap = (prev.roadmap || []).filter(phase => phase.phase !== phaseToRemove.phase);
-      return { ...prev, roadmap: updatedRoadmap };
+      materials: [],
+      isActive: true
     });
   };
 
-  // For adding videos:
-  const handleAddVideo = () => {
-    if (!currentPhase) return;
-    
-    if (!newVideo.title || !newVideo.url) {
+  const resetNewVideo = () => {
+    setNewVideo({
+      title: '',
+      url: '',
+      duration: '',
+      description: ''
+    });
+  };
+
+  const resetNewMaterial = () => {
+    setNewMaterial({
+      title: '',
+      type: 'pdf',
+      url: '',
+      description: ''
+    });
+  };
+
+  const handleSavePhase = () => {
+    if (!course || !newPhase.title || !newPhase.description) {
       toast({
-        title: "Required Fields Missing",
-        description: "Please fill in all required fields for the video.",
+        title: "Missing Information",
+        description: "Please provide title and description for the phase.",
         variant: "destructive"
       });
       return;
     }
+
+    const phaseToSave: RoadmapPhase = {
+      id: editingPhase?.id || `phase_${Date.now()}`,
+      title: newPhase.title,
+      description: newPhase.description,
+      duration: newPhase.duration || '',
+      modules: [], // Add modules as required by type
+      isActive: newPhase.isActive ?? true,
+      phase: editingPhase?.phase || (course.roadmap?.length || 0) + 1,
+      topics: newPhase.topics || [],
+      projects: newPhase.projects || [],
+      videos: newPhase.videos || [],
+      materials: newPhase.materials || []
+    };
+
+    let updatedRoadmap: RoadmapPhase[];
     
-    const video: VideoType = { // Use the Video type from our types.ts
-      id: `video_${Date.now()}`,
+    if (editingPhase) {
+      updatedRoadmap = course.roadmap?.map(phase => 
+        phase.id === editingPhase.id ? phaseToSave : phase
+      ) || [phaseToSave];
+    } else {
+      updatedRoadmap = [...(course.roadmap || []), phaseToSave];
+    }
+
+    const updatedCourse = { ...course, roadmap: updatedRoadmap };
+    updateCourse(course.id, updatedCourse);
+    setCourse(updatedCourse);
+    
+    setIsPhaseDialogOpen(false);
+    setEditingPhase(null);
+    resetNewPhase();
+    
+    toast({
+      title: editingPhase ? "Phase Updated" : "Phase Added",
+      description: `${phaseToSave.title} has been ${editingPhase ? 'updated' : 'added'} successfully.`
+    });
+  };
+
+  const handleEditPhase = (phase: RoadmapPhase) => {
+    setEditingPhase(phase);
+    setNewPhase({
+      title: phase.title,
+      description: phase.description,
+      duration: phase.duration,
+      topics: phase.topics || [],
+      projects: phase.projects || [],
+      videos: phase.videos || [],
+      materials: phase.materials || [],
+      isActive: phase.isActive
+    });
+    setIsPhaseDialogOpen(true);
+  };
+
+  const handleDeletePhase = (phaseId: string) => {
+    if (!course) return;
+    
+    const updatedRoadmap = course.roadmap?.filter(phase => phase.id !== phaseId) || [];
+    const updatedCourse = { ...course, roadmap: updatedRoadmap };
+    
+    updateCourse(course.id, updatedCourse);
+    setCourse(updatedCourse);
+    
+    toast({
+      title: "Phase Deleted",
+      description: "Phase has been deleted successfully."
+    });
+  };
+
+  const handleSaveVideo = () => {
+    if (!selectedPhase || !newVideo.title || !newVideo.url) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide title and URL for the video.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const videoToSave: Video = {
+      id: editingVideo?.id || `video_${Date.now()}`,
       title: newVideo.title,
       url: newVideo.url,
-      description: newVideo.description || "",
-      topicIndex: newVideo.topicIndex || 0
+      duration: newVideo.duration || '',
+      description: newVideo.description
     };
+
+    const updatedVideos = editingVideo
+      ? selectedPhase.videos?.map(video => video.id === editingVideo.id ? videoToSave : video) || [videoToSave]
+      : [...(selectedPhase.videos || []), videoToSave];
+
+    const updatedPhase = { ...selectedPhase, videos: updatedVideos };
+    updatePhaseInCourse(updatedPhase);
     
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      
-      const updatedRoadmap = [...(prev.roadmap || [])];
-      const phaseIndex = updatedRoadmap.findIndex(p => p.phase === currentPhase.phase);
-      
-      if (phaseIndex !== -1) {
-        const videos = [...(updatedRoadmap[phaseIndex].videos || [])];
-        videos.push(video);
-        updatedRoadmap[phaseIndex] = {
-          ...updatedRoadmap[phaseIndex],
-          videos
-        };
-      }
-      
-      return {
-        ...prev,
-        roadmap: updatedRoadmap
-      };
+    setIsVideoDialogOpen(false);
+    setEditingVideo(null);
+    resetNewVideo();
+    
+    toast({
+      title: editingVideo ? "Video Updated" : "Video Added",
+      description: `${videoToSave.title} has been ${editingVideo ? 'updated' : 'added'} successfully.`
     });
-    
-    setNewVideo({ title: "", url: "", description: "", topicIndex: 0 });
-    setIsAddVideoDialogOpen(false);
   };
 
-  // For materials:
-  const handleAddMaterial = () => {
-    if (!currentPhase) return;
-    
-    if (!newMaterial.title || !newMaterial.url) {
+  const handleSaveMaterial = () => {
+    if (!selectedPhase || !newMaterial.title || !newMaterial.url) {
       toast({
-        title: "Required Fields Missing",
-        description: "Please fill in all required fields for the material.",
+        title: "Missing Information",
+        description: "Please provide title and URL for the material.",
         variant: "destructive"
       });
       return;
     }
-    
-    const material: MaterialType = { // Use the Material type from our types.ts
-      id: `material_${Date.now()}`,
+
+    const materialToSave: Material = {
+      id: editingMaterial?.id || `material_${Date.now()}`,
       title: newMaterial.title,
-      type: newMaterial.type as "document" | "link", 
+      type: newMaterial.type as 'pdf' | 'doc' | 'link' | 'image',
       url: newMaterial.url,
-      description: newMaterial.description || ""
+      description: newMaterial.description
     };
+
+    const updatedMaterials = editingMaterial
+      ? selectedPhase.materials?.map(material => material.id === editingMaterial.id ? materialToSave : material) || [materialToSave]
+      : [...(selectedPhase.materials || []), materialToSave];
+
+    const updatedPhase = { ...selectedPhase, materials: updatedMaterials };
+    updatePhaseInCourse(updatedPhase);
     
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      
-      const updatedRoadmap = [...(prev.roadmap || [])];
-      const phaseIndex = updatedRoadmap.findIndex(p => p.phase === currentPhase.phase);
-      
-      if (phaseIndex !== -1) {
-        const materials = [...(updatedRoadmap[phaseIndex].materials || [])];
-        materials.push(material);
-        updatedRoadmap[phaseIndex] = {
-          ...updatedRoadmap[phaseIndex],
-          materials
-        };
-      }
-      
-      return {
-        ...prev,
-        roadmap: updatedRoadmap
-      };
-    });
+    setIsMaterialDialogOpen(false);
+    setEditingMaterial(null);
+    resetNewMaterial();
     
-    setNewMaterial({ title: "", type: "document", url: "", description: "" });
-    setIsAddMaterialDialogOpen(false);
-  };
-  
-  const handleRemoveVideo = (phaseIndex: number, videoIndex: number) => {
-    if (!updatedCourse) return;
-    
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      
-      const updatedRoadmap = [...(prev.roadmap || [])];
-      
-      if (phaseIndex !== -1 && updatedRoadmap[phaseIndex].videos) {
-        const videos = [...updatedRoadmap[phaseIndex].videos!];
-        videos.splice(videoIndex, 1);
-        updatedRoadmap[phaseIndex] = {
-          ...updatedRoadmap[phaseIndex],
-          videos
-        };
-      }
-      
-      return {
-        ...prev,
-        roadmap: updatedRoadmap
-      };
+    toast({
+      title: editingMaterial ? "Material Updated" : "Material Added", 
+      description: `${materialToSave.title} has been ${editingMaterial ? 'updated' : 'added'} successfully.`
     });
   };
-  
-  const handleRemoveMaterial = (phaseIndex: number, materialIndex: number) => {
-    if (!updatedCourse) return;
+
+  const updatePhaseInCourse = (updatedPhase: RoadmapPhase) => {
+    if (!course) return;
     
-    setUpdatedCourse(prev => {
-      if (!prev) return prev;
-      
-      const updatedRoadmap = [...(prev.roadmap || [])];
-      
-      if (phaseIndex !== -1 && updatedRoadmap[phaseIndex].materials) {
-        const materials = [...updatedRoadmap[phaseIndex].materials!];
-        materials.splice(materialIndex, 1);
-        updatedRoadmap[phaseIndex] = {
-          ...updatedRoadmap[phaseIndex],
-          materials
-        };
-      }
-      
-      return {
-        ...prev,
-        roadmap: updatedRoadmap
-      };
-    });
+    const updatedRoadmap = course.roadmap?.map(phase => 
+      phase.id === updatedPhase.id ? updatedPhase : phase
+    ) || [updatedPhase];
+    
+    const updatedCourse = { ...course, roadmap: updatedRoadmap };
+    updateCourse(course.id, updatedCourse);
+    setCourse(updatedCourse);
+    setSelectedPhase(updatedPhase);
   };
-  
-  const handleSaveChanges = () => {
-    if (!updatedCourse) return;
-    
-    const success = updateCourse(courseId!, updatedCourse);
-    
-    if (success) {
-      toast({
-        title: "Course Updated",
-        description: "The course roadmap has been updated successfully.",
-      });
-      setCourse(updatedCourse);
-    } else {
-      toast({
-        title: "Error",
-        description: "Failed to update the course. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-  
-  if (loading) {
-    return <div className="p-6">Loading course roadmap...</div>;
-  }
-  
+
   if (!course) {
-    return <div className="p-6">Course not found.</div>;
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">Course not found</h1>
+          <p className="text-gray-600">The requested course could not be found.</p>
+        </div>
+      </div>
+    );
   }
-  
+
   return (
     <div className="p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Course Roadmap</CardTitle>
-          <CardDescription>Manage the roadmap for {course.title}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                type="text"
-                id="title"
-                name="title"
-                value={updatedCourse?.title || ''}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div>
-              <Label htmlFor="duration">Duration</Label>
-              <Input
-                type="text"
-                id="duration"
-                name="duration"
-                value={updatedCourse?.duration || ''}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div>
-              <Label htmlFor="isPublished">Published</Label>
-              <Checkbox
-                id="isPublished"
-                name="isPublished"
-                checked={updatedCourse?.isPublished || false}
-                onCheckedChange={(checked) => handleCheckboxChange({ target: { name: 'isPublished', checked } } as any)}
-              />
-            </div>
-          </div>
-          
-          <Accordion type="multiple">
-            {(updatedCourse?.roadmap || []).map((phase, phaseIndex) => (
-              <AccordionItem key={phase.phase} value={`phase-${phase.phase}`}>
-                <AccordionTrigger>
-                  Phase {phase.phase}: {phase.title}
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Topics</Label>
-                        {phase.topics.map((topic, tIndex) => (
-                          <Input key={tIndex} type="text" value={topic} readOnly className="mb-2" />
-                        ))}
-                      </div>
-                      <div>
-                        <Label>Projects</Label>
-                        {phase.projects.map((project, pIndex) => (
-                          <Input key={pIndex} type="text" value={project} readOnly className="mb-2" />
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <div>
-                        <Button variant="secondary" size="sm" onClick={() => {
-                          setCurrentPhase(phase);
-                          setIsAddVideoDialogOpen(true);
-                        }}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Video
-                        </Button>
-                        <Button variant="secondary" size="sm" className="ml-2" onClick={() => {
-                          setCurrentPhase(phase);
-                          setIsAddMaterialDialogOpen(true);
-                        }}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Material
-                        </Button>
-                      </div>
-                      <div>
-                        <Button variant="outline" size="sm" onClick={() => handleEditPhase(phase)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Phase
-                        </Button>
-                        <Button variant="destructive" size="sm" className="ml-2" onClick={() => handleRemovePhase(phase)}>
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Remove Phase
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="border rounded-md p-3">
-                      <h4 className="text-sm font-medium mb-2">Videos</h4>
-                      {(phase.videos || []).map((video, vIndex) => (
-                        <div key={video.id || `video-${vIndex}`} className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50">
-                          <div className="flex items-center">
-                            <Video className="h-4 w-4 text-blue-500 mr-2" />
-                            <span>{typeof video === 'string' ? video : video.title}</span>
-                          </div>
-                          <div>
-                            {typeof video !== 'string' && video.topicIndex !== undefined && (
-                              <span className="text-xs text-gray-500 mr-3">Topic: {video.topicIndex + 1}</span>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-500 hover:text-red-700"
-                              onClick={() => handleRemoveVideo(phaseIndex, vIndex)}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="border rounded-md p-3">
-                      <h4 className="text-sm font-medium mb-2">Materials</h4>
-                      {(phase.materials || []).map((material, mIndex) => (
-                        <div key={material.id || `material-${mIndex}`} className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50">
-                          <div className="flex items-center">
-                            <FileText className="h-4 w-4 text-green-500 mr-2" />
-                            <span>{typeof material === 'string' ? material : material.title}</span>
-                          </div>
-                          <div>
-                            {typeof material !== 'string' && (
-                              <span className="text-xs text-gray-500 mr-3">
-                                Type: {typeof material === 'string' ? 'document' : material.type}
-                              </span>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm" 
-                              className="text-red-500 hover:text-red-700"
-                              onClick={() => handleRemoveMaterial(phaseIndex, mIndex)}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-          
-          <Button onClick={() => setIsAddPhaseDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Phase
-          </Button>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={handleSaveChanges}>Save Changes</Button>
-        </CardFooter>
-      </Card>
-      
-      <Dialog open={isAddPhaseDialogOpen} onOpenChange={setIsAddPhaseDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add New Phase</DialogTitle>
-            <DialogDescription>Create a new phase for the course roadmap.</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="phase" className="text-right">Phase</Label>
-              <Input
-                type="number"
-                id="phase"
-                defaultValue={1}
-                className="col-span-3"
-                value={newPhase.phase}
-                onChange={(e) => setNewPhase({ ...newPhase, phase: parseInt(e.target.value) })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">Title</Label>
-              <Input
-                type="text"
-                id="title"
-                value={newPhase.title}
-                onChange={(e) => setNewPhase({ ...newPhase, title: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="duration" className="text-right">Duration</Label>
-              <Input
-                type="text"
-                id="duration"
-                value={newPhase.duration}
-                onChange={(e) => setNewPhase({ ...newPhase, duration: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div>
-              <Label>Topics</Label>
-              {newPhase.topics.map((topic, index) => (
-                <div key={index} className="flex items-center mb-2">
-                  <Input
-                    type="text"
-                    value={topic}
-                    onChange={(e) => handleTopicChange(index, e.target.value)}
-                    className="mr-2"
-                  />
-                  <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveTopic(index)}>
-                    Remove
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" variant="secondary" size="sm" onClick={handleAddTopic}>
-                Add Topic
-              </Button>
-            </div>
-            <div>
-              <Label>Projects</Label>
-              {newPhase.projects.map((project, index) => (
-                <div key={index} className="flex items-center mb-2">
-                  <Input
-                    type="text"
-                    value={project}
-                    onChange={(e) => handleProjectChange(index, e.target.value)}
-                    className="mr-2"
-                  />
-                  <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveProject(index)}>
-                    Remove
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" variant="secondary" size="sm" onClick={handleAddProject}>
-                Add Project
-              </Button>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => setIsAddPhaseDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" onClick={handleAddPhase}>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">{course.title} - Roadmap</h1>
+        <p className="text-gray-500">Manage the learning roadmap for this course</p>
+      </div>
+
+      <div className="flex gap-6">
+        {/* Phases List */}
+        <div className="w-1/3">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Learning Phases</h2>
+            <Button onClick={() => setIsPhaseDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
               Add Phase
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={isEditPhaseDialogOpen} onOpenChange={setIsEditPhaseDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+          </div>
+          
+          <div className="space-y-3">
+            {course.roadmap?.map((phase, index) => (
+              <Card key={phase.id} className={`cursor-pointer transition-all ${selectedPhase?.id === phase.id ? 'ring-2 ring-blue-500' : ''}`}>
+                <CardHeader className="pb-2" onClick={() => setSelectedPhase(phase)}>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-sm">Phase {index + 1}: {phase.title}</CardTitle>
+                      <CardDescription className="text-xs">{phase.duration}</CardDescription>
+                    </div>
+                    <Badge variant={phase.isActive ? "default" : "secondary"}>
+                      {phase.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardFooter className="pt-0">
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditPhase(phase);
+                    }}>
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePhase(phase.id);
+                    }}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            )) || (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <p className="text-gray-500">No phases added yet</p>
+                  <Button className="mt-2" onClick={() => setIsPhaseDialogOpen(true)}>
+                    Add First Phase
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Phase Details */}
+        <div className="flex-1">
+          {selectedPhase ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{selectedPhase.title}</CardTitle>
+                <CardDescription>{selectedPhase.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="overview" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="topics">Topics</TabsTrigger>
+                    <TabsTrigger value="videos">Videos</TabsTrigger>
+                    <TabsTrigger value="materials">Materials</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="overview" className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Duration</h4>
+                      <p className="text-sm text-gray-600">{selectedPhase.duration}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium mb-2">Projects</h4>
+                      {selectedPhase.projects && selectedPhase.projects.length > 0 ? (
+                        <ul className="list-disc list-inside text-sm text-gray-600">
+                          {selectedPhase.projects.map((project, index) => (
+                            <li key={index}>{project}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500">No projects defined</p>
+                      )}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="topics" className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Topics Covered</h4>
+                    </div>
+                    {selectedPhase.topics && selectedPhase.topics.length > 0 ? (
+                      <div className="grid gap-2">
+                        {selectedPhase.topics.map((topic, index) => (
+                          <Badge key={index} variant="outline">{topic}</Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No topics defined</p>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="videos" className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Learning Videos</h4>
+                      <Button size="sm" onClick={() => setIsVideoDialogOpen(true)}>
+                        <Plus className="mr-2 h-3 w-3" />
+                        Add Video
+                      </Button>
+                    </div>
+                    
+                    {selectedPhase.videos && selectedPhase.videos.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedPhase.videos.map((video, index) => (
+                          <Card key={video.id}>
+                            <CardContent className="flex items-center justify-between p-4">
+                              <div className="flex items-center gap-3">
+                                <Play className="h-4 w-4 text-blue-500" />
+                                <div>
+                                  <p className="font-medium text-sm">{video.title}</p>
+                                  <p className="text-xs text-gray-500">Duration: {video.duration}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" onClick={() => {
+                                  setEditingVideo(video);
+                                  setNewVideo({
+                                    title: video.title,
+                                    url: video.url,
+                                    duration: video.duration,
+                                    description: video.description
+                                  });
+                                  setIsVideoDialogOpen(true);
+                                }}>
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => {
+                                  const updatedVideos = selectedPhase.videos?.filter(v => v.id !== video.id) || [];
+                                  updatePhaseInCourse({ ...selectedPhase, videos: updatedVideos });
+                                }}>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No videos added yet</p>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="materials" className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Learning Materials</h4>
+                      <Button size="sm" onClick={() => setIsMaterialDialogOpen(true)}>
+                        <Plus className="mr-2 h-3 w-3" />
+                        Add Material
+                      </Button>
+                    </div>
+                    
+                    {selectedPhase.materials && selectedPhase.materials.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedPhase.materials.map((material, index) => (
+                          <Card key={material.id}>
+                            <CardContent className="flex items-center justify-between p-4">
+                              <div className="flex items-center gap-3">
+                                {material.type === 'pdf' && <FileText className="h-4 w-4 text-red-500" />}
+                                {material.type === 'doc' && <FileText className="h-4 w-4 text-blue-500" />}
+                                {material.type === 'link' && <Link className="h-4 w-4 text-green-500" />}
+                                {material.type === 'image' && <Download className="h-4 w-4 text-purple-500" />}
+                                <div>
+                                  <p className="font-medium text-sm">{material.title}</p>
+                                  <p className="text-xs text-gray-500 capitalize">{material.type}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" onClick={() => {
+                                  setEditingMaterial(material);
+                                  setNewMaterial({
+                                    title: material.title,
+                                    type: material.type,
+                                    url: material.url,
+                                    description: material.description
+                                  });
+                                  setIsMaterialDialogOpen(true);
+                                }}>
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => {
+                                  const updatedMaterials = selectedPhase.materials?.filter(m => m.id !== material.id) || [];
+                                  updatePhaseInCourse({ ...selectedPhase, materials: updatedMaterials });
+                                }}>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No materials added yet</p>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-12">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Phase</h3>
+                <p className="text-gray-500">Choose a phase from the left to view and edit its details</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* Phase Dialog */}
+      <Dialog open={isPhaseDialogOpen} onOpenChange={setIsPhaseDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Edit Phase</DialogTitle>
-            <DialogDescription>Edit the details of the current phase.</DialogDescription>
+            <DialogTitle>{editingPhase ? 'Edit Phase' : 'Add New Phase'}</DialogTitle>
+            <DialogDescription>
+              {editingPhase ? 'Update the phase details below.' : 'Create a new learning phase for this course.'}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-title" className="text-right">Title</Label>
+              <Label htmlFor="phase-title" className="text-right">Title</Label>
               <Input
-                type="text"
-                id="edit-title"
-                name="title"
-                value={editedPhase?.title || ''}
-                onChange={handleEditedPhaseInputChange}
+                id="phase-title"
+                value={newPhase.title || ''}
+                onChange={(e) => setNewPhase({ ...newPhase, title: e.target.value })}
                 className="col-span-3"
+                placeholder="Phase title"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-duration" className="text-right">Duration</Label>
-              <Input
-                type="text"
-                id="edit-duration"
-                name="duration"
-                value={editedPhase?.duration || ''}
-                onChange={handleEditedPhaseInputChange}
+              <Label htmlFor="phase-description" className="text-right">Description</Label>
+              <Textarea
+                id="phase-description"
+                value={newPhase.description || ''}
+                onChange={(e) => setNewPhase({ ...newPhase, description: e.target.value })}
                 className="col-span-3"
+                placeholder="Phase description"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phase-duration" className="text-right">Duration</Label>
+              <Input
+                id="phase-duration"
+                value={newPhase.duration || ''}
+                onChange={(e) => setNewPhase({ ...newPhase, duration: e.target.value })}
+                className="col-span-3"
+                placeholder="e.g., 2 weeks"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => setIsEditPhaseDialogOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setIsPhaseDialogOpen(false);
+              setEditingPhase(null);
+              resetNewPhase();
+            }}>
               Cancel
             </Button>
-            <Button type="submit" onClick={handleUpdatePhase}>
-              Update Phase
+            <Button onClick={handleSavePhase}>
+              {editingPhase ? 'Update Phase' : 'Add Phase'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <Dialog open={isAddVideoDialogOpen} onOpenChange={setIsAddVideoDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+
+      {/* Video Dialog */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Video</DialogTitle>
-            <DialogDescription>Add a video to the current phase.</DialogDescription>
+            <DialogTitle>{editingVideo ? 'Edit Video' : 'Add New Video'}</DialogTitle>
+            <DialogDescription>
+              {editingVideo ? 'Update the video details below.' : 'Add a new video to this phase.'}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="video-title" className="text-right">Title</Label>
               <Input
-                type="text"
                 id="video-title"
-                value={newVideo.title}
+                value={newVideo.title || ''}
                 onChange={(e) => setNewVideo({ ...newVideo, title: e.target.value })}
                 className="col-span-3"
+                placeholder="Video title"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="video-url" className="text-right">URL</Label>
               <Input
-                type="text"
                 id="video-url"
-                value={newVideo.url}
+                value={newVideo.url || ''}
                 onChange={(e) => setNewVideo({ ...newVideo, url: e.target.value })}
                 className="col-span-3"
+                placeholder="Video URL"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="video-duration" className="text-right">Duration</Label>
+              <Input
+                id="video-duration"
+                value={newVideo.duration || ''}
+                onChange={(e) => setNewVideo({ ...newVideo, duration: e.target.value })}
+                className="col-span-3"
+                placeholder="e.g., 15 minutes"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="video-description" className="text-right">Description</Label>
               <Textarea
                 id="video-description"
-                value={newVideo.description}
+                value={newVideo.description || ''}
                 onChange={(e) => setNewVideo({ ...newVideo, description: e.target.value })}
                 className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="video-topicIndex" className="text-right">Topic Index</Label>
-              <Input
-                type="number"
-                id="video-topicIndex"
-                value={newVideo.topicIndex}
-                onChange={(e) => setNewVideo({ ...newVideo, topicIndex: parseInt(e.target.value) })}
-                className="col-span-3"
+                placeholder="Video description"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => setIsAddVideoDialogOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setIsVideoDialogOpen(false);
+              setEditingVideo(null);
+              resetNewVideo();
+            }}>
               Cancel
             </Button>
-            <Button type="submit" onClick={handleAddVideo}>
-              Add Video
+            <Button onClick={handleSaveVideo}>
+              {editingVideo ? 'Update Video' : 'Add Video'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <Dialog open={isAddMaterialDialogOpen} onOpenChange={setIsAddMaterialDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+
+      {/* Material Dialog */}
+      <Dialog open={isMaterialDialogOpen} onOpenChange={setIsMaterialDialogOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Material</DialogTitle>
-            <DialogDescription>Add material to the current phase.</DialogDescription>
+            <DialogTitle>{editingMaterial ? 'Edit Material' : 'Add New Material'}</DialogTitle>
+            <DialogDescription>
+              {editingMaterial ? 'Update the material details below.' : 'Add a new material to this phase.'}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="material-title" className="text-right">Title</Label>
               <Input
-                type="text"
                 id="material-title"
-                value={newMaterial.title}
+                value={newMaterial.title || ''}
                 onChange={(e) => setNewMaterial({ ...newMaterial, title: e.target.value })}
                 className="col-span-3"
+                placeholder="Material title"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="material-type" className="text-right">Type</Label>
-              <Select onValueChange={(value) => setNewMaterial({ ...newMaterial, type: value as "document" | "link" })}>
+              <Select
+                value={newMaterial.type || 'pdf'}
+                onValueChange={(value: 'pdf' | 'doc' | 'link' | 'image') => 
+                  setNewMaterial({ ...newMaterial, type: value })}
+              >
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select type" defaultValue={newMaterial.type} />
+                  <SelectValue placeholder="Select material type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="document">Document</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="doc">Document</SelectItem>
                   <SelectItem value="link">Link</SelectItem>
+                  <SelectItem value="image">Image</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="material-url" className="text-right">URL</Label>
               <Input
-                type="text"
                 id="material-url"
-                value={newMaterial.url}
+                value={newMaterial.url || ''}
                 onChange={(e) => setNewMaterial({ ...newMaterial, url: e.target.value })}
                 className="col-span-3"
+                placeholder="Material URL"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="material-description" className="text-right">Description</Label>
               <Textarea
                 id="material-description"
-                value={newMaterial.description}
+                value={newMaterial.description || ''}
                 onChange={(e) => setNewMaterial({ ...newMaterial, description: e.target.value })}
                 className="col-span-3"
+                placeholder="Material description"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => setIsAddMaterialDialogOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setIsMaterialDialogOpen(false);
+              setEditingMaterial(null);
+              resetNewMaterial();
+            }}>
               Cancel
             </Button>
-            <Button type="submit" onClick={handleAddMaterial}>
-              Add Material
+            <Button onClick={handleSaveMaterial}>
+              {editingMaterial ? 'Update Material' : 'Add Material'}
             </Button>
           </DialogFooter>
         </DialogContent>
