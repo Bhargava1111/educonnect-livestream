@@ -137,7 +137,11 @@ const AdminCourseAssessments = () => {
         passingScore: newAssessmentData.passingScore,
         type: newAssessmentData.type,
         duration: newAssessmentData.timeLimit,
-        timeLimit: newAssessmentData.timeLimit
+        timeLimit: newAssessmentData.timeLimit,
+        totalMarks: 100,
+        passingMarks: newAssessmentData.passingScore,
+        isActive: true,
+        createdAt: new Date().toISOString()
       });
 
       setAssessments(prevAssessments => [...prevAssessments, newAssessment]);
@@ -167,7 +171,7 @@ const AdminCourseAssessments = () => {
         description: assessmentToEdit.description,
         questions: assessmentToEdit.questions || [],
         timeLimit: assessmentToEdit.timeLimit || 60,
-        passingScore: assessmentToEdit.passingScore,
+        passingScore: assessmentToEdit.passingScore || 70,
         type: assessmentToEdit.type || 'quiz'
       });
       setIsEditDialogOpen(true);

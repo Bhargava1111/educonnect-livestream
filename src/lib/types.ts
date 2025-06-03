@@ -107,12 +107,13 @@ export interface Assessment {
 
 export interface Question {
   id: string;
-  text: string;
+  text?: string;
   question?: string;
-  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'descriptive' | 'fill-in-blanks' | 'coding';
+  type: 'multiple-choice' | 'true-false' | 'short-answer' | 'descriptive' | 'fill-in-blanks' | 'coding' | 'essay';
   options?: string[];
   correctAnswer: string | string[];
   marks: number;
+  points?: number;
   explanation?: string;
   codingTemplate?: string;
 }
@@ -242,12 +243,13 @@ export interface Video {
   url: string;
   duration: string;
   description?: string;
+  topicIndex?: number;
 }
 
 export interface Material {
   id: string;
   title: string;
-  type: 'pdf' | 'doc' | 'link' | 'image';
+  type: 'pdf' | 'doc' | 'link' | 'image' | 'document';
   url: string;
   description?: string;
 }

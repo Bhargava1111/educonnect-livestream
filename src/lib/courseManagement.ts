@@ -1,13 +1,12 @@
 
 // This file now serves as a central export point for all services
 
-// Export all types
+// Export all types except LiveMeeting to avoid conflict
 export * from './types';
 
 // Export all services - preventing circular dependencies by exporting them separately
 // rather than using re-exports
 export * from './courseService';
-export * from './liveMeetingService';
 export * from './jobService';
 export * from './placementService';
 export * from './assessmentService';
@@ -15,6 +14,26 @@ export * from './enrollmentService';
 export * from './paymentService';
 export * from './contactService';
 export * from './enrollmentFormService';
+
+// Import and re-export LiveMeeting service functions but not the type
+import {
+  getAllLiveMeetings,
+  createLiveMeeting,
+  updateLiveMeeting,
+  deleteLiveMeeting,
+  getMeetingsByCourse,
+  updateMeetingStatuses
+} from './liveMeetingService';
+
+// Re-export live meeting functions
+export {
+  getAllLiveMeetings,
+  createLiveMeeting,
+  updateLiveMeeting,
+  deleteLiveMeeting,
+  getMeetingsByCourse,
+  updateMeetingStatuses
+};
 
 // Import and re-export student auth related functions from the new modules
 import {

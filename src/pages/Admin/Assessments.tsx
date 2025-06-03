@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -10,9 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Plus, Pencil, Trash, Search, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import {
@@ -25,80 +23,112 @@ import {
   createAssessment,
   updateAssessment,
   deleteAssessment,
+  getAssessmentsByCourseId
 } from '@/lib/assessmentService';
 import { getAllCourses } from '@/lib/courseService';
-import { Plus, FileEdit, Trash2, Search } from 'lucide-react';
 
 const AdminAssessments = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
+  
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [filteredAssessments, setFilteredAssessments] = useState<Assessment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState('all');
-  
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingAssessmentId, setEditingAssessmentId] = useState<string | null>(null);
+  const [editingAssessment, setEditingAssessment] = useState<Assessment | null>(null);
   const [newAssessmentData, setNewAssessmentData] = useState({
     title: '',
     description: '',
     courseId: '',
-    questions: [] as AssessmentQuestion[],
     timeLimit: 60,
     passingScore: 70,
     type: 'quiz' as 'quiz' | 'coding-challenge' | 'project' | 'exam'
   });
 
   useEffect(() => {
-    loadAssessmentsAndCourses();
+    loadData();
   }, []);
 
-  useEffect(() => {
-    filterAssessments();
-  }, [searchTerm, selectedCourse, assessments]);
-
-  const loadAssessmentsAndCourses = () => {
+  const loadData = () => {
     const allAssessments = getAllAssessments();
     const allCourses = getAllCourses();
+    
     setAssessments(allAssessments);
     setCourses(allCourses);
   };
 
-  const filterAssessments = () => {
-    let filtered = assessments;
+  const filteredAssessments = assessments.filter(assessment => {
+    const matchesSearch = assessment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         assessment.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCourse = selectedCourse === 'all' || assessment.courseId === selectedCourse;
+    const matchesType = selectedType === 'all' || assessment.type === selectedType;
+    
+    return matchesSearch && matchesCourse && matchesType;
+  });
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        assessment =>
-          assessment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          assessment.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  const handleExportCSV = () => {
+    const headers = [
+      'Title',
+      'Course',
+      'Type',
+      'Duration (min)',
+      'Passing Score (%)',
+      'Questions',
+      'Status'
+    ];
+    
+    const csvData = filteredAssessments.map(assessment => {
+      const course = courses.find(c => c.id === assessment.courseId);
+      return [
+        assessment.title,
+        course?.title || 'Unknown Course',
+        assessment.type || 'quiz',
+        assessment.timeLimit || assessment.duration,
+        assessment.passingScore || assessment.passingMarks,
+        assessment.questions?.length || 0,
+        assessment.isActive ? 'Active' : 'Inactive'
+      ];
+    });
+    
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(field => `"${field}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'assessments_export.csv');
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
-    // Filter by course
-    if (selectedCourse !== 'all') {
-      filtered = filtered.filter(assessment => assessment.courseId === selectedCourse);
-    }
-
-    setFilteredAssessments(filtered);
+  const resetNewAssessmentData = () => {
+    setNewAssessmentData({
+      title: '',
+      description: '',
+      courseId: '',
+      timeLimit: 60,
+      passingScore: 70,
+      type: 'quiz'
+    });
   };
 
   const handleCreateAssessment = () => {
     if (!newAssessmentData.title || !newAssessmentData.courseId) {
       toast({
         title: "Missing Information",
-        description: "Please provide a title and select a course.",
+        description: "Please provide title and course for the assessment.",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      // Create assessment with required fields
       const newAssessment = createAssessment({
         title: newAssessmentData.title,
         description: newAssessmentData.description,
@@ -107,10 +137,14 @@ const AdminAssessments = () => {
         passingScore: newAssessmentData.passingScore,
         type: newAssessmentData.type,
         duration: newAssessmentData.timeLimit,
-        timeLimit: newAssessmentData.timeLimit
+        timeLimit: newAssessmentData.timeLimit,
+        totalMarks: 100,
+        passingMarks: newAssessmentData.passingScore,
+        isActive: true,
+        createdAt: new Date().toISOString()
       });
 
-      setAssessments([...assessments, newAssessment]);
+      setAssessments(prevAssessments => [newAssessment, ...prevAssessments]);
       setIsCreateDialogOpen(false);
       resetNewAssessmentData();
       
@@ -129,31 +163,23 @@ const AdminAssessments = () => {
   };
 
   const handleEditAssessment = (assessment: Assessment) => {
-    setEditingAssessmentId(assessment.id);
+    setEditingAssessment(assessment);
     setNewAssessmentData({
       title: assessment.title,
       description: assessment.description,
       courseId: assessment.courseId,
-      questions: assessment.questions || [],
-      timeLimit: assessment.timeLimit || 60,
-      passingScore: assessment.passingScore,
+      timeLimit: assessment.timeLimit || assessment.duration || 60,
+      passingScore: assessment.passingScore || assessment.passingMarks || 70,
       type: assessment.type || 'quiz'
     });
     setIsEditDialogOpen(true);
   };
 
   const handleUpdateAssessment = () => {
-    if (!editingAssessmentId || !newAssessmentData.title || !newAssessmentData.courseId) {
-      toast({
-        title: "Missing Information",
-        description: "Please provide all required information.",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!editingAssessment) return;
 
     try {
-      updateAssessment(editingAssessmentId, {
+      const updatedAssessment = updateAssessment(editingAssessment.id, {
         title: newAssessmentData.title,
         description: newAssessmentData.description,
         courseId: newAssessmentData.courseId,
@@ -163,22 +189,16 @@ const AdminAssessments = () => {
         duration: newAssessmentData.timeLimit
       });
 
-      const updatedAssessments = assessments.map(assessment =>
-        assessment.id === editingAssessmentId
-          ? {
-              ...assessment,
-              title: newAssessmentData.title,
-              description: newAssessmentData.description,
-              courseId: newAssessmentData.courseId,
-              timeLimit: newAssessmentData.timeLimit,
-              passingScore: newAssessmentData.passingScore,
-              type: newAssessmentData.type
-            }
-          : assessment
-      );
+      if (updatedAssessment) {
+        setAssessments(prevAssessments => 
+          prevAssessments.map(assessment => 
+            assessment.id === editingAssessment.id ? updatedAssessment : assessment
+          )
+        );
+      }
 
-      setAssessments(updatedAssessments);
       setIsEditDialogOpen(false);
+      setEditingAssessment(null);
       resetNewAssessmentData();
       
       toast({
@@ -198,8 +218,7 @@ const AdminAssessments = () => {
   const handleDeleteAssessment = (id: string) => {
     try {
       deleteAssessment(id);
-      const updatedAssessments = assessments.filter(assessment => assessment.id !== id);
-      setAssessments(updatedAssessments);
+      setAssessments(prevAssessments => prevAssessments.filter(assessment => assessment.id !== id));
       
       toast({
         title: "Assessment Deleted",
@@ -215,116 +234,111 @@ const AdminAssessments = () => {
     }
   };
 
-  const resetNewAssessmentData = () => {
-    setNewAssessmentData({
-      title: '',
-      description: '',
-      courseId: '',
-      questions: [],
-      timeLimit: 60,
-      passingScore: 70,
-      type: 'quiz'
-    });
-    setEditingAssessmentId(null);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewAssessmentData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleViewDetails = (assessmentId: string) => {
-    navigate(`/admin/assessments/${assessmentId}`);
+  const handleSelectChange = (name: string, value: string) => {
+    if (name === 'type') {
+      setNewAssessmentData(prev => ({
+        ...prev,
+        [name]: value as 'quiz' | 'coding-challenge' | 'project' | 'exam'
+      }));
+    } else {
+      setNewAssessmentData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Assessments</h1>
-          <p className="text-gray-500">Manage assessments for all courses</p>
+        <h1 className="text-2xl font-bold">Manage Assessments</h1>
+        <div className="flex gap-2">
+          <Button onClick={handleExportCSV} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Assessment
+          </Button>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Assessment
-        </Button>
       </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Search assessments..."
-            className="pl-8"
-            value={searchTerm}
+      
+      <div className="flex gap-4 mb-6">
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+          <Input 
+            placeholder="Search assessments..." 
+            value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
           />
         </div>
-        <Select
-          value={selectedCourse}
-          onValueChange={setSelectedCourse}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by course" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Courses</SelectItem>
-            {courses.map(course => (
-              <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-64">
+          <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by course" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Courses</SelectItem>
+              {courses.map((course) => (
+                <SelectItem key={course.id} value={course.id}>
+                  {course.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-48">
+          <Select value={selectedType} onValueChange={setSelectedType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="quiz">Quiz</SelectItem>
+              <SelectItem value="coding-challenge">Coding Challenge</SelectItem>
+              <SelectItem value="project">Project</SelectItem>
+              <SelectItem value="exam">Exam</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-
+      
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {filteredAssessments.map(assessment => {
           const course = courses.find(c => c.id === assessment.courseId);
-          
           return (
-            <Card key={assessment.id} className="overflow-hidden">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">{assessment.title}</CardTitle>
-                <CardDescription>
-                  {course ? `Course: ${course.title}` : 'No course assigned'}
-                </CardDescription>
+            <Card key={assessment.id}>
+              <CardHeader>
+                <CardTitle>{assessment.title}</CardTitle>
+                <CardDescription>{course?.title || 'Unknown Course'}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm">{assessment.description}</p>
-                <div className="mt-2 space-y-1">
-                  <div className="text-xs flex justify-between">
-                    <span>Type:</span>
-                    <span className="font-medium">{assessment.type}</span>
-                  </div>
-                  <div className="text-xs flex justify-between">
-                    <span>Duration:</span>
-                    <span className="font-medium">{assessment.timeLimit || assessment.duration} minutes</span>
-                  </div>
-                  <div className="text-xs flex justify-between">
-                    <span>Passing Score:</span>
-                    <span className="font-medium">{assessment.passingScore}%</span>
-                  </div>
-                  <div className="text-xs flex justify-between">
-                    <span>Questions:</span>
-                    <span className="font-medium">{assessment.questions?.length || 0}</span>
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2 mt-4">
-                  <Button size="sm" variant="outline" onClick={() => handleViewDetails(assessment.id)}>
-                    View Details
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleEditAssessment(assessment)}>
-                    <FileEdit className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDeleteAssessment(assessment.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <p className="text-sm text-gray-600 mb-2">{assessment.description}</p>
+                <div className="space-y-1 text-sm">
+                  <p><strong>Type:</strong> {assessment.type || 'Quiz'}</p>
+                  <p><strong>Duration:</strong> {assessment.timeLimit || assessment.duration} minutes</p>
+                  <p><strong>Passing Score:</strong> {assessment.passingScore || assessment.passingMarks}%</p>
+                  <p><strong>Questions:</strong> {assessment.questions?.length || 0}</p>
+                  <p><strong>Status:</strong> {assessment.isActive ? 'Active' : 'Inactive'}</p>
                 </div>
               </CardContent>
+              <div className="flex justify-end space-x-2 p-4">
+                <Button size="sm" variant="outline" onClick={() => handleEditAssessment(assessment)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => handleDeleteAssessment(assessment.id)}>
+                  <Trash className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
+              </div>
             </Card>
           );
         })}
-        
-        {filteredAssessments.length === 0 && (
-          <div className="col-span-full text-center py-10 text-gray-500">
-            No assessments found. Create a new assessment to get started.
-          </div>
-        )}
       </div>
 
       {/* Create Assessment Dialog */}
@@ -333,7 +347,7 @@ const AdminAssessments = () => {
           <DialogHeader>
             <DialogTitle>Create New Assessment</DialogTitle>
             <DialogDescription>
-              Add a new assessment to your courses.
+              Add a new assessment to a course.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -345,7 +359,7 @@ const AdminAssessments = () => {
                 id="title"
                 name="title"
                 value={newAssessmentData.title}
-                onChange={(e) => setNewAssessmentData({...newAssessmentData, title: e.target.value})}
+                onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
@@ -353,16 +367,18 @@ const AdminAssessments = () => {
               <Label htmlFor="courseId" className="text-right">
                 Course
               </Label>
-              <Select 
+              <Select
                 value={newAssessmentData.courseId}
-                onValueChange={(value) => setNewAssessmentData({...newAssessmentData, courseId: value})}
+                onValueChange={(value) => handleSelectChange('courseId', value)}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a course" />
                 </SelectTrigger>
                 <SelectContent>
                   {courses.map(course => (
-                    <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.title}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -373,8 +389,9 @@ const AdminAssessments = () => {
               </Label>
               <Textarea
                 id="description"
+                name="description"
                 value={newAssessmentData.description}
-                onChange={(e) => setNewAssessmentData({...newAssessmentData, description: e.target.value})}
+                onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
@@ -384,8 +401,7 @@ const AdminAssessments = () => {
               </Label>
               <Select
                 value={newAssessmentData.type}
-                onValueChange={(value: 'quiz' | 'coding-challenge' | 'project' | 'exam') => 
-                  setNewAssessmentData({...newAssessmentData, type: value})}
+                onValueChange={(value: string) => handleSelectChange('type', value)}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a type" />
@@ -400,34 +416,33 @@ const AdminAssessments = () => {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="timeLimit" className="text-right">
-                Time Limit
+                Time Limit (minutes)
               </Label>
               <Input
-                id="timeLimit"
                 type="number"
+                id="timeLimit"
+                name="timeLimit"
                 value={newAssessmentData.timeLimit}
-                onChange={(e) => setNewAssessmentData({...newAssessmentData, timeLimit: parseInt(e.target.value)})}
+                onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="passingScore" className="text-right">
-                Passing Score
+                Passing Score (%)
               </Label>
               <Input
-                id="passingScore"
                 type="number"
+                id="passingScore"
+                name="passingScore"
                 value={newAssessmentData.passingScore}
-                onChange={(e) => setNewAssessmentData({...newAssessmentData, passingScore: parseInt(e.target.value)})}
+                onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => {
-              resetNewAssessmentData();
-              setIsCreateDialogOpen(false);
-            }}>
+            <Button type="button" variant="secondary" onClick={() => setIsCreateDialogOpen(false)}>
               Cancel
             </Button>
             <Button type="button" onClick={handleCreateAssessment}>
@@ -443,7 +458,7 @@ const AdminAssessments = () => {
           <DialogHeader>
             <DialogTitle>Edit Assessment</DialogTitle>
             <DialogDescription>
-              Make changes to your assessment.
+              Edit the assessment details.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -533,7 +548,7 @@ const AdminAssessments = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => {
+            <Button type="button" variant="secondary" onClick={() => {
               resetNewAssessmentData();
               setIsEditDialogOpen(false);
             }}>

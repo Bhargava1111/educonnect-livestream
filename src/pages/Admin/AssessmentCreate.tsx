@@ -48,12 +48,17 @@ const AdminAssessmentCreate = () => {
     requiresScreenshare: false,
     requiresCamera: false,
     timeLimit: 60,
-    type: 'quiz'
+    type: 'quiz',
+    totalMarks: 100,
+    passingMarks: 70,
+    isActive: true,
+    createdAt: new Date().toISOString()
   });
   
   const [courses, setCourses] = useState<Course[]>([]);
   const [newQuestion, setNewQuestion] = useState<Question>({
     id: '',
+    text: '',
     question: '',
     type: 'multiple-choice',
     options: [],
@@ -106,9 +111,10 @@ const AdminAssessmentCreate = () => {
   const handleAddQuestion = () => {
     const newQ: AssessmentQuestion = {
       id: `question_${Date.now()}`,
-      question: newQuestion.question || '',
+      text: newQuestion.question || newQuestion.text || '',
+      question: newQuestion.question || newQuestion.text || '',
       type: newQuestion.type,
-      options: newQuestion.options,
+      options: newQuestion.options || [],
       correctAnswer: newQuestion.correctAnswer,
       marks: Number(newQuestion.marks)
     };
@@ -120,6 +126,7 @@ const AdminAssessmentCreate = () => {
     
     setNewQuestion({
       id: '',
+      text: '',
       question: '',
       type: 'multiple-choice',
       options: [],
@@ -136,16 +143,24 @@ const AdminAssessmentCreate = () => {
   };
   
   const handleSubmit = () => {
+    const assessmentData = {
+      ...assessment,
+      totalMarks: assessment.totalMarks || 100,
+      passingMarks: assessment.passingMarks || assessment.passingScore || 70,
+      isActive: assessment.isActive !== undefined ? assessment.isActive : true,
+      createdAt: assessment.createdAt || new Date().toISOString()
+    };
+
     if (assessmentId) {
       // Update existing assessment
-      updateAssessment(assessmentId, assessment);
+      updateAssessment(assessmentId, assessmentData);
       toast({
         title: "Assessment Updated",
         description: `${assessment.title} has been updated successfully.`
       });
     } else {
       // Create new assessment
-      createAssessment(assessment);
+      createAssessment(assessmentData);
       toast({
         title: "Assessment Created",
         description: `${assessment.title} has been created successfully.`
@@ -331,7 +346,7 @@ const AdminAssessmentCreate = () => {
               <Card key={question.id} className="mb-4">
                 <CardContent className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">{question.question}</p>
+                    <p className="font-medium">{question.question || question.text}</p>
                     <p className="text-sm text-gray-500">Type: {question.type}</p>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handleRemoveQuestion(question.id)}>

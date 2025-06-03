@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -69,8 +70,8 @@ const TakeAssessment = () => {
     // Initialize answers object
     const initialAnswers: { [key: string]: any } = {};
     assessmentData.questions.forEach(question => {
-      if (question.type === 'descriptive' || question.type === 'essay') {
-        initialAnswers[question.id] = (question.codingTemplate || '');
+      if (question.type === 'descriptive' || question.type === 'coding') {
+        initialAnswers[question.id] = '';
       }
     });
     setAnswers(initialAnswers);
@@ -218,15 +219,15 @@ const TakeAssessment = () => {
     let earnedPoints = 0;
     
     assessment.questions.forEach(question => {
-      const points = question.points || question.marks || 10;
-      totalPoints += points;
+      const marks = question.marks || 10;
+      totalPoints += marks;
       
       if (question.type === 'multiple-choice') {
         if (answers[question.id] === question.correctAnswer) {
-          earnedPoints += points;
+          earnedPoints += marks;
         }
       }
-      // For essay and coding questions, in a real app you would need manual grading
+      // For descriptive and coding questions, in a real app you would need manual grading
     });
     
     return Math.round((earnedPoints / totalPoints) * 100);
@@ -409,15 +410,16 @@ const TakeAssessment = () => {
                 <CardHeader>
                   <CardTitle className="text-lg">Question {currentQuestionIndex + 1}</CardTitle>
                   <CardDescription>
-                    ${currentQuestion.points || currentQuestion.marks || 10} points • {
+                    {currentQuestion.marks || 10} points • {
                       currentQuestion.type === 'multiple-choice' ? 'Multiple Choice' :
-                      currentQuestion.type === 'descriptive' || currentQuestion.type === 'essay' ? 'Essay' : 'Coding'
+                      currentQuestion.type === 'descriptive' ? 'Essay' : 
+                      currentQuestion.type === 'coding' ? 'Coding' : 'Text'
                     }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="mb-6">
-                    <p className="text-lg font-medium mb-4">{currentQuestion.text}</p>
+                    <p className="text-lg font-medium mb-4">{currentQuestion.text || currentQuestion.question}</p>
                     
                     {currentQuestion.type === 'multiple-choice' && (
                       <RadioGroup
@@ -425,7 +427,7 @@ const TakeAssessment = () => {
                         onValueChange={(value) => handleAnswerChange(currentQuestion.id, parseInt(value))}
                       >
                         <div className="space-y-3">
-                          {currentQuestion.options.map((option, index) => (
+                          {currentQuestion.options?.map((option, index) => (
                             <div key={index} className="flex items-center space-x-2">
                               <RadioGroupItem value={index.toString()} id={`option-${index}`} />
                               <Label htmlFor={`option-${index}`} className="cursor-pointer">
@@ -437,7 +439,7 @@ const TakeAssessment = () => {
                       </RadioGroup>
                     )}
                     
-                    {currentQuestion.type === 'descriptive' || currentQuestion.type === 'essay' && (
+                    {currentQuestion.type === 'descriptive' && (
                       <Textarea
                         value={answers[currentQuestion.id] || ''}
                         onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
