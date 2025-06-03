@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,20 +8,21 @@ import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { getAllCourses, getAllStudents, getAllAssessments } from '@/lib/courseManagement';
 import { getAllLiveMeetings } from '@/lib/services/liveMeetingService';
-import { LiveMeeting, Course, Student, Assessment } from '@/lib/types';
+import { LiveMeeting as ServiceLiveMeeting } from '@/lib/services/liveMeetingService';
+import { Course, Student, Assessment } from '@/lib/types';
 
 const AdminReports = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
-  const [meetings, setMeetings] = useState<LiveMeeting[]>([]);
+  const [meetings, setMeetings] = useState<ServiceLiveMeeting[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const coursesData = getAllCourses();
-        const studentsData = getAllStudents();
+        const studentsData = await getAllStudents();
         const assessmentsData = getAllAssessments();
         const meetingsData = await getAllLiveMeetings();
         
