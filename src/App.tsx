@@ -60,20 +60,27 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<Layout><Home /></Layout>} />
-              <Route path="/courses" element={<Layout><Courses /></Layout>} />
-              <Route path="/courses/:courseId/roadmap" element={<Layout><CourseRoadmap /></Layout>} />
-              <Route path="/courses/:courseId" element={<Layout><CourseCurriculum /></Layout>} />
-              <Route path="/contact" element={<Layout><Contact /></Layout>} />
-              <Route path="/careers" element={<Layout><Careers /></Layout>} />
-              <Route path="/jobs" element={<Layout><Jobs /></Layout>} />
-              <Route path="/placements" element={<Layout><Placements /></Layout>} />
-              <Route path="/live-meetings" element={<Layout><LiveMeetings /></Layout>} />
-              <Route path="/login" element={<Layout><Login /></Layout>} />
-              <Route path="/register" element={<Layout><Register /></Layout>} />
-              <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
-              <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
-              <Route path="/admin-login" element={<Layout><AdminLogin /></Layout>} />
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="courses" element={<Courses />} />
+                <Route path="courses/:courseId/roadmap" element={<CourseRoadmap />} />
+                <Route path="courses/:courseId" element={<CourseCurriculum />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="careers" element={<Careers />} />
+                <Route path="jobs" element={<Jobs />} />
+                <Route path="placements" element={<Placements />} />
+                <Route path="live-meetings" element={<LiveMeetings />} />
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route path="forgot-password" element={<ForgotPassword />} />
+                <Route path="reset-password" element={<ResetPassword />} />
+                <Route path="admin-login" element={<AdminLogin />} />
+                <Route path="course-enrollment/:courseId" element={<CourseEnrollmentPage />} />
+                <Route path="payment/:courseId" element={<PaymentPage />} />
+                <Route path="payment-success" element={<PaymentSuccessPage />} />
+                <Route path="job/:jobId" element={<JobDetail />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/students" element={<AdminStudents />} />
               <Route path="/admin/courses" element={<AdminCourses />} />
@@ -96,11 +103,6 @@ const App = () => (
               <Route path="/student/courses" element={<StudentCourses />} />
               <Route path="/student/profile" element={<StudentProfile />} />
               <Route path="/student/*" element={<StudentDashboard />} />
-              <Route path="/course-enrollment/:courseId" element={<Layout><CourseEnrollmentPage /></Layout>} />
-              <Route path="/payment/:courseId" element={<Layout><PaymentPage /></Layout>} />
-              <Route path="/payment-success" element={<Layout><PaymentSuccessPage /></Layout>} />
-              <Route path="/job/:jobId" element={<Layout><JobDetail /></Layout>} />
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
           </TooltipProvider>
         </AuthProvider>

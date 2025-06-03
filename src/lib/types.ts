@@ -91,28 +91,30 @@ export interface Assessment {
   title: string;
   description: string;
   courseId: string;
-  questions: Question[];
+  questions: AssessmentQuestion[];
   timeLimit: number;
   totalMarks: number;
   passingMarks: number;
   isActive: boolean;
   createdAt: string;
-  type?: 'quiz' | 'exam' | 'assignment';
+  type?: 'quiz' | 'coding-challenge' | 'project' | 'exam';
   duration?: number;
   passingScore?: number;
   isPublished?: boolean;
   requiresScreenshare?: boolean;
+  requiresCamera?: boolean;
 }
 
 export interface Question {
   id: string;
   text: string;
+  question?: string;
   type: 'multiple-choice' | 'true-false' | 'short-answer' | 'descriptive' | 'fill-in-blanks' | 'coding';
   options?: string[];
   correctAnswer: string | string[];
   marks: number;
   explanation?: string;
-  question?: string;
+  codingTemplate?: string;
 }
 
 export interface AssessmentQuestion extends Question {}
@@ -174,6 +176,7 @@ export interface StudentData extends Student {
     tenth?: any;
     twelfth?: any;
     degree?: any;
+    highest?: any;
   };
   aadharNumber?: string;
 }
@@ -293,26 +296,48 @@ export interface NotificationTemplate {
   isActive: boolean;
 }
 
+export interface StudentActivityRow {
+  id: string;
+  student_id: string;
+  activity_type: string;
+  context: any;
+  timestamp: string;
+}
+
+export interface ProfileRow {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  country: string;
+  address?: string;
+  skills?: string[];
+  profile_picture?: string;
+  aadhar_number?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LiveMeeting {
+  id: string;
+  title: string;
+  description: string;
+  courseId: string;
+  instructorId?: string;
+  instructorName: string;
+  scheduledDate: string;
+  duration: string;
+  meetingLink: string;
+  meetingId?: string;
+  platform: string;
+  joinPassword?: string;
+  status: string;
+  recordingUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DatabaseTypes {
-  StudentActivityRow: {
-    id: string;
-    student_id: string;
-    activity_type: string;
-    context: any;
-    timestamp: string;
-  };
-  
-  ProfileRow: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    phone: string;
-    country: string;
-    address?: string;
-    skills?: string[];
-    profile_picture?: string;
-    aadhar_number?: string;
-    created_at: string;
-    updated_at: string;
-  };
+  StudentActivityRow: StudentActivityRow;
+  ProfileRow: ProfileRow;
 }
