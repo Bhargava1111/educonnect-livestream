@@ -9,14 +9,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Plus, Calendar, Clock, Users, Video, Pencil, Trash, ExternalLink } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { LiveMeeting, Course } from '@/lib/types';
+import { Course } from '@/lib/types';
 import {
   getAllLiveMeetings,
   createLiveMeeting,
   updateLiveMeeting,
-  deleteLiveMeeting,
-  updateMeetingStatuses
-} from '@/lib/liveMeetingService';
+  deleteLiveMeeting
+} from '@/lib/services/liveMeetingService';
+import { LiveMeeting } from '@/lib/services/liveMeetingService';
 import { getAllCourses } from '@/lib/courseService';
 
 const AdminLiveMeetings = () => {
@@ -30,43 +30,45 @@ const AdminLiveMeetings = () => {
   const [newMeetingData, setNewMeetingData] = useState({
     title: '',
     description: '',
-    courseId: '',
-    scheduledAt: '',
-    duration: 60,
-    meetingLink: '',
-    maxParticipants: 50,
-    isRecording: false
+    course_id: '',
+    scheduled_date: '',
+    duration: '60 minutes',
+    meeting_link: '',
+    platform: 'Manual',
+    instructor_name: ''
   });
 
   useEffect(() => {
     loadData();
-    // Update meeting statuses when component mounts
-    updateMeetingStatuses();
   }, []);
 
-  const loadData = () => {
-    const allMeetings = getAllLiveMeetings();
-    const allCourses = getAllCourses();
-    
-    setMeetings(allMeetings);
-    setCourses(allCourses);
+  const loadData = async () => {
+    try {
+      const allMeetings = await getAllLiveMeetings();
+      const allCourses = getAllCourses();
+      
+      setMeetings(allMeetings);
+      setCourses(allCourses);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
   };
 
   const resetNewMeetingData = () => {
     setNewMeetingData({
       title: '',
       description: '',
-      courseId: '',
-      scheduledAt: '',
-      duration: 60,
-      meetingLink: '',
-      maxParticipants: 50,
-      isRecording: false
+      course_id: '',
+      scheduled_date: '',
+      duration: '60 minutes',
+      meeting_link: '',
+      platform: 'Manual',
+      instructor_name: ''
     });
   };
 
-  const handleCreateMeeting = () => {
-    if (!newMeetingData.title || !newMeetingData.courseId || !newMeetingData.scheduledAt) {
+  const handleCreateMeeting = async () => {
+    if (!newMeetingData.title || !newMeetingData.course_id || !newMeetingData.scheduled_date) {
       toast({
         title: "Missing Information",
         description: "Please provide title, course, and schedule for the meeting.",
@@ -76,26 +78,30 @@ const AdminLiveMeetings = () => {
     }
 
     try {
-      const newMeeting = createLiveMeeting({
+      const result = await createLiveMeeting({
         title: newMeetingData.title,
         description: newMeetingData.description,
-        courseId: newMeetingData.courseId,
-        scheduledAt: newMeetingData.scheduledAt,
+        course_id: newMeetingData.course_id,
+        scheduled_date: newMeetingData.scheduled_date,
         duration: newMeetingData.duration,
-        meetingLink: newMeetingData.meetingLink,
-        maxParticipants: newMeetingData.maxParticipants,
-        isRecording: newMeetingData.isRecording,
-        createdAt: new Date().toISOString()
+        meeting_link: newMeetingData.meeting_link,
+        platform: newMeetingData.platform,
+        instructor_name: newMeetingData.instructor_name,
+        status: 'scheduled'
       });
 
-      setMeetings(prevMeetings => [newMeeting, ...prevMeetings]);
-      setIsCreateDialogOpen(false);
-      resetNewMeetingData();
-      
-      toast({
-        title: "Meeting Scheduled",
-        description: `${newMeeting.title} has been scheduled successfully.`
-      });
+      if (result.success && result.data) {
+        setMeetings(prevMeetings => [result.data!, ...prevMeetings]);
+        setIsCreateDialogOpen(false);
+        resetNewMeetingData();
+        
+        toast({
+          title: "Meeting Scheduled",
+          description: `${result.data.title} has been scheduled successfully.`
+        });
+      } else {
+        throw new Error(result.error || 'Failed to create meeting');
+      }
     } catch (error) {
       console.error("Error creating meeting:", error);
       toast({
@@ -111,47 +117,49 @@ const AdminLiveMeetings = () => {
     setNewMeetingData({
       title: meeting.title,
       description: meeting.description,
-      courseId: meeting.courseId,
-      scheduledAt: meeting.scheduledAt,
+      course_id: meeting.course_id,
+      scheduled_date: meeting.scheduled_date,
       duration: meeting.duration,
-      meetingLink: meeting.meetingLink,
-      maxParticipants: meeting.maxParticipants,
-      isRecording: meeting.isRecording
+      meeting_link: meeting.meeting_link,
+      platform: meeting.platform,
+      instructor_name: meeting.instructor_name
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateMeeting = () => {
+  const handleUpdateMeeting = async () => {
     if (!editingMeeting) return;
 
     try {
-      const updatedMeeting = updateLiveMeeting(editingMeeting.id, {
+      const result = await updateLiveMeeting(editingMeeting.id, {
         title: newMeetingData.title,
         description: newMeetingData.description,
-        courseId: newMeetingData.courseId,
-        scheduledAt: newMeetingData.scheduledAt,
+        course_id: newMeetingData.course_id,
+        scheduled_date: newMeetingData.scheduled_date,
         duration: newMeetingData.duration,
-        meetingLink: newMeetingData.meetingLink,
-        maxParticipants: newMeetingData.maxParticipants,
-        isRecording: newMeetingData.isRecording
+        meeting_link: newMeetingData.meeting_link,
+        platform: newMeetingData.platform,
+        instructor_name: newMeetingData.instructor_name
       });
 
-      if (updatedMeeting) {
+      if (result.success && result.data) {
         setMeetings(prevMeetings => 
           prevMeetings.map(meeting => 
-            meeting.id === editingMeeting.id ? updatedMeeting : meeting
+            meeting.id === editingMeeting.id ? result.data! : meeting
           )
         );
-      }
 
-      setIsEditDialogOpen(false);
-      setEditingMeeting(null);
-      resetNewMeetingData();
-      
-      toast({
-        title: "Meeting Updated",
-        description: `${newMeetingData.title} has been updated successfully.`
-      });
+        setIsEditDialogOpen(false);
+        setEditingMeeting(null);
+        resetNewMeetingData();
+        
+        toast({
+          title: "Meeting Updated",
+          description: `${newMeetingData.title} has been updated successfully.`
+        });
+      } else {
+        throw new Error(result.error || 'Failed to update meeting');
+      }
     } catch (error) {
       console.error("Error updating meeting:", error);
       toast({
@@ -162,15 +170,20 @@ const AdminLiveMeetings = () => {
     }
   };
 
-  const handleDeleteMeeting = (id: string) => {
+  const handleDeleteMeeting = async (id: string) => {
     try {
-      deleteLiveMeeting(id);
-      setMeetings(prevMeetings => prevMeetings.filter(meeting => meeting.id !== id));
+      const result = await deleteLiveMeeting(id);
       
-      toast({
-        title: "Meeting Deleted",
-        description: "Meeting has been deleted successfully."
-      });
+      if (result.success) {
+        setMeetings(prevMeetings => prevMeetings.filter(meeting => meeting.id !== id));
+        
+        toast({
+          title: "Meeting Deleted",
+          description: "Meeting has been deleted successfully."
+        });
+      } else {
+        throw new Error(result.error || 'Failed to delete meeting');
+      }
     } catch (error) {
       console.error("Error deleting meeting:", error);
       toast({
@@ -182,10 +195,10 @@ const AdminLiveMeetings = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setNewMeetingData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -205,7 +218,7 @@ const AdminLiveMeetings = () => {
       
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {meetings.map(meeting => {
-          const course = courses.find(c => c.id === meeting.courseId);
+          const course = courses.find(c => c.id === meeting.course_id);
           return (
             <Card key={meeting.id}>
               <CardHeader>
@@ -216,23 +229,19 @@ const AdminLiveMeetings = () => {
                 <div className="space-y-1 text-sm">
                   <p>
                     <Calendar className="mr-2 inline-block h-4 w-4" />
-                    {new Date(meeting.scheduledAt).toLocaleDateString()}
+                    {new Date(meeting.scheduled_date).toLocaleDateString()}
                   </p>
                   <p>
                     <Clock className="mr-2 inline-block h-4 w-4" />
-                    {new Date(meeting.scheduledAt).toLocaleTimeString()} ({meeting.duration} minutes)
-                  </p>
-                  <p>
-                    <Users className="mr-2 inline-block h-4 w-4" />
-                    {meeting.maxParticipants} Participants
+                    {new Date(meeting.scheduled_date).toLocaleTimeString()} ({meeting.duration})
                   </p>
                   <p>
                     <Video className="mr-2 inline-block h-4 w-4" />
-                    Recording: {meeting.isRecording ? 'Yes' : 'No'}
+                    Platform: {meeting.platform}
                   </p>
                   <p>
                     <ExternalLink className="mr-2 inline-block h-4 w-4" />
-                    <a href={meeting.meetingLink} target="_blank" rel="noopener noreferrer">
+                    <a href={meeting.meeting_link} target="_blank" rel="noopener noreferrer">
                       Join Meeting
                     </a>
                   </p>
@@ -279,12 +288,12 @@ const AdminLiveMeetings = () => {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="courseId" className="text-right">
+              <Label htmlFor="course_id" className="text-right">
                 Course
               </Label>
               <Select
-                value={newMeetingData.courseId}
-                onValueChange={(value) => handleSelectChange('courseId', value)}
+                value={newMeetingData.course_id}
+                onValueChange={(value) => handleSelectChange('course_id', value)}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a course" />
@@ -299,69 +308,74 @@ const AdminLiveMeetings = () => {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="scheduledAt" className="text-right">
+              <Label htmlFor="scheduled_date" className="text-right">
                 Schedule
               </Label>
               <Input
                 type="datetime-local"
-                id="scheduledAt"
-                name="scheduledAt"
-                value={newMeetingData.scheduledAt}
+                id="scheduled_date"
+                name="scheduled_date"
+                value={newMeetingData.scheduled_date}
                 onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="duration" className="text-right">
-                Duration (minutes)
+                Duration
               </Label>
               <Input
-                type="number"
                 id="duration"
                 name="duration"
                 value={newMeetingData.duration}
                 onChange={handleInputChange}
+                placeholder="e.g., 60 minutes"
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="meetingLink" className="text-right">
+              <Label htmlFor="meeting_link" className="text-right">
                 Meeting Link
               </Label>
               <Input
                 type="url"
-                id="meetingLink"
-                name="meetingLink"
-                value={newMeetingData.meetingLink}
+                id="meeting_link"
+                name="meeting_link"
+                value={newMeetingData.meeting_link}
                 onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="maxParticipants" className="text-right">
-                Max Participants
+              <Label htmlFor="instructor_name" className="text-right">
+                Instructor
               </Label>
               <Input
-                type="number"
-                id="maxParticipants"
-                name="maxParticipants"
-                value={newMeetingData.maxParticipants}
+                id="instructor_name"
+                name="instructor_name"
+                value={newMeetingData.instructor_name}
                 onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="isRecording" className="text-right">
-                Recording
+              <Label htmlFor="platform" className="text-right">
+                Platform
               </Label>
-              <Input
-                type="checkbox"
-                id="isRecording"
-                name="isRecording"
-                checked={newMeetingData.isRecording}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
+              <Select
+                value={newMeetingData.platform}
+                onValueChange={(value) => handleSelectChange('platform', value)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Manual">Manual</SelectItem>
+                  <SelectItem value="Zoom">Zoom</SelectItem>
+                  <SelectItem value="Google Meet">Google Meet</SelectItem>
+                  <SelectItem value="Microsoft Teams">Microsoft Teams</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
@@ -410,12 +424,12 @@ const AdminLiveMeetings = () => {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-courseId" className="text-right">
+              <Label htmlFor="edit-course_id" className="text-right">
                 Course
               </Label>
               <Select
-                value={newMeetingData.courseId}
-                onValueChange={(value) => handleSelectChange('courseId', value)}
+                value={newMeetingData.course_id}
+                onValueChange={(value) => handleSelectChange('course_id', value)}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a course" />
@@ -430,24 +444,23 @@ const AdminLiveMeetings = () => {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-scheduledAt" className="text-right">
+              <Label htmlFor="edit-scheduled_date" className="text-right">
                 Schedule
               </Label>
               <Input
                 type="datetime-local"
-                id="edit-scheduledAt"
-                name="scheduledAt"
-                value={newMeetingData.scheduledAt}
+                id="edit-scheduled_date"
+                name="scheduled_date"
+                value={newMeetingData.scheduled_date}
                 onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-duration" className="text-right">
-                Duration (minutes)
+                Duration
               </Label>
               <Input
-                type="number"
                 id="edit-duration"
                 name="duration"
                 value={newMeetingData.duration}
@@ -456,40 +469,26 @@ const AdminLiveMeetings = () => {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-meetingLink" className="text-right">
+              <Label htmlFor="edit-meeting_link" className="text-right">
                 Meeting Link
               </Label>
               <Input
                 type="url"
-                id="edit-meetingLink"
-                name="meetingLink"
-                value={newMeetingData.meetingLink}
+                id="edit-meeting_link"
+                name="meeting_link"
+                value={newMeetingData.meeting_link}
                 onChange={handleInputChange}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-maxParticipants" className="text-right">
-                Max Participants
+              <Label htmlFor="edit-instructor_name" className="text-right">
+                Instructor
               </Label>
               <Input
-                type="number"
-                id="edit-maxParticipants"
-                name="maxParticipants"
-                value={newMeetingData.maxParticipants}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-isRecording" className="text-right">
-                Recording
-              </Label>
-              <Input
-                type="checkbox"
-                id="edit-isRecording"
-                name="isRecording"
-                checked={newMeetingData.isRecording}
+                id="edit-instructor_name"
+                name="instructor_name"
+                value={newMeetingData.instructor_name}
                 onChange={handleInputChange}
                 className="col-span-3"
               />

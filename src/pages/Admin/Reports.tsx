@@ -6,7 +6,7 @@ import { Calendar, Users, BookOpen, Award, TrendingUp, Download } from 'lucide-r
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { getAllCourses, getAllStudents, getAllAssessments } from '@/lib/courseManagement';
-import { getAllLiveMeetings } from '@/lib/liveMeetingService';
+import { getAllLiveMeetings } from '@/lib/services/liveMeetingService';
 import { LiveMeeting, Course, Student, Assessment } from '@/lib/types';
 
 const AdminReports = () => {
@@ -22,7 +22,7 @@ const AdminReports = () => {
         const coursesData = getAllCourses();
         const studentsData = getAllStudents();
         const assessmentsData = getAllAssessments();
-        const meetingsData = getAllLiveMeetings();
+        const meetingsData = await getAllLiveMeetings();
         
         setCourses(coursesData);
         setStudents(studentsData);
