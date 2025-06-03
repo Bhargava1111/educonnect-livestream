@@ -1,4 +1,3 @@
-
 import { Job, JOBS_KEY } from './types';
 
 // Initialize default jobs if not present
@@ -142,6 +141,56 @@ export const applyForJob = (jobId: string, studentId: string): { success: boolea
 
 export const getJobApplicationLink = (job: Job): string => {
   return job.applicationLink || job.externalLink || '#';
+};
+
+export const exportJobsAsCSV = (): string => {
+  const jobs = getAllJobs();
+  
+  // CSV headers
+  const headers = [
+    'ID',
+    'Title', 
+    'Company',
+    'Location',
+    'Salary',
+    'Job Type',
+    'Experience Level',
+    'Status',
+    'Category',
+    'Applied Count',
+    'Posted Date',
+    'Application Deadline',
+    'Contact Email',
+    'Requirements',
+    'Description'
+  ];
+  
+  // Convert jobs to CSV rows
+  const rows = jobs.map(job => [
+    job.id,
+    job.title,
+    job.company,
+    job.location,
+    job.salary,
+    job.jobType || job.type,
+    job.experienceLevel,
+    job.status,
+    job.category || '',
+    job.appliedCount || 0,
+    job.postedDate || job.createdAt,
+    job.applicationDeadline || job.lastDate,
+    job.contactEmail || '',
+    job.requirements ? job.requirements.join('; ') : '',
+    job.description.replace(/,/g, ';') // Replace commas to avoid CSV issues
+  ]);
+  
+  // Combine headers and rows
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(field => `"${field}"`).join(','))
+  ].join('\n');
+  
+  return csvContent;
 };
 
 // Re-export Job type for components
