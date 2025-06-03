@@ -9,10 +9,9 @@ import { PlacementForm } from '@/components/admin/placements/PlacementForm';
 import { Placement } from '@/lib/types';
 import { 
   getAllPlacements, 
-  addPlacement, 
+  createPlacement, 
   updatePlacement, 
-  deletePlacement,
-  exportPlacementsAsCSV
+  deletePlacement
 } from '@/lib/placementService';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -39,8 +38,36 @@ const AdminPlacements = () => {
 
   // Handle CSV export
   const handleExportCSV = () => {
-    const csvData = exportPlacementsAsCSV();
-    const blob = new Blob([csvData], { type: 'text/csv' });
+    const headers = [
+      'Student Name',
+      'Company',
+      'Position',
+      'Package',
+      'Placement Date',
+      'Course',
+      'Year',
+      'Description',
+      'Testimonial'
+    ];
+    
+    const csvData = filteredPlacements.map(placement => [
+      placement.studentName,
+      placement.company,
+      placement.position,
+      placement.packageAmount || placement.salary,
+      new Date(placement.placementDate).toLocaleDateString(),
+      placement.courseCompleted || placement.course,
+      placement.year,
+      placement.description?.replace(/,/g, ';') || '',
+      placement.testimonial?.replace(/,/g, ';') || ''
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(field => `"${field}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -51,7 +78,7 @@ const AdminPlacements = () => {
 
   const handleAddPlacement = (placementData: Omit<Placement, 'id'>) => {
     try {
-      const newPlacement = addPlacement(placementData);
+      const newPlacement = createPlacement(placementData);
       setPlacements([newPlacement, ...placements]);
       
       toast({
