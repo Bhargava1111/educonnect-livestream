@@ -95,6 +95,47 @@
   }
 }
 
+/* Mobile-first responsive utilities */
+.mobile-container {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.mobile-text {
+  @apply text-sm sm:text-base;
+}
+
+.mobile-header {
+  @apply text-2xl sm:text-3xl lg:text-4xl;
+}
+
+.mobile-subheader {
+  @apply text-lg sm:text-xl lg:text-2xl;
+}
+
+.mobile-grid {
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.mobile-card {
+  @apply p-4 sm:p-6;
+}
+
+.mobile-button {
+  @apply w-full sm:w-auto;
+}
+
+.mobile-spacing {
+  @apply space-y-4 sm:space-y-6;
+}
+
+.mobile-table {
+  @apply overflow-x-auto;
+}
+
+.mobile-form {
+  @apply space-y-4 w-full max-w-md mx-auto;
+}
+
 .hero-gradient {
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
 }
@@ -106,6 +147,26 @@
 .card-hover:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Touch-friendly interactive elements */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .mobile-menu-item {
+    @apply py-3 px-4 border-b border-gray-100 last:border-b-0;
+  }
+  
+  .mobile-admin-card {
+    @apply p-4 space-y-3;
+  }
+  
+  .mobile-admin-grid {
+    @apply grid-cols-1 sm:grid-cols-2 gap-4;
+  }
 }
 
 /* New radiant styles */

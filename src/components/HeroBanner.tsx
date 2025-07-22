@@ -135,26 +135,26 @@ const HeroBanner: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
+      <div className="relative z-10 mobile-container h-full flex items-center">
         <div className="max-w-4xl text-white">
           <div className="animate-fade-in">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 leading-tight">
               {currentBanner.title}
             </h1>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 text-blue-100">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold mb-4 sm:mb-6 text-blue-100">
               {currentBanner.subtitle}
             </h2>
-            <p className="text-lg md:text-xl mb-8 max-w-3xl leading-relaxed opacity-90">
+            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-3xl leading-relaxed opacity-90">
               {currentBanner.description}
             </p>
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row gap-4 mb-8 sm:mb-12">
             <Link to={currentBanner.primaryCta.link}>
               <Button 
                 size="lg" 
-                className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl text-lg px-8 py-4 group"
+                className="w-full sm:w-auto bg-white text-blue-600 hover:bg-blue-50 shadow-xl text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 group touch-target"
               >
                 {currentBanner.primaryCta.text}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -164,7 +164,7 @@ const HeroBanner: React.FC = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white text-white hover:bg-white/10 text-lg px-8 py-4 group"
+                className="w-full sm:w-auto border-white text-white hover:bg-white/10 text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 group touch-target"
               >
                 <PlayCircle className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                 {currentBanner.secondaryCta.text}
@@ -173,12 +173,12 @@ const HeroBanner: React.FC = () => {
           </div>
 
           {/* Slide Indicators */}
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 justify-center sm:justify-start">
             {bannerSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                className={`w-3 h-3 rounded-full transition-all duration-300 touch-target ${
                   index === currentSlide
                     ? 'bg-white scale-125'
                     : 'bg-white/50 hover:bg-white/75'
@@ -190,10 +190,10 @@ const HeroBanner: React.FC = () => {
         </div>
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Hidden on mobile */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-300 backdrop-blur-sm"
+        className="hidden sm:block absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-300 backdrop-blur-sm touch-target"
         aria-label="Previous slide"
       >
         <ChevronLeft className="h-6 w-6" />
@@ -201,16 +201,17 @@ const HeroBanner: React.FC = () => {
       
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-300 backdrop-blur-sm"
+        className="hidden sm:block absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-3 transition-all duration-300 backdrop-blur-sm touch-target"
         aria-label="Next slide"
       >
         <ChevronRight className="h-6 w-6" />
       </button>
 
-      {/* Auto-scroll Indicator */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex items-center space-x-2 text-white/70 text-sm">
+      {/* Auto-scroll Indicator - Smaller on mobile */}
+      <div className="absolute bottom-16 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex items-center space-x-2 text-white/70 text-xs sm:text-sm">
         <div className={`w-2 h-2 rounded-full ${isAutoScrolling ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
-        <span>{isAutoScrolling ? 'Auto-scrolling' : 'Manual control'}</span>
+        <span className="hidden sm:inline">{isAutoScrolling ? 'Auto-scrolling' : 'Manual control'}</span>
+        <span className="sm:hidden">{isAutoScrolling ? 'Auto' : 'Manual'}</span>
       </div>
 
       {/* Progress Bar */}

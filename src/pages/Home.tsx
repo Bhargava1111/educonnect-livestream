@@ -82,16 +82,16 @@ const Home = () => {
       <HeroBanner />
 
       {/* Learning People Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="mobile-container">
+          <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12">
             <div className="lg:w-1/2">
-              <h2 className="text-3xl font-bold mb-6 text-gray-800">Learn From The Best Minds in Tech</h2>
-              <p className="text-lg text-gray-600 mb-6">
+              <h2 className="mobile-header font-bold mb-4 sm:mb-6 text-gray-800">Learn From The Best Minds in Tech</h2>
+              <p className="mobile-text text-gray-600 mb-4 sm:mb-6">
                 Our educators are industry professionals with years of experience at top tech companies. Get real-world insights 
                 and practical knowledge that goes beyond theoretical concepts.
               </p>
-              <ul className="space-y-3 mb-8">
+              <ul className="mobile-spacing mb-6 sm:mb-8">
                 {[
                   "Live interactive sessions with industry experts",
                   "Small batch sizes for personalized attention",
@@ -105,12 +105,12 @@ const Home = () => {
                 ))}
               </ul>
               <Link to="/courses">
-                <Button className="bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all shadow-md">
+                <Button className="mobile-button bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all shadow-md">
                   Join Our Learning Community
                 </Button>
               </Link>
             </div>
-            <div className="lg:w-1/2 grid grid-cols-2 gap-4">
+            <div className="lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <img 
                   src="https://images.unsplash.com/photo-1542626991-cbc4e32524cc?auto=format&fit=crop&w=500&h=350" 
@@ -141,20 +141,20 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-gradient-to-br from-eduBlue-50 to-purple-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4">Why Choose Career Aspire Technology</h2>
-          <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto">
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-eduBlue-50 to-purple-50">
+        <div className="mobile-container">
+          <h2 className="mobile-header font-bold text-center mb-4">Why Choose Career Aspire Technology</h2>
+          <p className="text-center text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto mobile-text">
             We provide a comprehensive learning experience designed to help you succeed in the tech industry
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid mobile-grid gap-6 sm:gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-lg card-hover border border-purple-100">
-                <div className="mb-4 bg-gradient-to-br from-eduBlue-100 to-purple-100 w-14 h-14 rounded-full flex items-center justify-center">
+              <div key={index} className="bg-white mobile-card rounded-lg shadow-lg card-hover border border-purple-100">
+                <div className="mb-4 bg-gradient-to-br from-eduBlue-100 to-purple-100 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600 mobile-text">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -165,28 +165,28 @@ const Home = () => {
       <TrainingRoadmap />
 
       {/* Payment Methods Section */}
-      <section className="py-16 bg-gradient-to-br from-purple-50 to-eduBlue-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4">Flexible Payment Options</h2>
-          <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto">
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-purple-50 to-eduBlue-50">
+        <div className="mobile-container">
+          <h2 className="mobile-header font-bold text-center mb-4">Flexible Payment Options</h2>
+          <p className="text-center text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto mobile-text">
             We offer various payment methods to make quality education accessible to everyone.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {paymentMethods.map((method, index) => (
-              <div key={index} className="bg-white p-8 rounded-lg shadow-lg text-center border border-purple-100 card-hover">
-                <div className="flex justify-center mb-4 bg-gradient-to-br from-eduBlue-100 to-purple-100 w-20 h-20 rounded-full mx-auto flex items-center justify-center">
+              <div key={index} className="bg-white mobile-card rounded-lg shadow-lg text-center border border-purple-100 card-hover">
+                <div className="flex justify-center mb-4 bg-gradient-to-br from-eduBlue-100 to-purple-100 w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto items-center">
                   {method.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{method.title}</h3>
-                <p className="text-gray-600">{method.description}</p>
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">{method.title}</h3>
+                <p className="text-gray-600 mobile-text">{method.description}</p>
               </div>
             ))}
           </div>
           
-          <div className="mt-12 text-center">
+          <div className="mt-8 sm:mt-12 text-center">
             <Link to="/contact">
-              <Button className="bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all shadow-md">
+              <Button className="mobile-button bg-gradient-to-r from-eduBlue-600 to-purple-600 hover:from-eduBlue-700 hover:to-purple-700 transition-all shadow-md">
                 Contact Us for Payment Queries
               </Button>
             </Link>
@@ -287,20 +287,20 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-purple-600 via-eduBlue-600 to-indigo-700 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Advance Your Career?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
+      <section className="py-12 sm:py-16 bg-gradient-to-r from-purple-600 via-eduBlue-600 to-indigo-700 text-white">
+        <div className="mobile-container text-center">
+          <h2 className="mobile-header font-bold mb-4 sm:mb-6">Ready to Advance Your Career?</h2>
+          <p className="mobile-subheader mb-6 sm:mb-8 max-w-2xl mx-auto">
             Join thousands of students who have transformed their careers with our expert-led training programs.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link to="/courses">
-              <Button size="lg" className="bg-white text-eduBlue-600 hover:bg-gray-100 shadow-lg">
+              <Button size="lg" className="mobile-button bg-white text-eduBlue-600 hover:bg-gray-100 shadow-lg touch-target">
                 Browse Courses
               </Button>
             </Link>
             <Link to="/register">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="mobile-button border-white text-white hover:bg-white/10 touch-target">
                 Sign Up Now
               </Button>
             </Link>
