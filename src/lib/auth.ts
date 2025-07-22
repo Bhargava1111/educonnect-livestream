@@ -14,35 +14,28 @@ const ADMIN_AUTH_KEY = "career_aspire_admin_auth";
 export const loginAdmin = async (email: string, password: string): Promise<boolean> => {
   if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
     try {
-      // For admin, we'll first try to sign in with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      // If Supabase login fails, we'll still allow admin login with hardcoded credentials
-      // This helps during initial setup when the admin might not be in Supabase yet
-      if (error || !data.user) {
-        console.log("Using fallback admin authentication");
-      }
-
-      // Store admin session in localStorage
+      // Store admin session in localStorage immediately for hardcoded credentials
       localStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify({ 
         email, 
         isAdmin: true,
         loginTime: new Date().toISOString()
       }));
       
+      // Try to sign in with Supabase as well (optional, for consistency)
+      try {
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        console.log("Admin also authenticated with Supabase");
+      } catch (supabaseError) {
+        console.log("Admin using local authentication only (Supabase user not found)");
+      }
+      
       return true;
     } catch (error) {
       console.error("Admin login error:", error);
-      // Still allow local admin auth if credentials match
-      localStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify({ 
-        email, 
-        isAdmin: true,
-        loginTime: new Date().toISOString()
-      }));
-      return true;
+      return false;
     }
   }
   return false;

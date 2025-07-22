@@ -64,8 +64,8 @@ const AdminLogin = () => {
         description: "Welcome to the admin portal.",
       });
       
-      // Force navigation to admin page
-      window.location.href = '/admin';
+      // Use React Router navigation instead of window.location
+      navigate('/admin');
       
     } catch (error) {
       console.error("Admin login error:", error);
