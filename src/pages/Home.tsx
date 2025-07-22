@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Code, GraduationCap, Laptop, Users, Video, CreditCard, BookOpen, Award, Sparkles, Brain, Lightbulb } from 'lucide-react';
 import TrainingRoadmap from '@/components/TrainingRoadmap';
+import HeroBanner from '@/components/HeroBanner';
 
 const Home = () => {
   const features = [
@@ -77,31 +78,8 @@ const Home = () => {
 
   return (
     <div>
-      {/* Hero Section with Radiant Gradient */}
-      <section className="py-24 bg-gradient-to-br from-purple-600 via-eduBlue-600 to-indigo-700 text-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
-              Transform Your Tech Career with Expert Training
-            </h1>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl">
-              Join our live online software training courses and gain in-demand skills from industry professionals.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/courses">
-                <Button size="lg" className="bg-white text-eduBlue-600 hover:bg-gray-100 shadow-lg">
-                  Explore Courses
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Register Now
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Banner with Auto-Scroll */}
+      <HeroBanner />
 
       {/* Learning People Section */}
       <section className="py-16 bg-white">
